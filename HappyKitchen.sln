@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35303.130
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HappyKitchen", "HappyKitchen\HappyKitchen.csproj", "{91769D72-D883-4E39-A71C-C2D3CC3D11FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91769D72-D883-4E39-A71C-C2D3CC3D11FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91769D72-D883-4E39-A71C-C2D3CC3D11FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91769D72-D883-4E39-A71C-C2D3CC3D11FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91769D72-D883-4E39-A71C-C2D3CC3D11FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4381C1B9-9FE0-4F05-B1A8-46D55323BDA5}
+	EndGlobalSection
+EndGlobal

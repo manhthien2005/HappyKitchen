@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\css\menu.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\menu.css" />
+    <None Include="wwwroot\css\style.css" />
+    <None Include="wwwroot\images\about-abs-image-old.jpg" />
+    <None Include="wwwroot\images\about-abs-image.jpg" />
+    <None Include="wwwroot\images\about-banner.jpg" />
+    <None Include="wwwroot\images\badge-1.png" />
+    <None Include="wwwroot\images\badge-2-bg.png" />
+    <None Include="wwwroot\images\badge-2.png" />
+    <None Include="wwwroot\images\event-1.jpg" />
+    <None Include="wwwroot\images\event-2.jpg" />
+    <None Include="wwwroot\images\event-3.jpg" />
+    <None Include="wwwroot\images\features-icon-1.png" />
+    <None Include="wwwroot\images\features-icon-2.png" />
+    <None Include="wwwroot\images\features-icon-3.png" />
+    <None Include="wwwroot\images\features-icon-4.png" />
+    <None Include="wwwroot\images\footer-bg.jpg" />
+    <None Include="wwwroot\images\footer-form-bg.png" />
+    <None Include="wwwroot\images\footer-form-pattern.svg" />
+    <None Include="wwwroot\images\form-pattern.png" />
+    <None Include="wwwroot\images\hero-icon.png" />
+    <None Include="wwwroot\images\hero-slider-1.jpg" />
+    <None Include="wwwroot\images\hero-slider-2.jpg" />
+    <None Include="wwwroot\images\hero-slider-3.jpg" />
+    <None Include="wwwroot\images\img-pattern.svg" />
+    <None Include="wwwroot\images\khoa_avt.jpg" />
+    <None Include="wwwroot\images\logo.png" />
+    <None Include="wwwroot\images\logo.svg" />
+    <None Include="wwwroot\images\logo_happy.svg" />
+    <None Include="wwwroot\images\menu-1-old.png" />
+    <None Include="wwwroot\images\menu-1.png" />
+    <None Include="wwwroot\images\menu-2.png" />
+    <None Include="wwwroot\images\menu-3.png" />
+    <None Include="wwwroot\images\menu-4.png" />
+    <None Include="wwwroot\images\menu-5.png" />
+    <None Include="wwwroot\images\menu-6.png" />
+    <None Include="wwwroot\images\separator.svg" />
+    <None Include="wwwroot\images\service-1.jpg" />
+    <None Include="wwwroot\images\service-2.jpg" />
+    <None Include="wwwroot\images\service-3.jpg" />
+    <None Include="wwwroot\images\shape-1.png" />
+    <None Include="wwwroot\images\shape-2.png" />
+    <None Include="wwwroot\images\shape-3.png" />
+    <None Include="wwwroot\images\shape-4.png" />
+    <None Include="wwwroot\images\shape-5.png" />
+    <None Include="wwwroot\images\shape-6.png" />
+    <None Include="wwwroot\images\shape-7.png" />
+    <None Include="wwwroot\images\shape-8.png" />
+    <None Include="wwwroot\images\shape-9.png" />
+    <None Include="wwwroot\images\special-dish-banner-old.jpg" />
+    <None Include="wwwroot\images\special-dish-banner.jpg" />
+    <None Include="wwwroot\images\testi-avatar.jpg" />
+    <None Include="wwwroot\images\testimonial-bg.jpg" />
+    <None Include="wwwroot\images\thien_avt.jpg" />
+    <None Include="wwwroot\images\Thumbs.db" />
+    <None Include="wwwroot\images\tuan_avt.jpg" />
+    <None Include="wwwroot\js\script.js" />
+    <None Include="wwwroot\js\section.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.5.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
