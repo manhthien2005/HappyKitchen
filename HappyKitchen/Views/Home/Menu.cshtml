@@ -242,7 +242,9 @@
                                 <li>
                                     <div class="menu-card hover:card">
                                         <figure class="card-banner img-holder" style="--width: 150; --height: 150;">
-                                            <img src="~/images/MenuItem/@item.MenuItemImage" width="150" height="150" loading="lazy" alt="@item.Name" class="img-cover">
+                                            <img src="~/images/MenuItem/@item.MenuItemImage" width="150" height="150" loading="lazy" alt="@item.Name" class="img-cover"
+                                                 data-bs-toggle="modal" data-bs-target="#detailModal"
+                                                 onclick="showDetails('@item.Name', '@item.MenuItemImage', '@item.Price.ToString("N0")', '@item.Description')">
                                         </figure>
 
                                         <div>
@@ -289,13 +291,37 @@
             </a>
 
 
+            <!--
+              - #MODEL SHOW DETAIL OF MENU ITEM
+            -->
+            <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="detailModalLabel"></h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="modalImage" src="" alt="" class="img-fluid mb-3">
+                            <p id="modalPrice" class="text-muted"></p>
+                            <p id="modalDescription"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-
-
+            <script> 
+                function showDetails(name, image, price, description) {
+                    document.getElementById("detailModalLabel").textContent = name;
+                    document.getElementById("modalImage").src = "/images/MenuItem/" + image;
+                    document.getElementById("modalPrice").textContent = "Giá: " + price + " VNĐ";
+                    document.getElementById("modalDescription").textContent = description;
+                }
+            </script>
             <!--
               - custom js link
             -->
-            <script src="~/js/script.js"></script>
+            <script src="~/js/menu_script.js"></script>
 
             <!--
               - ionicon link

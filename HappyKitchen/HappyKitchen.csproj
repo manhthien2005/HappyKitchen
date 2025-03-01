@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\css\menu.css" />
+    <Content Remove="wwwroot\js\menu_script.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,6 +67,7 @@
     <None Include="wwwroot\images\thien_avt.jpg" />
     <None Include="wwwroot\images\Thumbs.db" />
     <None Include="wwwroot\images\tuan_avt.jpg" />
+    <None Include="wwwroot\js\menu_script.js" />
     <None Include="wwwroot\js\script.js" />
     <None Include="wwwroot\js\section.js" />
   </ItemGroup>
