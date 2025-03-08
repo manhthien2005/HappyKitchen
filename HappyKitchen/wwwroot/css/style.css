@@ -833,21 +833,26 @@ body.nav-active { overflow: hidden; }
 .hero .btn { margin-inline: auto; }
 
 .hero-btn {
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
-  z-index: 2;
-  background-color: var(--gold-crayola);
-  width: 110px;
-  height: 110px;
-  padding: 12px;
-  transform: scale(0.6);
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    z-index: 2;
+    background-color: var(--gold-crayola);
+    width: 110px;
+    height: 110px;
+    padding: 12px;
+    transform: scale(0.6);
+    transition: transform 0.3s ease-in-out;
 }
 
-.hero-btn img {
-  margin-inline: auto;
-  margin-block-end: 6px;
-}
+    .hero-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .hero-btn img {
+        margin-inline: auto;
+        margin-block-end: 6px;
+    }
 
 .hero-btn .span {
   color: var(--black);

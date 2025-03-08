@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace HappyKitchen.Models
 {
@@ -49,6 +50,9 @@ namespace HappyKitchen.Models
 
         [MaxLength(100)]
         public string Email { get; set; }
+
+        [Required]
+        public string PasswordHash {get; set; }
 
         [Required]
         public decimal Salary { get; set; }
@@ -182,5 +186,53 @@ namespace HappyKitchen.Models
 
         // Quan hệ với MenuItem
         public MenuItem MenuItem { get; set; }
+    }
+
+    public class EmployeeLogin
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class EmployeeRegister
+    {
+        [Required, MaxLength(60)]
+        public string FullName { get; set; }
+
+        [Required, MaxLength(10)]
+        public string PhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required, MinLength(6)]
+        public string Password { get; set; }
+
+        [Required, Compare("Password", ErrorMessage = "Mật khẩu nhập lại không khớp.")]
+        public string ConfirmPassword { get; set; }
+    }
+
+    public class OTPModel
+    {
+        public string OTPCode { get; set; }
+    }
+
+    public class OTPPasswordModel
+    {
+        public string OTPPassCode { get; set; }
+    }
+
+    public class ResetPasswordModel
+    {
+        public string Email { get; set; }
+
+        [Required]
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự.")]
+        public string NewPassword { get; set; }
+
+        [Required]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+        public string ConfirmPassword { get; set; }
     }
 }

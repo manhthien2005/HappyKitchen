@@ -102,7 +102,7 @@
                     <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
                 </div>
 
-                <span class="span">hapykitchenvn2025@gmail.com</span>
+                <span class="span">happykitchenvn2025@gmail.com</span>
             </a>
 
         </div>
@@ -119,7 +119,7 @@
     <header class="header" data-header>
         <div class="container">
 
-            <a href="#" class="logo">
+            <a href="@Url.Action("Index", "Home")" class="logo">
                 <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
             </a>
 
@@ -129,14 +129,14 @@
                     <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
                 </button>
 
-                <a href="#" class="logo">
+                <a href="@Url.Action("Index", "Home")" class="logo">
                     <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
                 </a>
 
                 <ul class="navbar-list">
 
                     <li class="navbar-item">
-                        <a href="#home" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#home" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Trang Chủ</span>
@@ -144,7 +144,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#about" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#about" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Giới Thiệu</span>
@@ -152,7 +152,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#menu" class="navbar-link hover-underline active">
+                        <a href="@Url.Action("Index", "Home")#menu" class="navbar-link hover-underline active">
                             <div class="separator"></div>
 
                             <span class="span">Thực Đơn</span>
@@ -160,7 +160,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Đầu Bếp</span>
@@ -168,7 +168,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#booking" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#booking" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Kết Nối</span>
@@ -177,40 +177,7 @@
 
                 </ul>
 
-                <div class="text-center">
-                    <p class="headline-1 navbar-title">Visit Us</p>
-
-                    <address class="body-4">
-                        Restaurant St, Delicious City, <br>
-                        London 9578, UK
-                    </address>
-
-                    <p class="body-4 navbar-text">Open: 9.30 am - 2.30pm</p>
-
-                    <a href="mailto:booking@grilli.com" class="body-4 sidebar-link">booking@grilli.com</a>
-
-                    <div class="separator"></div>
-
-                    <p class="contact-label">Booking Request</p>
-
-                    <a href="tel:+88123123456" class="body-1 contact-number hover-underline">
-                        +88-123-123456
-                    </a>
-                </div>
-
             </nav>
-
-            <a href="#booking" class="btn btn-secondary">
-                <span class="text text-1">Đặt Bàn</span>
-
-                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
-            </a>
-
-            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
-                <span class="line line-1"></span>
-                <span class="line line-2"></span>
-                <span class="line line-3"></span>
-            </button>
 
             <div class="overlay" data-nav-toggler data-overlay></div>
 
@@ -267,12 +234,9 @@
                     <p class="menu-text text-center">
                         Thực đơn cho mọi ngày từ <span class="span">9:00 am</span> to <span class="span">10:00 pm</span>
                     </p>
-
-                    <a href="#" class="btn btn-primary">
-                        <span class="text text-1">Xem Tất Cả</span>
-
-                        <span class="text text-2" aria-hidden="true">Xem Tất Cả</span>
-                    </a>
+                    <p class="menu-text text-center">
+                        Chúc quý khách ngon miệng!
+                    </p>
 
                     <img src="~/images/shape-5.png" width="921" height="1036" loading="lazy" alt="shape"
                          class="shape shape-2 move-anim">

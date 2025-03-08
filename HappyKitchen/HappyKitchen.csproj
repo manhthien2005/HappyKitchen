@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,7 +8,13 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\css\menu.css" />
+    <Content Remove="wwwroot\js\ForgotPass\emailCheck.js" />
+    <Content Remove="wwwroot\js\ForgotPass\otp_input.js" />
+    <Content Remove="wwwroot\js\ForgotPass\validatePassword.js" />
+    <Content Remove="wwwroot\js\Login\validate_login.js" />
     <Content Remove="wwwroot\js\menu_script.js" />
+    <Content Remove="wwwroot\js\SignUp\signup.js" />
+    <Content Remove="wwwroot\js\VerifyOTP\otp_input.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -67,12 +73,19 @@
     <None Include="wwwroot\images\thien_avt.jpg" />
     <None Include="wwwroot\images\Thumbs.db" />
     <None Include="wwwroot\images\tuan_avt.jpg" />
+    <None Include="wwwroot\js\ForgotPass\validatePassword.js" />
+    <None Include="wwwroot\js\ForgotPass\emailCheck.js" />
+    <None Include="wwwroot\js\ForgotPass\otp_input.js" />
+    <None Include="wwwroot\js\Login\validate_login.js" />
     <None Include="wwwroot\js\menu_script.js" />
     <None Include="wwwroot\js\script.js" />
     <None Include="wwwroot\js\section.js" />
+    <None Include="wwwroot\js\SignUp\signup.js" />
+    <None Include="wwwroot\js\VerifyOTP\otp_input.js" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
@@ -85,5 +98,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="if exist &quot;$(TargetPath).locked&quot; del &quot;$(TargetPath).locked&quot;&#xD;&#xA;if exist &quot;$(TargetPath)&quot; if not exist &quot;$(TargetPath).locked&quot; move &quot;$(TargetPath)&quot; &quot;$(TargetPath).locked&quot;" />
+  </Target>
 
 </Project>
