@@ -45,7 +45,8 @@ namespace HappyKitchen.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] EmployeeLogin model)
         {
-            if (model == null || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.RecaptchaToken))
+            if (model == null || string.IsNullOrEmpty(model.Email) ||
+                string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.RecaptchaToken))
             {
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
             }
@@ -64,7 +65,36 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
 
-            return Json(new { success = true, message = "Đăng nhập thành công!" });
+            // Kiểm tra cookie trusted device
+            if (Request.Cookies.ContainsKey("TrustedDevice"))
+            {
+                string deviceToken = Request.Cookies["TrustedDevice"];
+                var trustedDevice = _context.TrustedDevices
+                    .FirstOrDefault(td => td.DeviceToken == deviceToken && td.UserID == user.EmployeeID);
+                if (trustedDevice != null)
+                {
+                    // Thiết bị đã tin cậy, đăng nhập thành công
+                    return Json(new { success = true, message = "Đăng nhập thành công!" });
+                }
+            }
+
+            // Thiết bị chưa tin cậy, cần xác thực OTP
+            string otpCode = new Random().Next(100000, 999999).ToString();
+            HttpContext.Session.SetString("OTP_Login", otpCode);
+            HttpContext.Session.SetString("Login_Email", model.Email);
+            HttpContext.Session.SetString("OTP_Login_Timestamp", DateTime.Now.ToString());
+
+            // (Gọi dịch vụ gửi OTP qua email)
+            var emailService = new EmailService(_configuration);
+            emailService.SendLoginOTP(model.Email, otpCode);
+
+            return Json(new
+            {
+                success = true,
+                requireOTP = true,
+                message = "Thiết bị của bạn chưa được tin cậy. OTP đã được gửi đến email. Vui lòng xác thực OTP.",
+                redirectUrl = Url.Action("Verify_Login", "Home", new { email = model.Email })
+            }); 
         }
 
         // Hàm xác minh reCAPTCHA
@@ -80,12 +110,119 @@ namespace HappyKitchen.Controllers
             }
         }
 
-        public IActionResult Verify_Login()
+        [HttpGet]
+        public IActionResult Verify_Login(string email)
         {
-            return View();
+            string sessionEmail = HttpContext.Session.GetString("Login_Email");
+
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
+            {
+                return RedirectToAction("SignUp");
+            }
+
+            return View("Verify_Login", email);
         }
 
+        [HttpPost]
+        public IActionResult Verify_Login([FromBody] OTPModel model)
+        {
+            // Kiểm tra dữ liệu đầu vào
+            if (model == null || string.IsNullOrEmpty(model.OTPCode))
+            {
+                return Json(new { success = false, message = "Mã OTP không hợp lệ." });
+            }
 
+            // Lấy OTP và email từ Session
+            string sessionOTP = HttpContext.Session.GetString("OTP_Login");
+            string email = HttpContext.Session.GetString("Login_Email");
+
+            if (string.IsNullOrEmpty(sessionOTP) || string.IsNullOrEmpty(email))
+            {
+                return Json(new { success = false, message = "Phiên OTP đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            // Kiểm tra thời gian OTP (ví dụ: 5 phút)
+            if (DateTime.TryParse(HttpContext.Session.GetString("OTP_Login_Timestamp"), out DateTime ts) &&
+                (DateTime.Now - ts).TotalMinutes > 5)
+            {
+                HttpContext.Session.Remove("OTP_Login");
+                HttpContext.Session.Remove("Login_Email");
+                HttpContext.Session.Remove("OTP_Login_Timestamp");
+                return Json(new { success = false, message = "Mã OTP đã hết hạn. Vui lòng đăng nhập lại." });
+            }
+
+            // So sánh OTP nhập vào với OTP trong Session
+            if (model.OTPCode != sessionOTP)
+            {
+                return Json(new { success = false, message = "Mã OTP không chính xác." });
+            }
+
+            // OTP hợp lệ, tiến hành xác định thiết bị tin cậy
+            var user = _context.Employees.FirstOrDefault(e => e.Email == email);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy người dùng." });
+            }
+
+            // Tạo token duy nhất cho thiết bị (GUID)
+            string trustedDeviceToken = Guid.NewGuid().ToString();
+
+            // Lưu thông tin thiết bị vào DB
+            TrustedDevice device = new TrustedDevice
+            {
+                UserID = user.EmployeeID,
+                DeviceToken = trustedDeviceToken,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.TrustedDevices.Add(device);
+            _context.SaveChanges();
+
+            // Xóa dữ liệu OTP khỏi session
+            HttpContext.Session.Remove("OTP_Login");
+            HttpContext.Session.Remove("Login_Email");
+            HttpContext.Session.Remove("OTP_Login_Timestamp");
+            // Đánh dấu OTP đã xác thực
+            HttpContext.Session.SetString("OTP_Login_Verified", "true");
+
+            // Gửi cookie TrustedDevice (thời hạn 30 ngày)
+            CookieOptions options = new CookieOptions
+            {
+                Expires = DateTime.Now.AddDays(30),
+                HttpOnly = true,
+                Secure = true
+            };
+            Response.Cookies.Append("TrustedDevice", trustedDeviceToken, options);
+
+            // Trả về kết quả thành công, chuyển hướng (ví dụ: đến trang Menu)
+            return Json(new
+            {
+                success = true,
+                message = "Xác thực OTP thành công. Thiết bị của bạn đã được lưu tin cậy.",
+                redirectUrl = Url.Action("Menu", "Home")
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Resend_Login_OTP([FromBody] string email)
+        {
+            // Kiểm tra email có khớp với email đăng nhập trong session không
+            string sessionEmail = HttpContext.Session.GetString("Login_Email");
+            if (string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
+            {
+                return Json(new { success = false, message = "Phiên đăng nhập hết hạn hoặc email không hợp lệ!" });
+            }
+
+            // Tạo OTP mới và lưu vào session
+            string newOtp = new Random().Next(100000, 999999).ToString();
+            HttpContext.Session.SetString("OTP_Login", newOtp);
+            HttpContext.Session.SetString("OTP_Login_Timestamp", DateTime.Now.ToString());
+
+            var emailService = new EmailService(_configuration);
+            emailService.SendLoginOTP(sessionEmail, newOtp);
+
+            return Json(new { success = true, message = "OTP mới đã được gửi!" });
+        }
 
         [HttpGet]
         public IActionResult SignUp()

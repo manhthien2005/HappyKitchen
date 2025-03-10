@@ -75,5 +75,22 @@ namespace HappyKitchen.Services
             </div>";
             SendEmailAsync(toEmail, subject, body);
         }
+
+        public void SendLoginOTP(string toEmail, string otpCode)
+        {
+            string subject = "🔑 New Device Login OTP";
+            string body = $@"
+            <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 5px; max-width: 500px; margin: auto;'>
+                <h2 style='color: #333;'>🔑 Verify Your Login</h2>
+                <p>We detected a login attempt from a new device. Please enter the OTP below to verify your identity:</p>
+                <div style='background: #f4f4f4; padding: 10px; border-radius: 5px; text-align: center; font-size: 20px; font-weight: bold;'>
+                    {otpCode}
+                </div>
+                <p>This OTP is valid for <strong>5 minutes</strong>. If this wasn't you, please secure your account immediately.</p>
+                <p>Thank you,<br><strong>Your Website Team</strong></p>
+            </div>";
+            SendEmailAsync(toEmail, subject, body);
+        }
+
     }
 }

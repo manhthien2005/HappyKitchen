@@ -13,17 +13,20 @@
             return;
         }
 
-        // Lấy token reCAPTCHA từ widget v2 (đã được Google chèn vào input ẩn)
-        const token = document.getElementById("g-recaptcha-response").value;
-        if (!token) {
-            toastr.error("Vui lòng xác thực reCAPTCHA.");
-            return;
-        }
-
         // Hiển thị loading
         loginBtn.disabled = true;
         loginText.textContent = "Đang xử lý...";
         loadingIcon.classList.remove("d-none");
+
+        // Lấy reCAPTCHA token (ví dụ từ widget v2)
+        const token = document.getElementById("g-recaptcha-response").value;
+        if (!token) {
+            toastr.error("Vui lòng xác thực reCAPTCHA.");
+            loginBtn.disabled = false;
+            loginText.textContent = "Đăng Nhập";
+            loadingIcon.classList.add("d-none");
+            return;
+        }
 
         try {
             const response = await fetch("/Home/Login", {
@@ -32,14 +35,25 @@
                 body: JSON.stringify({
                     Email: email,
                     Password: password,
-                    RecaptchaToken: token // Gửi token lấy được từ widget v2
+                    RecaptchaToken: token
                 })
             });
 
             const data = await response.json();
 
             if (data.success) {
-                toastr.success(data.message);
+                if (data.requireOTP) {
+                    // Nếu yêu cầu OTP, chuyển hướng sang trang xác thực OTP
+                    toastr.info(data.message);
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl;
+                    }, 1500);
+                } else {
+                    toastr.success(data.message);
+                    setTimeout(() => {
+                        window.location.href = "/Home/Menu"; // Trang Menu hoặc trang chủ
+                    }, 1500);
+                }
             } else {
                 toastr.error(data.message);
             }

@@ -11,11 +11,10 @@
     <Content Remove="wwwroot\js\ForgotPass\emailCheck.js" />
     <Content Remove="wwwroot\js\ForgotPass\otp_input.js" />
     <Content Remove="wwwroot\js\ForgotPass\validatePassword.js" />
+    <Content Remove="wwwroot\js\Login\login_otp_input.js" />
     <Content Remove="wwwroot\js\Login\validate_login.js" />
     <Content Remove="wwwroot\js\menu_script.js" />
     <Content Remove="wwwroot\js\SignUp\signup.js" />
-    <Content Remove="wwwroot\js\Verify_Login\otp_input.js" />
-    <Content Remove="wwwroot\js\VerifyOTP\otp_input.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,13 +76,12 @@
     <None Include="wwwroot\js\ForgotPass\validatePassword.js" />
     <None Include="wwwroot\js\ForgotPass\emailCheck.js" />
     <None Include="wwwroot\js\ForgotPass\otp_input.js" />
+    <None Include="wwwroot\js\Login\login_otp_input.js" />
     <None Include="wwwroot\js\Login\validate_login.js" />
     <None Include="wwwroot\js\menu_script.js" />
     <None Include="wwwroot\js\script.js" />
     <None Include="wwwroot\js\section.js" />
     <None Include="wwwroot\js\SignUp\signup.js" />
-    <None Include="wwwroot\js\Verify_Login\otp_input.js" />
-    <None Include="wwwroot\js\VerifyOTP\otp_input.js" />
   </ItemGroup>
 
   <ItemGroup>

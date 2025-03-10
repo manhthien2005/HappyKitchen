@@ -236,4 +236,13 @@ namespace HappyKitchen.Models
         [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmPassword { get; set; }
     }
+
+    public class TrustedDevice
+    {
+        public int Id { get; set; }
+        public int UserID { get; set; } // ID của người dùng
+        public string DeviceToken { get; set; } // Token định danh duy nhất cho thiết bị
+        public DateTime CreatedAt { get; set; }
+    }
+
 }
