@@ -13,6 +13,13 @@
             return;
         }
 
+        // Lấy token reCAPTCHA từ widget v2 (đã được Google chèn vào input ẩn)
+        const token = document.getElementById("g-recaptcha-response").value;
+        if (!token) {
+            toastr.error("Vui lòng xác thực reCAPTCHA.");
+            return;
+        }
+
         // Hiển thị loading
         loginBtn.disabled = true;
         loginText.textContent = "Đang xử lý...";
@@ -22,14 +29,17 @@
             const response = await fetch("/Home/Login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ Email: email, Password: password })
+                body: JSON.stringify({
+                    Email: email,
+                    Password: password,
+                    RecaptchaToken: token // Gửi token lấy được từ widget v2
+                })
             });
 
             const data = await response.json();
 
             if (data.success) {
                 toastr.success(data.message);
-
             } else {
                 toastr.error(data.message);
             }
