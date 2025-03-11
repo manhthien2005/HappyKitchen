@@ -52,8 +52,9 @@ CREATE TABLE Tables (
     AreaID INT NOT NULL,
     Capacity INT NOT NULL CHECK (Capacity > 0),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
-    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID) ON DELETE CASCADE
 );
+
 
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
