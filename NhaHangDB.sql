@@ -1,42 +1,75 @@
 ﻿CREATE DATABASE RestaurantDB;
-GO
 USE RestaurantDB;
 GO
 
-CREATE TABLE Customers (
-    CustomerID INT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE Users (
+    UserID INT IDENTITY(1,1) PRIMARY KEY,
     FullName NVARCHAR(100) NOT NULL,
     PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
     Email NVARCHAR(100) UNIQUE NULL,
-    Address NVARCHAR(255) NULL
+    Address NVARCHAR(255) NULL,
+    
+    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)) DEFAULT 0, -- 0 = Khách hàng, 1 = Nhân viên
+    PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
+    Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
+    
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0 -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
+);
+
+CREATE TABLE Roles (
+    RoleID INT IDENTITY(1,1) PRIMARY KEY,
+    RoleName NVARCHAR(50) NOT NULL UNIQUE,
+    Description NVARCHAR(255) NULL
+);
+
+CREATE TABLE UserRoles (
+    UserID INT NOT NULL,
+    RoleID INT NOT NULL,
+    PRIMARY KEY (UserID, RoleID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE CASCADE
+);
+
+CREATE TABLE Permissions (
+    PermissionID INT IDENTITY(1,1) PRIMARY KEY,
+    PermissionName NVARCHAR(100) NOT NULL UNIQUE,
+    Description NVARCHAR(255) NULL
+);
+
+CREATE TABLE RolePermissions (
+    RoleID INT NOT NULL,
+    PermissionID INT NOT NULL,
+    PRIMARY KEY (RoleID, PermissionID),
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE CASCADE,
+    FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE
+);
+
+CREATE TABLE Areas (
+    AreaID INT IDENTITY(1,1) PRIMARY KEY,
+    AreaName NVARCHAR(50) NOT NULL UNIQUE,
+    Description NVARCHAR(255) NULL
 );
 
 CREATE TABLE Tables (
     TableID INT IDENTITY(1,1) PRIMARY KEY,
-    TableNumber INT UNIQUE NOT NULL,
-    Capacity INT NOT NULL,
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) -- 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
+    TableName NVARCHAR(50) NOT NULL,
+    AreaID INT NOT NULL,
+    Capacity INT NOT NULL CHECK (Capacity > 0),
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
+    FOREIGN KEY (AreaID) REFERENCES Areas(AreaID) ON DELETE CASCADE
 );
 
-CREATE TABLE Employees (
-    EmployeeID INT IDENTITY(1,1) PRIMARY KEY,
-    FullName NVARCHAR(50) NOT NULL,
-    PhoneNumber VARCHAR(10) UNIQUE NOT NULL,
-    Email NVARCHAR(100) UNIQUE NULL,
-	PasswordHash VARCHAR(255) NOT NULL,
-    Salary DECIMAL(10,2) NOT NULL DEFAULT 500000,
-    Status TINYINT NOT NULL CHECK (Status IN (0,1)) DEFAULT 0 -- 0 = Đang làm, 1 = Nghỉ việc
-);
 
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerID INT NOT NULL,
-    TableID INT NOT NULL UNIQUE,
+    CustomerID INT NOT NULL, 
+    TableID INT NOT NULL,
     CreatedTime DATETIME DEFAULT GETDATE() NOT NULL, -- Thời gian tạo đặt chỗ
     ReservationTime DATETIME NOT NULL, -- Thời gian khách đặt chỗ thực tế
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Đang chờ, 2 = Đã xác nhận
-    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE ON UPDATE CASCADE
+    Notes NVARCHAR(255) NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE CASCADE,
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
 );
 
 CREATE TABLE Categories (
@@ -47,7 +80,7 @@ CREATE TABLE Categories (
 CREATE TABLE MenuItems (
     MenuItemID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-	MenuItemImage VARCHAR(255) NOT NULL,
+	MenuItemImage VARCHAR(255) NULL,
     CategoryID INT NOT NULL,
     Price DECIMAL(10,2) NOT NULL,
     Description NVARCHAR(255) NULL,
@@ -55,17 +88,28 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE MenuItemRatings (
+    RatingID INT IDENTITY(1,1) PRIMARY KEY,
+    MenuItemID INT NOT NULL,
+    UserID INT NOT NULL,
+    Rating TINYINT NOT NULL CHECK (Rating BETWEEN 1 AND 5), -- Chỉ cho phép từ 1 đến 5 sao
+    Comment NVARCHAR(500) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+);
+
 CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerID INT NOT NULL,
-    EmployeeID INT NOT NULL,
+    CustomerID INT NULL,
+    EmployeeID INT NULL,
     TableID INT NOT NULL UNIQUE,
     OrderTime DATETIME DEFAULT GETDATE(),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
     PaymentMethod NVARCHAR(50) NOT NULL,
-    FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE NO ACTION,
+    FOREIGN KEY (EmployeeID) REFERENCES Users(UserID) ON DELETE NO ACTION,
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON UPDATE CASCADE
 );
 
 CREATE TABLE OrderDetails (
@@ -84,6 +128,14 @@ CREATE TABLE MenuItemAttributes (
     AttributeName NVARCHAR(100) NOT NULL, -- Tên thuộc tính (VD: "Spiciness", "Calories")
     AttributeValue NVARCHAR(255) NOT NULL, -- Giá trị thuộc tính (VD: "Medium", "350 kcal")
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE TrustedDevices (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL,
+    DeviceToken NVARCHAR(100) NOT NULL,
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
 -- Thêm danh mục
@@ -142,26 +194,31 @@ INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUE
 (8, N'Khẩu phần', N'1 chén (1 người)'),
 (8, N'Mô tả món', N'Món chè thanh mát với những viên khúc bạch mềm mịn, béo nhẹ, kết hợp cùng nước chè ngọt thanh và hạnh nhân rang giòn.');
 
+INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt)
+VALUES 
+(4, 1, 5, N'Rất ngon, sẽ quay lại lần nữa!','2025-03-13'),
+(4, 1, 4, N'Hương vị tuyệt vời nhưng hơi mặn một chút.','2025-03-13'),
+(4, 1, 3, N'Bình thường, không có gì đặc biệt.','2025-03-13'),
+(4, 1, 5, N'Món này xuất sắc, rất đáng thử!','2025-03-13'),
+(4, 1, 2, N'Không hợp khẩu vị của mình lắm.','2025-03-13');
 
-
-
-
-
-DROP TABLE IF EXISTS MenuItemAttributes;
-
+DROP TABLE IF EXISTS Reviews;
 DROP TABLE IF EXISTS OrderDetails;
-
 DROP TABLE IF EXISTS Orders;
-
-
+DROP TABLE IF EXISTS MenuItemAttributes;
+DROP TABLE IF EXISTS MenuItemRatings;
 DROP TABLE IF EXISTS MenuItems;
-
 DROP TABLE IF EXISTS Categories;
-
 DROP TABLE IF EXISTS Reservations;
-
-DROP TABLE IF EXISTS Employees;
-
 DROP TABLE IF EXISTS Tables;
+DROP TABLE IF EXISTS TrustedDevices;
+DROP TABLE IF EXISTS Areas;
+DROP TABLE IF EXISTS RolePermissions;
+DROP TABLE IF EXISTS Permissions;
+DROP TABLE IF EXISTS UserRoles;
+DROP TABLE IF EXISTS Roles;
+DROP TABLE IF EXISTS Users;
 
-DROP TABLE IF EXISTS Customers;
+
+
+
