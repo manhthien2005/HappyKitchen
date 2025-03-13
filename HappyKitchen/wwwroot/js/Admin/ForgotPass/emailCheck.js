@@ -17,7 +17,7 @@
 
         try {
             let checkEmailResponse = await $.ajax({
-                url: "/Home/CheckEmailExists",
+                url: "/Admin/CheckEmailExists",
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(email) // Gửi email dạng string
@@ -31,7 +31,7 @@
 
             // **Gửi OTP với POST**
             let sendOtpResponse = await $.ajax({
-                url: "/Home/SendPasswordOTP",
+                url: "/Admin/SendPasswordOTP",
                 type: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(email) // Gửi email đúng format JSON
@@ -39,7 +39,7 @@
 
             // Chuyển hướng đến trang Verify OTP nếu thành công
             if (sendOtpResponse.success) {
-                window.location.href = "/Home/VerifyPasswordOTP?email=" + encodeURIComponent(email);
+                window.location.href = "/Admin/VerifyPasswordOTP?email=" + encodeURIComponent(email);
             } else {
                 toastr.error("Không thể gửi OTP, vui lòng thử lại!");
                 submitBtn.prop("disabled", false).text("Xác nhận");

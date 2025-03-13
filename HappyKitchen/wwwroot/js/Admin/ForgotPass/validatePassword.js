@@ -32,7 +32,7 @@
     loadingIcon.classList.remove("d-none");
     loginBtn.disabled = true;
 
-    fetch("/Home/ResetPassword", {
+    fetch("/Admin/ResetPassword", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -50,7 +50,7 @@
                 loginText.innerText = "Đã cập nhật";
                 loadingIcon.classList.add("d-none");
 
-                setTimeout(() => window.location.href = "/Home/Login", 2000);
+                setTimeout(() => window.location.href = "/Admin/Login", 2000);
             } else {
                 toastr.error(result.message || "Đã có lỗi xảy ra!");
                 loginText.innerText = "Đổi Mật Khẩu";

@@ -159,15 +159,15 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#" class="navbar-link hover-underline">
+                        <a href="#event" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
-                            <span class="span">Đầu Bếp</span>
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#booking" class="navbar-link hover-underline">
+                        <a href="#connect" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Kết Nối</span>
@@ -209,6 +209,32 @@
                 <span class="line line-1"></span>
                 <span class="line line-2"></span>
                 <span class="line line-3"></span>
+            </button>
+
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                <div id="loginButton" class="login-btn">
+                    <a href="login.html" class="btn btn-outline-primary">
+                        <i class="bi bi-person"></i>
+                        <span>Đăng Nhập</span>
+                    </a>
+                </div>
+
+                <div id="userAvatar" class="user-avatar dropdown" style="display: none;">
+                    <img src="images/avatar.png" class="avatar-img dropdown-toggle" alt="User"
+                         data-bs-toggle="dropdown" aria-expanded="false">
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="account.html">Thông tin tài khoản</a></li>
+                        <li><a class="dropdown-item" href="reservations.html">Đơn Đặt Bàn</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Đăng Xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <i class="bi bi-list"></i>
             </button>
 
             <div class="overlay" data-nav-toggler data-overlay></div>
@@ -273,7 +299,7 @@
                             Hương vị tuyệt hảo, trải nghiệm khó quên
                         </p>
 
-                        <a href="#" class="btn btn-primary slider-reveal">
+                        <a href="@Url.Action("Menu","Home")" class="btn btn-primary slider-reveal">
                             <span class="text text-1">Xem Thực Đơn</span>
 
                             <span class="text text-2" aria-hidden="true">Xem Thực Đơn</span>
@@ -298,7 +324,7 @@
                             Chất lượng trong từng món ăn, tận tâm trong từng phục vụ
                         </p>
 
-                        <a href="#" class="btn btn-primary slider-reveal">
+                        <a href="@Url.Action("Menu","Home")" class="btn btn-primary slider-reveal">
                             <span class="text text-1">Xem Thực Đơn</span>
 
                             <span class="text text-2" aria-hidden="true">Xem Thực Đơn</span>
@@ -359,7 +385,7 @@
                                 <div class="card-content">
 
                                     <h3 class="title-4 card-title">
-                                        <a href="@Url.Action("Menu","Home")">Bữa Sáng</a>
+                                        <a href="@Url.Action("Menu","Home")">Khai Vị</a>
                                     </h3>
 
                                     <a href="@Url.Action("Menu", "Home")" class="btn-text hover-underline label-2">Xem Thực Đơn</a>
@@ -382,7 +408,7 @@
                                 <div class="card-content">
 
                                     <h3 class="title-4 card-title">
-                                        <a href="@Url.Action("Menu", "Home")">Khai Vị</a>
+                                        <a href="@Url.Action("Menu", "Home")">Món Chính</a>
                                     </h3>
 
                                     <a href="@Url.Action("Menu", "Home")" class="btn-text hover-underline label-2">Xem Thực Đơn</a>
@@ -1000,7 +1026,7 @@
               - #EVENT
             -->
 
-            <section class="section event bg-black-10" aria-label="event">
+            <section class="section event bg-black-10" aria-label="event" id="event">
                 <div class="container">
 
                     <p class="section-subtitle label-2 text-center">Cập Nhật Mới</p>
@@ -1016,7 +1042,7 @@
                                     <img src="~/images/event-1.jpg" width="350" height="450" loading="lazy"
                                          alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
 
-                                    <time class="publish-date label-2" datetime="2022-09-15">15/09/2022</time>
+                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
                                 </div>
 
                                 <div class="card-content">
@@ -1037,7 +1063,7 @@
                                     <img src="~/images/event-2.jpg" width="350" height="450" loading="lazy"
                                          alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
 
-                                    <time class="publish-date label-2" datetime="2022-09-08">08/09/2022</time>
+                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
                                 </div>
 
                                 <div class="card-content">
@@ -1058,7 +1084,7 @@
                                     <img src="~/images/event-3.jpg" width="350" height="450" loading="lazy"
                                          alt="Flavour so good you’ll try to eat with your eyes." class="img-cover">
 
-                                    <time class="publish-date label-2" datetime="2022-09-03">03/09/2022</time>
+                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
                                 </div>
 
                                 <div class="card-content">
@@ -1094,7 +1120,7 @@
       - #FOOTER
     -->
 
-    <footer class="footer section has-bg-image text-center"
+    <footer class="footer section has-bg-image text-center" id="connect"
             style="background-image: url('~/images/footer-bg.jpg')">
         <div class="container">
 

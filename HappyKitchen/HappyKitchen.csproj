@@ -8,13 +8,14 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\css\menu.css" />
-    <Content Remove="wwwroot\js\ForgotPass\emailCheck.js" />
-    <Content Remove="wwwroot\js\ForgotPass\otp_input.js" />
-    <Content Remove="wwwroot\js\ForgotPass\validatePassword.js" />
-    <Content Remove="wwwroot\js\Login\login_otp_input.js" />
-    <Content Remove="wwwroot\js\Login\validate_login.js" />
+    <Content Remove="wwwroot\js\Admin\ForgotPass\emailCheck.js" />
+    <Content Remove="wwwroot\js\Admin\ForgotPass\otp_input.js" />
+    <Content Remove="wwwroot\js\Admin\ForgotPass\validatePassword.js" />
+    <Content Remove="wwwroot\js\Admin\Login\login_otp_input.js" />
+    <Content Remove="wwwroot\js\Admin\Login\validate_login.js" />
+    <Content Remove="wwwroot\js\Menu\Comment.js" />
     <Content Remove="wwwroot\js\menu_script.js" />
-    <Content Remove="wwwroot\js\SignUp\signup.js" />
+    <Content Remove="wwwroot\js\Admin\SignUp\signup.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -73,15 +74,16 @@
     <None Include="wwwroot\images\thien_avt.jpg" />
     <None Include="wwwroot\images\Thumbs.db" />
     <None Include="wwwroot\images\tuan_avt.jpg" />
-    <None Include="wwwroot\js\ForgotPass\validatePassword.js" />
-    <None Include="wwwroot\js\ForgotPass\emailCheck.js" />
-    <None Include="wwwroot\js\ForgotPass\otp_input.js" />
-    <None Include="wwwroot\js\Login\login_otp_input.js" />
-    <None Include="wwwroot\js\Login\validate_login.js" />
+    <None Include="wwwroot\js\Admin\ForgotPass\validatePassword.js" />
+    <None Include="wwwroot\js\Admin\ForgotPass\emailCheck.js" />
+    <None Include="wwwroot\js\Admin\ForgotPass\otp_input.js" />
+    <None Include="wwwroot\js\Admin\Login\login_otp_input.js" />
+    <None Include="wwwroot\js\Admin\Login\validate_login.js" />
+    <None Include="wwwroot\js\Menu\Comment.js" />
     <None Include="wwwroot\js\menu_script.js" />
     <None Include="wwwroot\js\script.js" />
     <None Include="wwwroot\js\section.js" />
-    <None Include="wwwroot\js\SignUp\signup.js" />
+    <None Include="wwwroot\js\Admin\SignUp\signup.js" />
   </ItemGroup>
 
   <ItemGroup>

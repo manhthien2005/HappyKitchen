@@ -160,15 +160,15 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="@Url.Action("Index", "Home")" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#event" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
-                            <span class="span">Đầu Bếp</span>
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="@Url.Action("Index", "Home")#booking" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Kết Nối</span>
@@ -253,26 +253,6 @@
             <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
                 <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
             </a>
-
-
-            <!--
-              - #MODEL SHOW DETAIL OF MENU ITEM
-            -->
-            <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="detailModalLabel"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <img id="modalImage" src="" alt="" class="img-fluid mb-3">
-                            <p id="modalPrice" class="text-muted"></p>
-                            <p id="modalDescription"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <script> 
                 function showDetails(name, image, price, description) {
