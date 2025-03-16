@@ -1,0 +1,772 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hương Sen Restaurant</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Color variables */
+        :root {
+            --black: #000000;
+            --gold: #FFD700;
+            --gold-dark: #E6C200;
+            --amber-300: #FCD34D;
+            --amber-400: #FBBF24;
+            --amber-500: #F59E0B;
+            --amber-600: #D97706;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --white: #FFFFFF;
+        }
+
+        /* Header styles */
+        header {
+            background-color: var(--black);
+            color: var(--gold);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            background-color: var(--gray-300);
+        }
+
+        .restaurant-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--amber-400);
+        }
+
+        nav {
+            display: none;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .book-button {
+            background-color: var(--amber-500);
+            color: var(--black);
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .book-button:hover {
+            background-color: var(--amber-600);
+        }
+
+        .user-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--amber-400);
+        }
+
+        /* Main content styles */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background-color: var(--black);
+            color: var(--amber-400);
+            padding: 1.5rem;
+            width: 100%;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .booking-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .booking-info p {
+            font-weight: 600;
+        }
+
+        /* Content styles */
+        .content {
+            flex: 1;
+            padding: 1rem;
+        }
+
+        /* Menu tabs */
+        .menu-tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            white-space: nowrap;
+            border-radius: 0.375rem;
+            border: none;
+            background-color: var(--gray-200);
+            color: var(--gray-700);
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            background-color: var(--black);
+            color: var(--amber-400);
+        }
+
+        /* Menu items */
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 0.375rem;
+            margin-right: 1rem;
+            background-color: var(--gray-300);
+            flex-shrink: 0;
+        }
+
+        .item-details {
+            flex-grow: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-price {
+            color: var(--amber-600);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-button {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--gray-300);
+            border-radius: 0.375rem;
+            background-color: var(--white);
+            cursor: pointer;
+        }
+
+        .quantity-display {
+            width: 2rem;
+            text-align: center;
+        }
+
+        /* Selected items */
+        .selected-items-container {
+            margin-top: 2rem;
+        }
+
+        .selected-items-container h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .selected-items {
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: 0.375rem;
+        }
+
+        .empty-selection {
+            color: var(--gray-500);
+        }
+
+        .category-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--amber-600);
+            border-bottom: 1px solid var(--amber-400);
+            padding-bottom: 0.25rem;
+        }
+
+        .selected-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .selected-items-table th {
+            text-align: left;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        .selected-items-table th:nth-child(2) {
+            text-align: center;
+        }
+
+        .selected-items-table th:nth-child(3),
+        .selected-items-table th:nth-child(4) {
+            text-align: right;
+        }
+
+        .selected-items-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .selected-items-table tr {
+            background-color: var(--gray-50);
+        }
+
+        .selected-items-table td:nth-child(1) {
+            display: flex;
+            align-items: center;
+        }
+
+        .selected-items-table td:nth-child(2) {
+            text-align: center;
+        }
+
+        .selected-items-table td:nth-child(3),
+        .selected-items-table td:nth-child(4) {
+            text-align: right;
+        }
+
+        .selected-item-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.375rem;
+            margin-right: 0.5rem;
+            background-color: var(--gray-300);
+        }
+
+        .total-price {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .total-price p {
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: var(--amber-600);
+        }
+
+        /* Navigation buttons */
+        .navigation-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+
+        .back-button {
+            background-color: var(--gray-600);
+            color: var(--white);
+            font-weight: bold;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .back-button:hover {
+            background-color: var(--gray-700);
+        }
+
+        .next-button {
+            background-color: var(--amber-500);
+            color: var(--black);
+            font-weight: bold;
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .next-button:hover {
+            background-color: var(--amber-600);
+        }
+
+        /* Scroll to top button */
+        .scroll-top-button {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--amber-500);
+            color: var(--black);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        /* Responsive styles */
+        @@media (min-width: 768px) {
+            nav {
+                display: flex;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            nav a {
+                color: var(--amber-400);
+                text-decoration: none;
+            }
+
+            nav a:hover {
+                color: var(--amber-300);
+            }
+
+            .main-container {
+                flex-direction: row;
+            }
+
+            .sidebar {
+                width: 400px;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .restaurant-name {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <div class="logo"></div>
+            <h1 class="restaurant-name">Hương Sen</h1>
+        </div>
+        <nav>
+            <a href="#">TRANG CHỦ</a>
+            <a href="#">THỰC ĐƠN</a>
+            <a href="#">DỊCH VỤ</a>
+            <a href="#">TIN TỨC & MẸO HAY</a>
+            <a href="#">KHÁC</a>
+        </nav>
+        <div class="header-actions">
+            <button class="book-button">ĐẶT BÀN</button>
+            <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Thông tin đặt bàn</h2>
+            <div class="booking-info">
+                <p>Họ tên: Anh Tuấn</p>
+                <p>Email: sutten2004@gmail.com</p>
+                <p>Số điện thoại: 0877544321</p>
+                <p>Thời gian đặt bàn: 3/5/2025, 1:15:00 PM</p>
+                <p>Số người: 6 người</p>
+                <p>Ghi chú:</p>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Menu Tabs -->
+            <div class="menu-tabs">
+                <button class="tab-button active" data-tab="all">Tất cả</button>
+                <button class="tab-button" data-tab="main">Món chính</button>
+                <button class="tab-button" data-tab="appetizer">Món khai vị</button>
+                <button class="tab-button" data-tab="dessert">Món tráng miệng</button>
+                <button class="tab-button" data-tab="drinks">Đồ uống</button>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="menu-items" id="menu-items-container">
+                <!-- Menu items will be dynamically added here -->
+            </div>
+
+            <!-- Selected Items -->
+            <div class="selected-items-container">
+                <h2>Danh sách món đã chọn</h2>
+                <div class="selected-items" id="selected-items-container">
+                    <p class="empty-selection">Chưa có món nào được chọn.</p>
+                </div>
+                <div class="total-price">
+                    <p>Tổng tiền: <span id="total-price">0 đ</span></p>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <a class="back-button">TRỞ LẠI</a>
+                <a href="@Url.Action("DishChecking")" class="next-button" style="text-decoration:none">TIẾP THEO</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to top button -->
+    <button class="scroll-top-button" id="scroll-top-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+    </button>
+
+    <script>
+        // Menu items data
+        const menuItems = [
+            {
+                id: "goi-bap-bo",
+                name: "Gỏi Bắp Bò",
+                price: 130000,
+                image: "placeholder.jpg",
+                category: "appetizer",
+                categoryName: "Món khai vị"
+            },
+            {
+                id: "goi-bo-rau-ram",
+                name: "Gỏi Bò Rau Răm",
+                price: 101000,
+                image: "placeholder.jpg",
+                category: "appetizer",
+                categoryName: "Món khai vị"
+            },
+            {
+                id: "banh-bong-lan",
+                name: "Bánh bông lan",
+                price: 28000,
+                image: "placeholder.jpg",
+                category: "dessert",
+                categoryName: "Món tráng miệng"
+            },
+            {
+                id: "canh-chua-ca-loc",
+                name: "Canh chua cá lóc",
+                price: 60000,
+                image: "placeholder.jpg",
+                category: "main",
+                categoryName: "Món chính"
+            },
+            {
+                id: "lau-cua-dong",
+                name: "Lẩu Cua Đồng",
+                price: 220000,
+                image: "placeholder.jpg",
+                category: "main",
+                categoryName: "Món chính"
+            },
+            {
+                id: "tra-da",
+                name: "Trà đá",
+                price: 10000,
+                image: "placeholder.jpg",
+                category: "drinks",
+                categoryName: "Đồ uống"
+            },
+            {
+                id: "nuoc-cam",
+                name: "Nước cam",
+                price: 35000,
+                image: "placeholder.jpg",
+                category: "drinks",
+                categoryName: "Đồ uống"
+            }
+        ];
+
+        // State
+        let quantities = {};
+        let selectedItems = [];
+        let totalPrice = 0;
+        let activeTab = "all";
+
+        // Format price with thousand separators
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Update quantity and selected items
+        function updateQuantity(itemId, amount) {
+            const currentQuantity = quantities[itemId] || 0;
+            const newQuantity = Math.max(0, currentQuantity + amount);
+            quantities[itemId] = newQuantity;
+
+            const item = menuItems.find(item => item.id === itemId);
+
+            if (newQuantity > 0) {
+                if (!selectedItems.some(i => i.id === itemId)) {
+                    selectedItems.push(item);
+                }
+            } else {
+                selectedItems = selectedItems.filter(i => i.id !== itemId);
+            }
+
+            // Update UI
+            updateQuantityDisplay(itemId, newQuantity);
+            updateSelectedItemsDisplay();
+            updateTotalPrice();
+        }
+
+        // Update quantity display
+        function updateQuantityDisplay(itemId, quantity) {
+            const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+            if (quantityDisplay) {
+                quantityDisplay.textContent = quantity;
+            }
+        }
+
+        // Group items by category
+        function groupItemsByCategory(items) {
+            const groupedItems = {};
+
+            items.forEach(item => {
+                if (!groupedItems[item.category]) {
+                    groupedItems[item.category] = {
+                        name: item.categoryName,
+                        items: []
+                    };
+                }
+                groupedItems[item.category].items.push(item);
+            });
+
+            return groupedItems;
+        }
+
+        // Update selected items display
+        function updateSelectedItemsDisplay() {
+            const selectedItemsContainer = document.getElementById('selected-items-container');
+
+            if (selectedItems.length === 0) {
+                selectedItemsContainer.innerHTML = '<p class="empty-selection">Chưa có món nào được chọn.</p>';
+                return;
+            }
+
+            // Group selected items by category
+            const groupedItems = groupItemsByCategory(selectedItems);
+            let html = '';
+
+            // Create a section for each category
+            for (const category in groupedItems) {
+                const categoryData = groupedItems[category];
+
+                html += `
+                    <div class="category-section">
+                        <h3 class="category-title">${categoryData.name}:</h3>
+                        <table class="selected-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Món ăn</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                categoryData.items.forEach(item => {
+                    const quantity = quantities[item.id];
+                    const itemTotal = item.price * quantity;
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="selected-item-image"></div>
+                                ${item.name}
+                            </td>
+                            <td>${quantity}</td>
+                            <td>${formatPrice(item.price)} đ</td>
+                            <td>${formatPrice(itemTotal)} đ</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            selectedItemsContainer.innerHTML = html;
+        }
+
+        // Update total price
+        function updateTotalPrice() {
+            totalPrice = selectedItems.reduce((total, item) => {
+                return total + (item.price * (quantities[item.id] || 0));
+            }, 0);
+
+            const totalPriceElement = document.getElementById('total-price');
+            totalPriceElement.textContent = `${formatPrice(totalPrice)} đ`;
+        }
+
+        // Render menu items
+        function renderMenuItems() {
+            const menuItemsContainer = document.getElementById('menu-items-container');
+            menuItemsContainer.innerHTML = '';
+
+            const filteredItems = activeTab === 'all'
+                ? menuItems
+                : menuItems.filter(item => item.category === activeTab);
+
+            filteredItems.forEach(item => {
+                const menuItemElement = document.createElement('div');
+                menuItemElement.className = 'menu-item';
+                menuItemElement.innerHTML = `
+                    <div class="item-image"></div>
+                    <div class="item-details">
+                        <h3 class="item-name">${item.name}</h3>
+                        <p class="item-price">${formatPrice(item.price)} đ</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-button decrease-button" data-item-id="${item.id}">-</button>
+                        <span class="quantity-display" id="quantity-${item.id}">${quantities[item.id] || 0}</span>
+                        <button class="quantity-button increase-button" data-item-id="${item.id}">+</button>
+                    </div>
+                `;
+                menuItemsContainer.appendChild(menuItemElement);
+            });
+
+            // Add event listeners to quantity buttons
+            document.querySelectorAll('.increase-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-item-id');
+                    updateQuantity(itemId, 1);
+                });
+            });
+
+            document.querySelectorAll('.decrease-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-item-id');
+                    updateQuantity(itemId, -1);
+                });
+            });
+        }
+
+        // Initialize tabs
+        function initTabs() {
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                    activeTab = button.getAttribute('data-tab');
+                    renderMenuItems();
+                });
+            });
+        }
+
+        // Scroll to top functionality
+        function initScrollToTop() {
+            const scrollTopButton = document.getElementById('scroll-top-button');
+            scrollTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Show/hide button based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopButton.style.display = 'flex';
+                } else {
+                    scrollTopButton.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize the application
+        function init() {
+            renderMenuItems();
+            initTabs();
+            initScrollToTop();
+            updateSelectedItemsDisplay();
+            updateTotalPrice();
+        }
+
+        // Run initialization when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

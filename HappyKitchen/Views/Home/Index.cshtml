@@ -2,6 +2,8 @@
     Layout = null;
 }
 
+@model Reservation
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -793,7 +795,7 @@
 
                     <div class="form reservation-form bg-black-10">
 
-                        <form action="" class="form-left">
+                        <form action="@Url.Action("Menuing", "Reservation")" class="form-left">
 
                             <h2 class="headline-1 text-center">Đặt Bàn Trực Tuyến</h2>
 
@@ -806,6 +808,12 @@
                                 <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field">
 
                                 <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field">
+                            </div>
+
+                            <div class="">
+
+
+                                <input type="email" name="email" placeholder="Email" autocomplete="off" class="input-field">
                             </div>
 
                             <div class="input-wrapper">
