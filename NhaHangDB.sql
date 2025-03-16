@@ -204,6 +204,38 @@ VALUES
 (4, 1, 5, N'Món này xuất sắc, rất đáng thử!','2025-03-13'),
 (4, 1, 2, N'Không hợp khẩu vị của mình lắm.','2025-03-13');
 
+-- Thêm dữ liệu mẫu cho bảng Areas
+INSERT INTO Areas (AreaName, Description)
+VALUES
+(N'Khu VIP', N'Khu vực dành cho khách VIP, yên tĩnh và riêng tư.'),
+(N'Khu Gia Đình', N'Khu vực phù hợp cho nhóm gia đình, không gian ấm cúng.'),
+(N'Khu Ngoài Trời', N'Khu vực thoáng mát ngoài trời, gần gũi thiên nhiên.'),
+(N'Khu Sảnh Chính', N'Khu vực trung tâm, dễ dàng phục vụ nhanh chóng.');
+
+-- Thêm dữ liệu mẫu cho bảng Tables
+INSERT INTO Tables (TableName, AreaID, Capacity, Status)
+VALUES
+-- Bàn thuộc Khu VIP
+(N'Bàn VIP 1', 1, 4, 0),
+(N'Bàn VIP 2', 1, 6, 1),
+(N'Bàn VIP 3', 1, 8, 2),
+
+-- Bàn thuộc Khu Gia Đình
+(N'Bàn Gia Đình 1', 2, 6, 0),
+(N'Bàn Gia Đình 2', 2, 8, 1),
+(N'Bàn Gia Đình 3', 2, 10, 2),
+
+-- Bàn thuộc Khu Ngoài Trời
+(N'Bàn Ngoài Trời 1', 3, 4, 0),
+(N'Bàn Ngoài Trời 2', 3, 6, 1),
+(N'Bàn Ngoài Trời 3', 3, 8, 2),
+
+-- Bàn thuộc Khu Sảnh Chính
+(N'Bàn Sảnh 1', 4, 2, 0),
+(N'Bàn Sảnh 2', 4, 4, 1),
+(N'Bàn Sảnh 3', 4, 6, 2);
+
+
 DROP TABLE IF EXISTS Reviews;
 DROP TABLE IF EXISTS OrderDetails;
 DROP TABLE IF EXISTS Orders;
