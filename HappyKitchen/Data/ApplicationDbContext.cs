@@ -13,13 +13,13 @@ namespace HappyKitchen.Data
         }
 
         // Các DbSet tương ứng với các bảng trong database
-        public DbSet<Customer> Customers { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Table> Tables { get; set; }
-        public DbSet<Employee> Employees { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
         public DbSet<MenuItemAttribute> MenuItemAttributes { get; set; }
+        public DbSet<MenuItemRating> MenuItemRatings { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
 

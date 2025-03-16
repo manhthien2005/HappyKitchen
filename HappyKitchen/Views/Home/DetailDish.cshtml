@@ -1,0 +1,407 @@
+﻿@{
+    Layout = null;
+}
+
+@model MenuItem
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+      - primary meta tags
+    -->
+    <title>Happy Kitchen - Nơi ẩm thực thăng hoa</title>
+    <meta name="title" content="Happy Kitchen - Nơi ẩm thực thăng hoa">
+    <meta name="description" content="Team: TKT">
+
+    <!--
+      - favicon
+    -->
+    <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+
+    <!--
+      - google font link
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
+    <!--
+      - custom css link
+    -->
+    <link rel="stylesheet" href="~/css/dish_detail.css">
+
+    <!--
+      - preload images
+    -->
+    <link rel="preload" as="image" href="~/images/hero-slider-1.jpg">
+    <link rel="preload" as="image" href="~/images/hero-slider-2.jpg">
+    <link rel="preload" as="image" href="~/images/hero-slider-3.jpg">
+
+</head>
+
+<body id="top">
+
+    <!--
+      - #PRELOADER
+    -->
+
+    <div class="preload" data-preaload>
+        <div class="circle"></div>
+        <p class="text">HAPPY KITCHEN</p>
+    </div>
+
+
+
+
+
+    <!--
+      - #TOP BAR
+    -->
+
+    <div class="topbar">
+        <div class="container">
+
+            <address class="topbar-item">
+                <div class="icon">
+                    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">
+                    Happy Kitchen, 01 Thảo Điền, Hồ Chí Minh, VN
+                </span>
+            </address>
+
+            <div class="separator"></div>
+
+            <div class="topbar-item item-2">
+                <div class="icon">
+                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">Mở cửa : 8.00 AM - 10.00 PM</span>
+            </div>
+
+            <a href="tel:+11234567890" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">+84 977139203</span>
+            </a>
+
+            <div class="separator"></div>
+
+            <a href="mailto:booking@restaurant.com" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">happykitchenvn2025@gmail.com</span>
+            </a>
+
+        </div>
+    </div>
+
+
+
+
+
+    <!--
+      - #HEADER
+    -->
+
+    <header class="header" data-header>
+        <div class="container">
+
+            <a href="@Url.Action("Index", "Home")" class="logo">
+                <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+
+            <nav class="navbar" data-navbar>
+
+                <button class="close-btn" aria-label="close menu" data-nav-toggler>
+                    <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+                </button>
+
+                <a href="@Url.Action("Index", "Home")" class="logo">
+                    <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
+                </a>
+
+                <ul class="navbar-list">
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#home" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Trang Chủ</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#about" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Giới Thiệu</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#menu" class="navbar-link hover-underline active">
+                            <div class="separator"></div>
+
+                            <span class="span">Thực Đơn</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#event" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Kết Nối</span>
+                        </a>
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <div class="overlay" data-nav-toggler data-overlay></div>
+
+        </div>
+    </header>
+
+
+
+
+
+    <main>
+        <article>
+
+            <!--
+              - #DETAIL DISH
+            -->
+
+            <section class="section menu" aria-label="menu-label" id="menu">
+                <div class="container">
+                    <p class="section-subtitle text-center label-2">Mô Tả Món Ăn</p>
+
+                    <div class="recipe-card">
+                        <div class="recipe-header">
+                            <div class="image-container" id="image-display">
+                                <img src="~/images/MenuItem/@Model.MenuItemImage" alt="Dish Image" class="image-placeholder" />
+                            </div>
+
+                            <div class="recipe-info">
+                                <h2>Tên món: <span id="display-name">@Model.Name</span></h2>
+                                <h2>Giá: <span id="display-name">@Model.Price.ToString("N0") VNĐ</span></h2>
+                                @foreach (var attr in Model.Attributes.Where(a => a.AttributeName != "Mô tả chi tiết"))
+                                {
+                                    var iconClass = attr.AttributeName switch
+                                    {
+                                        "Thành phần" => "fa-solid fa-drumstick-bite",       // 🥬 Nguyên liệu
+                                        "Khẩu phần" => "fa-solid fa-utensils",        // 🍽 Suất ăn
+                                        "Thời gian hoàn tất" => "fa-solid fa-clock",  // ⏳ Thời gian nấu
+                                        "Hướng dẫn sử dụng" => "fa-solid fa-book",    // 📖 Hướng dẫn
+                                        "Calories" => "fa-solid fa-fire",             // 🔥 Calories
+                                        _ => "fa-solid fa-info-circle"                // ℹ️ Mặc định
+                                    };
+
+                                    <p><i class="@iconClass"></i> <strong style="margin-left: 10px;">@attr.AttributeName:</strong> <span class="display-ingredients">@attr.AttributeValue</span></p>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="description-container">
+                            <div class="description-label">Mô Tả Chi Tiết</div>
+                            <div id="display-description">
+                                @(Model.Attributes.FirstOrDefault(a => a.AttributeName == "Mô tả chi tiết")?.AttributeValue ?? "Không có mô tả")
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="section-subtitle text-center label-2">&nbsp;</p>
+
+                    <!-- Rating Section -->
+                    <div class="rating-section">
+                        <div class="rating-display">
+                            <div class="rating-stars" id="rating-stars-display">
+                                <!-- Stars will be generated by JavaScript -->
+                            </div>
+                            <div class="rating-value" id="average-rating">@Model.AverageRating</div>
+                            <div class="rating-count" id="rating-count">(@Model.RatingCount đánh giá)</div>
+                        </div>
+                        <div class="comment-count" id="comment-count">@Model.TotalComments Bình Luận</div>
+                    </div>
+
+                    <!-- Comment Section -->
+                    <div class="comment-section">
+                        <h3>Đánh Giá Của Khách Hàng</h3>
+
+                        <div class="comment-list">
+                            @foreach (var cmt in @Model.Ratings)
+                            {
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <span class="comment-author">@cmt.User.FullName</span>
+                                        <span class="comment-date">@cmt.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="rating-stars" id="@cmt.UserID" data-rating="@cmt.Rating"></div>
+                                    <div class="comment-text">
+                                        @cmt.Comment
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        <div class="pagination">
+                            <button id="prev-page" class="pagination-button" disabled>Previous</button>
+                            <div class="pagination-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></div>
+                            <button id="next-page" class="pagination-button" disabled>Next</button>
+                        </div>
+
+                        <!-- Comment Form -->
+                        <div class="comment-form">
+                            <h3>Bình Luận</h3>
+
+                            <div class="form-group">
+                                <label for="rating">Đánh giá của bạn:</label>
+                                <div class="star-rating">
+                                    <input type="radio" id="star5" name="rating" value="5">
+                                    <label for="star5">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1">★</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="comment-text">Nội Dung:</label>
+                                <textarea id="comment-text" rows="4" placeholder="Nhập bình luận của bạn"></textarea>
+                            </div>
+
+                            <button onclick="addComment()">Đăng Bình Luận</button>
+                        </div>
+                    </div>
+
+                    <img src="~/images/shape-5.png" width="921" height="1036" loading="lazy" alt="shape"
+                         class="shape shape-2 move-anim">
+                    <img src="~/images/shape-6.png" width="343" height="345" loading="lazy" alt="shape"
+                         class="shape shape-3 move-anim">
+
+                </div>
+            </section>
+
+            <!--
+              - #BACK TO TOP
+            -->
+
+            <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
+                <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
+            </a>
+
+            <script>
+
+                function showDetails(name, image, price, description) {
+                    document.getElementById("detailModalLabel").textContent = name;
+                    document.getElementById("modalImage").src = "/images/MenuItem/" + image;
+                    document.getElementById("modalPrice").textContent = "Giá: " + price + " VNĐ";
+                    document.getElementById("modalDescription").textContent = description;
+                }
+            </script>
+            <!--
+              - custom js link
+            -->
+            <script src="~/js/menu_script.js"></script>
+            <script src="~/js/Menu/Comment.js"></script>
+
+            <!--
+              - ionicon link
+            -->
+            <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+            <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+            <script src="assets/js/section.js"></script>
+            <script>
+                // Function to generate stars based on rating with precise fill level
+                function generateStarForElement(element) {
+                    // Get the rating from the data attribute
+                    const rating = parseFloat(element.getAttribute('data-rating'));
+
+                    // Clear existing content
+                    element.innerHTML = '';
+
+                    // Generate 5 stars based on the rating
+                    for (let i = 1; i <= 5; i++) {
+                        const starWrapper = document.createElement('div');
+                        starWrapper.className = 'star';
+                        starWrapper.textContent = '★';
+
+                        // Calculate fill percentage for this star
+                        let fillPercentage = 0;
+
+                        if (i <= Math.floor(rating)) {
+                            // Full star
+                            fillPercentage = 100;
+                        } else if (i === Math.ceil(rating)) {
+                            // Partial star - calculate exact percentage
+                            fillPercentage = (rating % 1) * 100;
+                        }
+
+                        // Only add fill element if there's some fill
+                        if (fillPercentage > 0) {
+                            const fillElement = document.createElement('div');
+                            fillElement.className = 'star-fill';
+                            fillElement.textContent = '★';
+                            fillElement.style.width = fillPercentage + '%';
+                            starWrapper.appendChild(fillElement);
+                        }
+
+                        element.appendChild(starWrapper);
+                    }
+                }
+
+                // Generate stars for all rating elements when the page loads
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Generate stars for the main average rating
+                    const averageRatingElement = document.getElementById('average-rating');
+                    if (averageRatingElement) {
+                        const averageRating = parseFloat(averageRatingElement.textContent);
+                        const starsContainer = document.getElementById('rating-stars-display');
+                        if (starsContainer) {
+                            starsContainer.setAttribute('data-rating', averageRating);
+                            generateStarForElement(starsContainer);
+                        }
+                    }
+
+                    // Generate stars for all comment ratings
+                    const commentRatingElements = document.querySelectorAll('.rating-stars[id]');
+                    commentRatingElements.forEach(function (element) {
+                        generateStarForElement(element);
+                    });
+                });
+            </script>
+</body>
+
+</html>

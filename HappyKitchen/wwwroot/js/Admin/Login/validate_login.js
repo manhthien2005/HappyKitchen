@@ -29,7 +29,7 @@
         }
 
         try {
-            const response = await fetch("/Home/Login", {
+            const response = await fetch("/Admin/Login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
