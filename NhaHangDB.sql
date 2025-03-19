@@ -68,6 +68,7 @@ CREATE TABLE Reservations (
     TableID INT NOT NULL,
     CreatedTime DATETIME DEFAULT GETDATE() NOT NULL, -- Thời gian tạo đặt chỗ
     ReservationTime DATETIME NOT NULL, -- Thời gian khách đặt chỗ thực tế
+    Duration INT NOT NULL, --Thời lượng khách dùng bữa 
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Đang chờ, 2 = Đã xác nhận
     Notes NVARCHAR(255) NULL,
     FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE CASCADE,
@@ -195,6 +196,11 @@ INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUE
 (8, N'Thành phần', N'Sữa tươi, gelatin, hạnh nhân, vải thiều, nhãn, đường phèn'),
 (8, N'Khẩu phần', N'1 chén (1 người)'),
 (8, N'Mô tả món', N'Món chè thanh mát với những viên khúc bạch mềm mịn, béo nhẹ, kết hợp cùng nước chè ngọt thanh và hạnh nhân rang giòn.');
+
+INSERT INTO Users ( FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status) 
+VALUES 
+(N'Nguyễn Văn A', '0987654321', 'nguyenvana@example.com', N'123 Đường ABC, TP.HCM', 1, 'hashed_password', 10000000, 0);
+
 
 INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt)
 VALUES 
