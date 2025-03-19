@@ -41,19 +41,39 @@ namespace HappyKitchen.Models
         public byte Status { get; set; } = 0; // 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
     }
 
+
+    public class Area
+    {
+        [Key]
+        public int AreaID { get; set; }
+
+        [Required]
+        public string AreaName { get; set; }
+
+        [Required]
+        public string Description { get; set; }
+
+    }
+
     public class Table
     {
         [Key]
         public int TableID { get; set; }
 
         [Required]
-        public int TableNumber { get; set; }
+        public string TableName { get; set; }
+
+        [Required]
+        public int AreaID { get; set; }
 
         [Required]
         public int Capacity { get; set; }
 
         [Required]
         public byte Status { get; set; } // 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
+
+        [ForeignKey("AreaID")]
+        public virtual Area Place { get; set; }
     }
 
     public class Reservation
@@ -61,10 +81,12 @@ namespace HappyKitchen.Models
         [Key]
         public int ReservationID { get; set; }
 
-        [Required]
-        public int CustomerID { get; set; }
+        public int UserID { get; set; }
 
         [Required]
+        public string CustomerName { get; set; }
+        [Required]
+        public string CustomerPhone { get; set; }
         public int TableID { get; set; }
 
         [Required]
@@ -72,7 +94,8 @@ namespace HappyKitchen.Models
 
         [Required]
         public DateTime ReservationTime { get; set; }
-
+        [Required]
+        public int Duration { get; set; }
         [Required]
         [Range(0, 2, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending), or 2 (Confirmed)")]
         public byte Status { get; set; }
@@ -323,6 +346,23 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; }
     }
 
+    public class ReservationInformation
+    {
+        public string CustomerName { get; set; }
+        public string CustomerPhone { get; set; }
+        public int TableID { get; set; }
+        public int Capacity { get; set; }
+        public DateTime CreatedTime { get; set; } = DateTime.Now;
+        public DateTime ReservationTime { get; set; }
+        public int Duration { get; set; }
+        public string Notes { get; set; }
+        public Table Table { get; set; }
+    }
 
 
+    public class MenuViewModel
+    {
+        public ReservationInformation ReservationInformation { get; set; }
+        public List<Category> Categories { get; set; }
+    }
 }
