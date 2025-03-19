@@ -2,7 +2,7 @@
     Layout = null;
 }
 
-@model Reservation
+@model List<Table>
 
 
 <!DOCTYPE html>
@@ -36,7 +36,7 @@
       - custom css link
     -->
     <link rel="stylesheet" href="~/css/style.css">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.2/air-datepicker.min.css">
     <!--
       - preload images
     -->
@@ -217,7 +217,7 @@
             <div class="login-container">
                 <div id="loginButton" class="login-btn">
                     <a href="login.html" class="btn btn-outline-primary">
-                        <i class="bi bi-person"></i>
+                        <i class="bi bi"></i>
                         <span>Đăng Nhập</span>
                     </a>
                 </div>
@@ -821,7 +821,7 @@
 
                     <div class="form reservation-form bg-black-10">
 
-                        <form action="@Url.Action("Menuing", "Reservation")" class="form-left">
+                        <form method="post" action="@Url.Action("Menuing", "Reservation")" class="form-left">
 
                             <h2 class="headline-1 text-center">Đặt Bàn Trực Tuyến</h2>
 
@@ -831,15 +831,9 @@
                             </p>
 
                             <div class="input-wrapper">
-                                <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field">
+                                <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field" required>
 
-                                <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field">
-                            </div>
-
-                            <div class="">
-
-
-                                <input type="email" name="email" placeholder="Email" autocomplete="off" class="input-field">
+                                <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" required>
                             </div>
 
                             <div class="input-wrapper">
@@ -847,14 +841,19 @@
                                 <div class="icon-wrapper">
                                     <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                                    <select name="person" class="input-field">
-                                        <option value="1-person">1 Người</option>
-                                        <option value="2-person">2 Người</option>
-                                        <option value="3-person">3 Người</option>
-                                        <option value="4-person">4 Người</option>
-                                        <option value="5-person">5 Người</option>
-                                        <option value="6-person">6 Người</option>
-                                        <option value="7-person">7 Người</option>
+                                    <select id="people" name="person" class="input-field" required>
+                                        <option value="" disabled selected>Chọn sức chứa</option>
+                                        <option value="1">1 Người</option>
+                                        <option value="2">2 Người</option>
+                                        <option value="3">3 Người</option>
+                                        <option value="4">4 Người</option>
+                                        <option value="5">5 Người</option>
+                                        <option value="6">6 Người</option>
+                                        <option value="7">7 Người</option>
+                                        <option value="8">8 Người</option>
+                                        <option value="9">9 Người</option>
+                                        <option value="10">10 người</option>
+                                      
                                     </select>
 
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
@@ -863,35 +862,41 @@
                                 <div class="icon-wrapper">
                                     <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
 
-                                    <input type="date" name="reservation-date" class="input-field">
+                                    <input type="text" id="reservationDate" name="reservationDate" class="input-field" placeholder="Chọn ngày giờ">
 
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                                 </div>
 
                                 <div class="icon-wrapper">
-                                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                                    <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                                    <select name="person" class="input-field">
-                                        <option value="08:00am">08 : 00 am</option>
-                                        <option value="09:00am">09 : 00 am</option>
-                                        <option value="010:00am">10 : 00 am</option>
-                                        <option value="011:00am">11 : 00 am</option>
-                                        <option value="012:00am">12 : 00 am</option>
-                                        <option value="01:00pm">01 : 00 pm</option>
-                                        <option value="02:00pm">02 : 00 pm</option>
-                                        <option value="03:00pm">03 : 00 pm</option>
-                                        <option value="04:00pm">04 : 00 pm</option>
-                                        <option value="05:00pm">05 : 00 pm</option>
-                                        <option value="06:00pm">06 : 00 pm</option>
-                                        <option value="07:00pm">07 : 00 pm</option>
-                                        <option value="08:00pm">08 : 00 pm</option>
-                                        <option value="09:00pm">09 : 00 pm</option>
-                                        <option value="10:00pm">10 : 00 pm</option>
+                                    <select id="duration" name="duration" class="input-field" required>
+                                        <option value="" disabled selected>Chọn thời lượng</option>
+                                        <option value="1">1 giờ</option>
+                                        <option value="2">2 giờ</option>
+                                        <option value="3">3 giờ</option>
+                                        <option value="4">4 giờ</option>
+
+
                                     </select>
 
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                                 </div>
 
+                                
+
+                            </div> 
+
+                            <div class="icon-wrapper">
+                                <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+
+                                <select id="table" name="table" class="input-field" required>
+                                    <option value="" disabled selected>Chọn bàn</option>
+
+
+                                </select>
+
+                                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                             </div>
 
                             <textarea name="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
@@ -1262,6 +1267,61 @@
       - custom js link
     -->
     <script src="~/js/script.js"></script>
+    <!--chỉnh sửa hiển thị bảng chọn ngày giờ đặt bàn-->
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.2/air-datepicker.min.js"></script>
+    <script>
+        new AirDatepicker('#reservationDate', {
+            timepicker: true,
+            locale: {
+                days: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
+                daysShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                daysMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                months: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                monthsShort: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                today: 'Hôm nay',
+                clear: 'Xóa',
+                dateFormat: 'dd/MM/yyyy',
+                timeFormat: 'HH:mm',
+                firstDay: 1
+            },
+            minDate: new Date(),
+        });
+    </script>
+
+   
+
+    <script>
+        function fetchAvailableTables() {
+            let datetime = document.getElementById("reservationDate").value;
+            let people = document.getElementById("people").value;
+            let duration = document.getElementById("duration").value;
+
+            if (!datetime || !people || !duration ) return; // Nếu chưa chọn đủ, không gửi yêu cầu
+
+            fetch(`/Home/GetAvailableTables?datetime=${encodeURIComponent(datetime)}&people=${people}&duration=${duration}`)
+                .then(response => {
+                    console.log("Response Status:", response.status);
+                    return response.text();  // Lấy raw response trước
+                })
+                .then(text => {
+                    console.log("Raw Response:", text);  // Xem dữ liệu trước khi chuyển JSON
+                    return text ? JSON.parse(text) : {}; // Chỉ parse nếu không rỗng
+                })
+                .then(data => {
+                    console.log("Parsed JSON:", data); // Kiểm tra dữ liệu nhận được
+                    let tableSelect = document.getElementById("table");
+                    tableSelect.innerHTML = "<option value=''>Chọn bàn</option>";
+                    data.forEach(table => {
+                        tableSelect.innerHTML += `<option value="${table.tableID}">${table.tableName} - Sức chứa: ${table.capacity}</option>`;
+                    });
+                })
+                .catch(error => console.error("Fetch Error:", error));
+        }
+
+        document.getElementById("reservationDate").addEventListener("change", fetchAvailableTables);
+        document.getElementById("people").addEventListener("change", fetchAvailableTables);
+        document.getElementById("duration").addEventListener("change", fetchAvailableTables);
+    </script>
 
     <!--
       - ionicon link

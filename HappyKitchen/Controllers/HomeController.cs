@@ -25,7 +25,8 @@ namespace HappyKitchen.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var tables = _context.Tables.ToList();
+            return View(tables);
         }
 
         public async Task<IActionResult> Menu()
@@ -36,6 +37,27 @@ namespace HappyKitchen.Controllers
                 .ToListAsync();
 
             return View(categories);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetAvailableTables( DateTime startTime, int people, int duration)
+        {
+
+            var startDate = startTime.Date; // Chỉ lọc trong cùng ngày
+            var endTime = startTime.AddHours(duration);
+
+            var reservedTableIds = await _context.Reservations
+                .Where(r => r.ReservationTime.Date == startDate) // Chỉ lấy đặt chỗ trong cùng ngày
+                .Where(r => startTime < r.ReservationTime.AddMinutes(r.Duration) && endTime > r.ReservationTime)
+                .Select(r => r.TableID)
+                .ToListAsync();
+
+            var availableTables = await _context.Tables
+                .Where(t => t.Capacity >= people && !reservedTableIds.Contains(t.TableID))
+                .Select(t => new { t.TableID, t.TableName, t.Capacity})
+                .ToListAsync();
+
+            return Json(availableTables);
         }
 
         public async Task<IActionResult> DetailDish(int MenuItemID)
