@@ -62,7 +62,9 @@ CREATE TABLE Tables (
 
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerID INT NOT NULL, 
+    CustomerID INT NULL, 
+    GuestName NVARCHAR(100) NOT NULL,
+    PhoneNumber NVARCHAR(15) NOT NULL,
     TableID INT NOT NULL,
     CreatedTime DATETIME DEFAULT GETDATE() NOT NULL, -- Thời gian tạo đặt chỗ
     ReservationTime DATETIME NOT NULL, -- Thời gian khách đặt chỗ thực tế
