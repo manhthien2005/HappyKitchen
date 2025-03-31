@@ -208,16 +208,18 @@
                             {
                                 <li>
                                     <div class="menu-card hover:card">
-                                        <figure class="card-banner img-holder" style="--width: 150; --height: 150;">
-                                            <img src="~/images/MenuItem/@item.MenuItemImage" width="150" height="150" loading="lazy" alt="@item.Name" class="img-cover"
-                                                 data-bs-toggle="modal" data-bs-target="#detailModal"
-                                                 onclick="showDetails('@item.Name', '@item.MenuItemImage', '@item.Price.ToString("N0")', '@item.Description')">
-                                        </figure>
+                                        <a href="@Url.Action("DetailDish", "Home", new { MenuItemID = item.MenuItemID })">
+                                            <figure class="card-banner img-holder" style="--width: 150; --height: 150;">
+                                                <img src="~/images/MenuItem/@item.MenuItemImage" width="150" height="150" loading="lazy"
+                                                     alt="@item.Name" class="img-cover">
+                                            </figure>
+                                        </a>
 
                                         <div>
                                             <div class="title-wrapper">
                                                 <h3 class="title-3">
-                                                    <a href="#" class="card-title">@item.Name</a>
+                                                    <a href="@Url.Action("DetailDish", "Home", new { MenuItemID = item.MenuItemID })" class="card-title">@item.Name
+                                                    </a>
                                                 </h3>
                                                 <span class="span title-2">@item.Price.ToString("N0") VNĐ</span>
                                             </div>

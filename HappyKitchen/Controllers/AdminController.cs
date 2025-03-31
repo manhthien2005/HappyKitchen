@@ -3,6 +3,7 @@ using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace HappyKitchen.Controllers
@@ -19,8 +20,42 @@ namespace HappyKitchen.Controllers
             _configuration = configuration;
         }
 
+        public IActionResult TEMP()
+        {
+            // Kiểm tra Session tồn tại chưa
+            var userName = HttpContext.Session.GetString("FullName");
+            var userEmail = HttpContext.Session.GetString("Email");
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return RedirectToAction("Login");
+            }
+
+            ViewBag.UserName = userName;
+            ViewBag.UserEmail = userEmail;
+
+            return View();
+        }
+
         public IActionResult Login()
         {
+            var email = Request.Cookies["RememberMe_Email"];
+
+            if (!string.IsNullOrEmpty(email))
+            {
+
+                var user = _context.Users.FirstOrDefault(u => u.Email == email);
+                if (user != null)
+                {
+
+                    HttpContext.Session.SetString("FullName", user.FullName);
+                    HttpContext.Session.SetString("Email", user.Email);
+                    HttpContext.Session.SetString("Phone", user.PhoneNumber);
+
+                    return RedirectToAction("TEMP");
+                }
+            }
+
             return View();
         }
 
@@ -56,6 +91,24 @@ namespace HappyKitchen.Controllers
                     .FirstOrDefault(td => td.DeviceToken == deviceToken && td.UserID == user.UserID);
                 if (trustedDevice != null)
                 {
+                    // Lưu thông tin vào session
+                    HttpContext.Session.SetString("FullName", user.FullName);
+                    HttpContext.Session.SetString("Email", user.Email);
+                    HttpContext.Session.SetString("Phone", user.PhoneNumber);
+
+                    // Kiểm tra "Remember Me"
+                    if (model.RememberMe)
+                    {
+                        CookieOptions options = new CookieOptions
+                        {
+                            Expires = DateTime.Now.AddDays(7),
+                            HttpOnly = true,
+                            Secure = true
+                        };
+
+                        Response.Cookies.Append("RememberMe_Email", user.Email, options);
+                    }
+
                     // Thiết bị đã tin cậy, đăng nhập thành công
                     return Json(new { success = true, message = "Đăng nhập thành công!" });
                 }
@@ -63,9 +116,9 @@ namespace HappyKitchen.Controllers
 
             // Thiết bị chưa tin cậy, cần xác thực OTP
             string otpCode = new Random().Next(100000, 999999).ToString();
-            HttpContext.Session.SetString("OTP_Login", otpCode);
-            HttpContext.Session.SetString("Login_Email", model.Email);
-            HttpContext.Session.SetString("OTP_Login_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.SetString("User_OTP_Login", otpCode);
+            HttpContext.Session.SetString("User_Login_Email", model.Email);
+            HttpContext.Session.SetString("User_OTP_Login_Timestamp", DateTime.Now.ToString());
 
             // (Gọi dịch vụ gửi OTP qua email)
             var emailService = new EmailService(_configuration);
@@ -96,7 +149,7 @@ namespace HappyKitchen.Controllers
         [HttpGet]
         public IActionResult Verify_Login(string email)
         {
-            string sessionEmail = HttpContext.Session.GetString("Login_Email");
+            string sessionEmail = HttpContext.Session.GetString("User_Login_Email");
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
             {
@@ -116,8 +169,8 @@ namespace HappyKitchen.Controllers
             }
 
             // Lấy OTP và email từ Session
-            string sessionOTP = HttpContext.Session.GetString("OTP_Login");
-            string email = HttpContext.Session.GetString("Login_Email");
+            string sessionOTP = HttpContext.Session.GetString("User_OTP_Login");
+            string email = HttpContext.Session.GetString("User_Login_Email");
 
             if (string.IsNullOrEmpty(sessionOTP) || string.IsNullOrEmpty(email))
             {
@@ -125,12 +178,12 @@ namespace HappyKitchen.Controllers
             }
 
             // Kiểm tra thời gian OTP (ví dụ: 5 phút)
-            if (DateTime.TryParse(HttpContext.Session.GetString("OTP_Login_Timestamp"), out DateTime ts) &&
+            if (DateTime.TryParse(HttpContext.Session.GetString("User_OTP_Login_Timestamp"), out DateTime ts) &&
                 (DateTime.Now - ts).TotalMinutes > 5)
             {
-                HttpContext.Session.Remove("OTP_Login");
-                HttpContext.Session.Remove("Login_Email");
-                HttpContext.Session.Remove("OTP_Login_Timestamp");
+                HttpContext.Session.Remove("User_OTP_Login");
+                HttpContext.Session.Remove("User_Login_Email");
+                HttpContext.Session.Remove("User_OTP_Login_Timestamp");
                 return Json(new { success = false, message = "Mã OTP đã hết hạn. Vui lòng đăng nhập lại." });
             }
 
@@ -162,11 +215,11 @@ namespace HappyKitchen.Controllers
             _context.SaveChanges();
 
             // Xóa dữ liệu OTP khỏi session
-            HttpContext.Session.Remove("OTP_Login");
-            HttpContext.Session.Remove("Login_Email");
-            HttpContext.Session.Remove("OTP_Login_Timestamp");
+            HttpContext.Session.Remove("User_OTP_Login");
+            HttpContext.Session.Remove("User_Login_Email");
+            HttpContext.Session.Remove("User_OTP_Login_Timestamp");
             // Đánh dấu OTP đã xác thực
-            HttpContext.Session.SetString("OTP_Login_Verified", "true");
+            HttpContext.Session.SetString("User_OTP_Login_Verified", "true");
 
             // Gửi cookie TrustedDevice (thời hạn 30 ngày)
             CookieOptions options = new CookieOptions
@@ -177,12 +230,31 @@ namespace HappyKitchen.Controllers
             };
             Response.Cookies.Append("TrustedDevice", trustedDeviceToken, options);
 
+
+            // Lưu thông tin vào session
+            HttpContext.Session.SetString("FullName", user.FullName);
+            HttpContext.Session.SetString("Email", user.Email);
+            HttpContext.Session.SetString("Phone", user.PhoneNumber);
+
+            // Kiểm tra "Remember Me"
+            if (model.RememberMe)
+            {
+                options = new CookieOptions
+                {
+                    Expires = DateTime.Now.AddDays(7),
+                    HttpOnly = true,
+                    Secure = true
+                };
+
+                Response.Cookies.Append("RememberMe_Email", user.Email, options);
+            }
+
             // Trả về kết quả thành công, chuyển hướng (ví dụ: đến trang Menu)
             return Json(new
             {
                 success = true,
                 message = "Xác thực OTP thành công. Thiết bị của bạn đã được lưu tin cậy.",
-                redirectUrl = Url.Action("Menu", "Home")
+                redirectUrl = Url.Action("TEMP", "Admin")
             });
         }
 
@@ -190,7 +262,7 @@ namespace HappyKitchen.Controllers
         public async Task<IActionResult> Resend_Login_OTP([FromBody] string email)
         {
             // Kiểm tra email có khớp với email đăng nhập trong session không
-            string sessionEmail = HttpContext.Session.GetString("Login_Email");
+            string sessionEmail = HttpContext.Session.GetString("User_Login_Email");
             if (string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
             {
                 return Json(new { success = false, message = "Phiên đăng nhập hết hạn hoặc email không hợp lệ!" });
@@ -198,8 +270,8 @@ namespace HappyKitchen.Controllers
 
             // Tạo OTP mới và lưu vào session
             string newOtp = new Random().Next(100000, 999999).ToString();
-            HttpContext.Session.SetString("OTP_Login", newOtp);
-            HttpContext.Session.SetString("OTP_Login_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.SetString("User_OTP_Login", newOtp);
+            HttpContext.Session.SetString("User_OTP_Login_Timestamp", DateTime.Now.ToString());
 
             var emailService = new EmailService(_configuration);
             emailService.SendLoginOTP(sessionEmail, newOtp);
@@ -243,8 +315,8 @@ namespace HappyKitchen.Controllers
 
                 // Tạo và lưu OTP vào Session
                 string otpCode = new Random().Next(100000, 999999).ToString();
-                HttpContext.Session.SetString("OTP_SignUp", otpCode);
-                HttpContext.Session.SetString("OTP_SignUp_Timestamp", DateTime.Now.ToString());
+                HttpContext.Session.SetString("User_OTP_SignUp", otpCode);
+                HttpContext.Session.SetString("User_OTP_SignUp_Timestamp", DateTime.Now.ToString());
 
                 // Gửi email OTP
                 var emailService = new EmailService(_configuration);
@@ -260,8 +332,8 @@ namespace HappyKitchen.Controllers
         [HttpGet]
         public IActionResult VerifyOTP(string email)
         {
-            string sessionEmail = HttpContext.Session.GetString("Email");
-            string sessionOTP = HttpContext.Session.GetString("OTP_SignUp");
+            string sessionEmail = HttpContext.Session.GetString("User_Email");
+            string sessionOTP = HttpContext.Session.GetString("User_OTP_SignUp");
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(sessionEmail) || string.IsNullOrEmpty(sessionOTP) || sessionEmail != email)
             {
@@ -274,13 +346,13 @@ namespace HappyKitchen.Controllers
         [HttpPost]
         public async Task<IActionResult> VerifyOTPCheck([FromBody] OTPModel model)
         {
-            string sessionOTP = HttpContext.Session.GetString("OTP_SignUp");
-            string fullName = HttpContext.Session.GetString("FullName");
-            string email = HttpContext.Session.GetString("Email");
-            string password = HttpContext.Session.GetString("Password");
-            string phoneNumber = HttpContext.Session.GetString("PhoneNumber");
-            string otpTimestamp = HttpContext.Session.GetString("OTP_SignUp_Timestamp");
-            int failedAttempts = HttpContext.Session.GetInt32("FailedOTP_SignUp_Attempts") ?? 0;
+            string sessionOTP = HttpContext.Session.GetString("User_OTP_SignUp");
+            string fullName = HttpContext.Session.GetString("User_FullName");
+            string email = HttpContext.Session.GetString("User_Email");
+            string password = HttpContext.Session.GetString("User_Password");
+            string phoneNumber = HttpContext.Session.GetString("User_PhoneNumber");
+            string otpTimestamp = HttpContext.Session.GetString("User_OTP_SignUp_Timestamp");
+            int failedAttempts = HttpContext.Session.GetInt32("User_FailedOTP_SignUp_Attempts") ?? 0;
 
             if (string.IsNullOrEmpty(sessionOTP) || string.IsNullOrEmpty(email))
             {
@@ -290,29 +362,29 @@ namespace HappyKitchen.Controllers
             // Kiểm tra thời gian hết hạn OTP (5 phút)
             if (DateTime.TryParse(otpTimestamp, out DateTime otpTime) && (DateTime.Now - otpTime).TotalMinutes > 3)
             {
-                HttpContext.Session.Remove("OTP_SignUp");
-                HttpContext.Session.Remove("OTP_SignUp_Timestamp");
+                HttpContext.Session.Remove("User_OTP_SignUp");
+                HttpContext.Session.Remove("User_OTP_SignUp_Timestamp");
                 return Json(new { success = false, message = "Mã OTP đã hết hạn. Vui lòng thử lại." });
             }
 
             // Kiểm tra số lần nhập sai OTP
             if (failedAttempts >= 3)
             {
-                HttpContext.Session.Remove("OTP_SignUp");
-                HttpContext.Session.Remove("OTP_SignUp_Timestamp");
+                HttpContext.Session.Remove("User_OTP_SignUp");
+                HttpContext.Session.Remove("User_OTP_SignUp_Timestamp");
                 return Json(new { success = false, message = "Bạn đã nhập sai quá 3 lần. Vui lòng yêu cầu mã mới." });
             }
 
             if (model.OTPCode != sessionOTP)
             {
-                HttpContext.Session.SetInt32("FailedOTP_SignUp_Attempts", failedAttempts + 1);
+                HttpContext.Session.SetInt32("User_FailedOTP_SignUp_Attempts", failedAttempts + 1);
                 return Json(new { success = false, message = "Mã OTP không chính xác. Vui lòng thử lại." });
             }
 
             // Xóa OTP khỏi session sau khi xác thực thành công
-            HttpContext.Session.Remove("OTP_SignUp");
-            HttpContext.Session.Remove("OTP_SignUp_Timestamp");
-            HttpContext.Session.Remove("FailedOTP_SignUp_Attempts");
+            HttpContext.Session.Remove("User_OTP_SignUp");
+            HttpContext.Session.Remove("User_OTP_SignUp_Timestamp");
+            HttpContext.Session.Remove("User_FailedOTP_SignUp_Attempts");
 
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
@@ -336,7 +408,7 @@ namespace HappyKitchen.Controllers
         public async Task<IActionResult> ResendOTP([FromBody] string email)
         {
             // Kiểm tra xem email có khớp với email đang đăng ký trong Session không
-            string sessionEmail = HttpContext.Session.GetString("Email");
+            string sessionEmail = HttpContext.Session.GetString("User_Email");
             if (string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
             {
                 return Json(new { success = false, message = "Phiên đăng ký hết hạn hoặc email không hợp lệ!" });
@@ -346,11 +418,11 @@ namespace HappyKitchen.Controllers
             string newOtp = new Random().Next(100000, 999999).ToString();
 
             // Cập nhật OTP và thời gian vào Session
-            HttpContext.Session.SetString("OTP_SignUp", newOtp);
-            HttpContext.Session.SetString("OTP_SignUp_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.SetString("User_OTP_SignUp", newOtp);
+            HttpContext.Session.SetString("User_OTP_SignUp_Timestamp", DateTime.Now.ToString());
 
             // Đặt lại số lần nhập sai OTP
-            HttpContext.Session.SetInt32("FailedOTP_SignUp_Attempts", 0);
+            HttpContext.Session.SetInt32("User_FailedOTP_SignUp_Attempts", 0);
 
             // Gửi OTP qua email
             var emailService = new EmailService(_configuration);
@@ -375,14 +447,14 @@ namespace HappyKitchen.Controllers
 
             // Tạo OTP 6 chữ số
             string otpCode = new Random().Next(100000, 999999).ToString();
-            HttpContext.Session.SetString("OTP_ResetPass", otpCode);
-            HttpContext.Session.SetString("OTP_ResetPass_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.SetString("User_OTP_ResetPass", otpCode);
+            HttpContext.Session.SetString("User_OTP_ResetPass_Timestamp", DateTime.Now.ToString());
 
             // Gửi email OTP
             var emailService = new EmailService(_configuration);
             emailService.SendResetPasswordOTP(email, otpCode);
 
-            HttpContext.Session.SetString("ForgotPass_Email", email);
+            HttpContext.Session.SetString("User_ForgotPass_Email", email);
 
             return Json(new { success = true });
         }
@@ -401,10 +473,10 @@ namespace HappyKitchen.Controllers
         [HttpPost] // CHUYỂN TỪ GET -> POST
         public IActionResult VerifyPasswordOTP([FromBody] OTPPasswordModel model)
         {
-            string sessionOTP = HttpContext.Session.GetString("OTP_ResetPass");
-            string email = HttpContext.Session.GetString("ForgotPass_Email");
-            string otpTimestamp = HttpContext.Session.GetString("OTP_ResetPass_Timestamp");
-            int failedAttempts = HttpContext.Session.GetInt32("FailedOTP_ResetPass_Attempts") ?? 0;
+            string sessionOTP = HttpContext.Session.GetString("User_OTP_ResetPass");
+            string email = HttpContext.Session.GetString("User_ForgotPass_Email");
+            string otpTimestamp = HttpContext.Session.GetString("User_OTP_ResetPass_Timestamp");
+            int failedAttempts = HttpContext.Session.GetInt32("User_FailedOTP_ResetPass_Attempts") ?? 0;
 
             if (string.IsNullOrEmpty(sessionOTP) || string.IsNullOrEmpty(email))
             {
@@ -414,31 +486,31 @@ namespace HappyKitchen.Controllers
             // Kiểm tra thời gian hết hạn OTP (5 phút)
             if (DateTime.TryParse(otpTimestamp, out DateTime otpTime) && (DateTime.Now - otpTime).TotalMinutes > 5)
             {
-                HttpContext.Session.Remove("OTP_ResetPass");
-                HttpContext.Session.Remove("OTP_ResetPass_Timestamp");
+                HttpContext.Session.Remove("User_OTP_ResetPass");
+                HttpContext.Session.Remove("User_OTP_ResetPass_Timestamp");
                 return Json(new { success = false, message = "Mã OTP đã hết hạn. Vui lòng thử lại." });
             }
 
             // Kiểm tra số lần nhập sai OTP
             if (failedAttempts >= 3)
             {
-                HttpContext.Session.Remove("OTP_ResetPass");
-                HttpContext.Session.Remove("OTP_ResetPass_Timestamp");
+                HttpContext.Session.Remove("User_OTP_ResetPass");
+                HttpContext.Session.Remove("User_OTP_ResetPass_Timestamp");
                 return Json(new { success = false, message = "Bạn đã nhập sai quá 3 lần. Vui lòng yêu cầu mã mới." });
             }
 
             if (model.OTPPassCode != sessionOTP)
             {
-                HttpContext.Session.SetInt32("FailedOTP_ResetPass_Attempts", failedAttempts + 1);
+                HttpContext.Session.SetInt32("User_FailedOTP_ResetPass_Attempts", failedAttempts + 1);
                 return Json(new { success = false, message = "Mã OTP không chính xác. Vui lòng thử lại." });
             }
 
             // Nếu OTP hợp lệ, xóa OTP khỏi session và chuyển đến trang đặt lại mật khẩu
-            HttpContext.Session.SetString("OTP_ResetPass_Verified", "true");
-            HttpContext.Session.SetString("OTPVerified_ResetPass_Timestamp", DateTime.Now.ToString());
-            HttpContext.Session.Remove("OTP_ResetPass");
-            HttpContext.Session.Remove("OTP_ResetPass_Timestamp");
-            HttpContext.Session.Remove("FailedOTP_ResetPass_Attempts");
+            HttpContext.Session.SetString("User_OTP_ResetPass_Verified", "true");
+            HttpContext.Session.SetString("User_OTPVerified_ResetPass_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.Remove("User_OTP_ResetPass");
+            HttpContext.Session.Remove("User_OTP_ResetPass_Timestamp");
+            HttpContext.Session.Remove("User_FailedOTP_ResetPass_Attempts");
 
             return Json(new { success = true, message = "OTP hợp lệ!", redirectUrl = Url.Action("ResetPassword", "Admin", new { email }) });
         }
@@ -446,16 +518,16 @@ namespace HappyKitchen.Controllers
         [HttpGet]
         public IActionResult ResetPassword(string email)
         {
-            string otpVerified = HttpContext.Session.GetString("OTP_ResetPass_Verified");
-            string otpVerifiedTimestamp = HttpContext.Session.GetString("OTPVerified_ResetPass_Timestamp");
-            string verifiedEmail = HttpContext.Session.GetString("ForgotPass_Email");
+            string otpVerified = HttpContext.Session.GetString("User_OTP_ResetPass_Verified");
+            string otpVerifiedTimestamp = HttpContext.Session.GetString("User_OTPVerified_ResetPass_Timestamp");
+            string verifiedEmail = HttpContext.Session.GetString("User_ForgotPass_Email");
 
             if (string.IsNullOrEmpty(email) || otpVerified != "true" || verifiedEmail != email || string.IsNullOrEmpty(otpVerifiedTimestamp) ||
         (DateTime.TryParse(otpVerifiedTimestamp, out DateTime verifiedTime) && (DateTime.Now - verifiedTime).TotalMinutes > 3))
             {
-                HttpContext.Session.Remove("OTP_ResetPass_Verified");
-                HttpContext.Session.Remove("OTPVerified_ResetPass_Timestamp");
-                HttpContext.Session.Remove("ForgotPass_Email");
+                HttpContext.Session.Remove("User_OTP_ResetPass_Verified");
+                HttpContext.Session.Remove("User_OTPVerified_ResetPass_Timestamp");
+                HttpContext.Session.Remove("User_ForgotPass_Email");
                 return RedirectToAction("Login");
             }
 
@@ -482,8 +554,8 @@ namespace HappyKitchen.Controllers
             _context.Users.Update(employee);
             await _context.SaveChangesAsync();
 
-            HttpContext.Session.Remove("OTP_ResetPass_Verified");
-            HttpContext.Session.Remove("ForgotPass_Email");
+            HttpContext.Session.Remove("User_OTP_ResetPass_Verified");
+            HttpContext.Session.Remove("User_ForgotPass_Email");
 
             return Json(new { success = true, message = "Mật khẩu đã được cập nhật thành công!", redirectUrl = Url.Action("Login", "Admin") });
         }
@@ -492,7 +564,7 @@ namespace HappyKitchen.Controllers
         public async Task<IActionResult> ResendPasswordOTP([FromBody] string email)
         {
             // Kiểm tra xem email có khớp với email đang đăng ký trong Session không
-            string sessionEmail = HttpContext.Session.GetString("ForgotPass_Email");
+            string sessionEmail = HttpContext.Session.GetString("User_ForgotPass_Email");
             if (string.IsNullOrEmpty(sessionEmail) || sessionEmail != email)
             {
                 return Json(new { success = false, message = "Phiên đăng ký hết hạn hoặc email không hợp lệ!" });
@@ -502,11 +574,11 @@ namespace HappyKitchen.Controllers
             string newOtp = new Random().Next(100000, 999999).ToString();
 
             // Cập nhật OTP và thời gian vào Session
-            HttpContext.Session.SetString("OTP_ResetPass", newOtp);
-            HttpContext.Session.SetString("OTP_ResetPass_Timestamp", DateTime.Now.ToString());
+            HttpContext.Session.SetString("User_OTP_ResetPass", newOtp);
+            HttpContext.Session.SetString("User_OTP_ResetPass_Timestamp", DateTime.Now.ToString());
 
             // Đặt lại số lần nhập sai OTP
-            HttpContext.Session.SetInt32("FailedOTP_ResetPass_Attempts", 0);
+            HttpContext.Session.SetInt32("User_FailedOTP_ResetPass_Attempts", 0);
 
             // Gửi OTP qua email
             var emailService = new EmailService(_configuration);
@@ -523,5 +595,15 @@ namespace HappyKitchen.Controllers
             bool exists = _context.Users.Any(u => u.Email.ToLower() == email);
             return Json(exists);
         }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
+            Response.Cookies.Delete("RememberMe");
+
+            return RedirectToAction("Login");
+        }
+
     }
 }

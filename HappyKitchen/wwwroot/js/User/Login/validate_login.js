@@ -7,8 +7,6 @@
         const loginBtn = document.getElementById("login-btn");
         const loginText = document.getElementById("login-text");
         const loadingIcon = document.getElementById("loading-icon");
-        const rememberMe = document.getElementById("rememberMe").checked;
-
 
         if (!email || !password) {
             toastr.warning("Vui lòng nhập đầy đủ thông tin.");
@@ -31,14 +29,13 @@
         }
 
         try {
-            const response = await fetch("/Admin/Login", {
+            const response = await fetch("/User/Login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     Email: email,
                     Password: password,
-                    RecaptchaToken: token,
-                    RememberMe: rememberMe
+                    RecaptchaToken: token
                 })
             });
 
@@ -54,7 +51,7 @@
                 } else {
                     toastr.success(data.message);
                     setTimeout(() => {
-                        window.location.href = "/Admin/TEMP"; // Trang Menu hoặc trang chủ
+                        window.location.href = "/User/TEMP"; // Trang Menu hoặc trang chủ
                     }, 1500);
                 }
             } else {

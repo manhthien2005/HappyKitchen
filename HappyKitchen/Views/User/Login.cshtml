@@ -40,10 +40,10 @@
 
                         <div class="mb-3">
                             <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="rememberMe" name="rememberMe">
-                                <label class="custom-control-label" for="rememberMe">Lưu Tài Khoản</label>
+                                <input type="checkbox" class="custom-control-input" id="cb1" name="">
+                                <label class="custom-control-label" for="cb1">Lưu Tài Khoản</label>
                                 <div class="text-right">
-                                    <a href="@Url.Action("ForgotPassword","Admin")" class="forget-link">
+                                    <a href="@Url.Action("ForgotPassword","User")" class="forget-link">
                                         Quên Mật Khẩu?
                                     </a>
                                 </div>
@@ -65,7 +65,7 @@
 
                         <div class="text-center mb-2">
                             Chưa có tài khoản? 
-                            <a href="@Url.Action("SignUp", "Admin")" class="register-link">
+                            <a href="@Url.Action("SignUp", "User")" class="register-link">
                                 Đăng Ký Ngay
                             </a>
                         </div>
@@ -96,7 +96,7 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="~/js/Admin/Login/validate_login.js"></script>
+    <script src="~/js/User/Login/validate_login.js"></script>
     <script>
         toastr.options = {
             closeButton: true,

@@ -30,7 +30,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
 
     <!--
@@ -181,6 +182,48 @@
 
             </nav>
 
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                @if (Context.Session.GetString("Email") != null)
+                {
+                    <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
+            </div>
+
             <div class="overlay" data-nav-toggler data-overlay></div>
 
         </div>
@@ -253,7 +296,7 @@
                     <div class="comment-section">
                         <h3>Đánh Giá Của Khách Hàng</h3>
 
-                        <div class="comment-list">
+                        <div class="comment-list" id="comment-list">
                             @foreach (var cmt in @Model.Ratings)
                             {
                                 <div class="comment">
@@ -284,16 +327,16 @@
                             <div class="form-group">
                                 <label for="rating">Đánh giá của bạn:</label>
                                 <div class="star-rating">
-                                    <input type="radio" id="star5" name="rating" value="5">
-                                    <label for="star5">★</label>
-                                    <input type="radio" id="star4" name="rating" value="4">
-                                    <label for="star4">★</label>
-                                    <input type="radio" id="star3" name="rating" value="3">
-                                    <label for="star3">★</label>
-                                    <input type="radio" id="star2" name="rating" value="2">
-                                    <label for="star2">★</label>
                                     <input type="radio" id="star1" name="rating" value="1">
                                     <label for="star1">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4">★</label>
+                                    <input type="radio" id="star5" name="rating" value="5">
+                                    <label for="star5">★</label>
                                 </div>
                             </div>
 
@@ -334,8 +377,17 @@
             <!--
               - custom js link
             -->
+
+            <script>
+                var isLoggedIn = @((Context.Session.GetString("Email") != null).ToString().ToLower());
+                var menuItemId = @Model.MenuItemID;
+
+            </script>
+
             <script src="~/js/menu_script.js"></script>
-            <script src="~/js/Menu/Comment.js"></script>
+            <script src="/js/Menu/Comment.js"></script>
+
+
 
             <!--
               - ionicon link
@@ -401,6 +453,13 @@
                         generateStarForElement(element);
                     });
                 });
+            </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+            <script>
+                toastr.options = {
+                    "positionClass": "toast-bottom-right",
+                    "timeOut": "3000"
+                };
             </script>
 </body>
 
