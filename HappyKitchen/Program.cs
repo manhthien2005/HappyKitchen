@@ -21,6 +21,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -36,6 +37,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
 app.UseRouting();
+app.UseSession();
 
 app.UseAuthorization();
 
@@ -44,3 +46,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

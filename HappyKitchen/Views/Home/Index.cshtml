@@ -2,7 +2,7 @@
     Layout = null;
 }
 
-@model List<Table>
+@model HomeIndexViewModel
 
 
 <!DOCTYPE html>
@@ -1038,6 +1038,227 @@
             <!--
               - #EVENT
             -->
+            <style>/* Order preview */
+                .order-preview {
+                    background-color: var(--gray-dark);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                }
+
+                .order-header {
+                    background-color: var(--black);
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--gold-crayola);
+                }
+
+                .order-title {
+                    color: var(--gold-crayola);
+                    text-align: center;
+                }
+
+                .order-items {
+                    padding: 0;
+                }
+
+                .order-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--gray-light);
+                    transition: background-color 0.3s ease;
+                }
+
+                .order-item:hover {
+                    background-color: var(--gray-medium);
+                }
+
+                .item-image {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 8px;
+                    object-fit: cover;
+                    margin-right: 1.5rem;
+                }
+
+                .item-details {
+                    flex-grow: 1;
+                }
+
+                .item-name {
+                    color: var(--gold-crayola);
+                    margin-bottom: 0.5rem;
+                }
+
+                .item-description {
+                    color: var(--white);
+                    opacity: 0.7;
+                    margin-bottom: 0.5rem;
+                }
+
+                .item-price-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .item-quantity {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: var(--gold-crayola);
+                    color: var(--black);
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    font-weight: bold;
+                    margin-right: 0.5rem;
+                }
+
+                .item-price {
+                    color: var(--gold-crayola);
+                    font-weight: bold;
+                }
+
+                .item-total {
+                    color: var(--gold-crayola);
+                    font-weight: bold;
+                }
+
+                /* Order summary */
+                .order-summary {
+                    padding: 1.5rem;
+                    background-color: var(--black);
+                    border-top: 1px solid var(--gold-crayola);
+                }
+
+                .summary-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.75rem;
+                }
+
+                .summary-label {
+                    color: var(--white);
+                }
+
+                .summary-value {
+                    color: var(--gold-crayola);
+                    font-weight: bold;
+                }
+
+                .total-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 1rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid var(--gray-light);
+                }
+
+                .total-label {
+                    color: var(--gold-crayola);
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                }
+
+                .total-value {
+                    color: var(--gold-crayola);
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                }
+
+                
+                /* Responsive */
+                @@media (max-width: 768px) {
+                    .container {
+                        padding: 1rem;
+                    }
+
+                    .order-item {
+                        flex-direction: column;
+                        align-items: flex-start;
+                    }
+
+                    .item-image {
+                        width: 100%;
+                        height: 150px;
+                        margin-right: 0;
+                        margin-bottom: 1rem;
+                    }
+
+                    .item-price-row {
+                        margin-top: 0.5rem;
+                        width: 100%;
+                    }
+
+                    .action-buttons {
+                        flex-direction: column;
+                        gap: 1rem;
+                    }
+
+                    .button {
+                        width: 100%;
+                    }
+                }
+            </style>
+            <section class="section event bg-black-10" aria-label="event" id="event">
+                <div class="container">
+
+                    <p class="section-subtitle label-2 text-center">Cập Nhật Mới</p>
+
+                    <h2 class="section-title headline-1 text-center">Sự Kiện Sắp Tới</h2>
+
+                    <div class="container">
+
+                        <div class="order-preview">
+                            <div class="order-header">
+                                <h2 class="order-title">Danh Sách Món Đã Chọn</h2>
+                            </div>
+                            <div class="order-items" id="order-items">
+                                <!-- Order items will be dynamically added here -->
+                            </div>
+                            <div class="order-summary">
+                                <div class="summary-row">
+                                    <span class="summary-label">Tạm tính:</span>
+                                    <span class="summary-value" id="subtotal">0 đ</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Giảm giá:</span>
+                                    <span class="summary-value" id="discount">0 đ</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Thuế (10%):</span>
+                                    <span class="summary-value" id="tax">0 đ</span>
+                                </div>
+                                <div class="total-row">
+                                    <span class="total-label">Tổng cộng:</span>
+                                    <span class="total-value" id="total">0 đ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <a href="#" class="btn btn-primary">
+                                <span class="text text-1">Quay lại thực đơn</span>
+
+                                <span class="text text-2" aria-hidden="true">Quay lại thực đơn</span>
+                            </a>
+                            <a href="#" class="btn btn-secondary">
+                                <span class="text text-1">Tiếp tục thanh toán</span>
+
+                                <span class="text text-2" aria-hidden="true">Tiếp tục thanh toán</span>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        
+    
+
+
+    <!--                        - #EVENT-->
 
             <section class="section event bg-black-10" aria-label="event" id="event">
                 <div class="container">
@@ -1124,8 +1345,6 @@
 
         </article>
     </main>
-
-
 
 
 
@@ -1321,6 +1540,96 @@
         document.getElementById("reservationDate").addEventListener("change", fetchAvailableTables);
         document.getElementById("people").addEventListener("change", fetchAvailableTables);
         document.getElementById("duration").addEventListener("change", fetchAvailableTables);
+    </script>
+
+    <script>
+        // Sample order data (simulating items already chosen)
+        const orderItems = [
+            {
+                id: 1,
+                name: "Lẩu Cua Đồng",
+                description: "Lẩu cua đồng thơm ngon với nước dùng đặc biệt",
+                price: 220000,
+                quantity: 1,
+                image: "/placeholder.svg?height=80&width=80"
+            },
+            {
+                id: 2,
+                name: "Bánh Bông Lan",
+                description: "Bánh bông lan mềm xốp, thơm mùi trứng và bơ",
+                price: 28000,
+                quantity: 1,
+                image: "/placeholder.svg?height=80&width=80"
+            },
+            {
+                id: 3,
+                name: "Canh Chua Cá Lóc",
+                description: "Canh chua cá lóc nấu với đầy đủ rau củ, chua ngọt đậm đà",
+                price: 60000,
+                quantity: 1,
+                image: "/placeholder.svg?height=80&width=80"
+            }
+        ];
+
+        // Format price with thousand separators
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ";
+        }
+
+        // Render order items
+        function renderOrderItems() {
+            const orderItemsContainer = document.getElementById('order-items');
+            orderItemsContainer.innerHTML = '';
+
+            orderItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const orderItemElement = document.createElement('div');
+                orderItemElement.className = 'order-item';
+                orderItemElement.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="item-image">
+                    <div class="item-details">
+                        <h3 class="item-name">${item.name}</h3>
+                        <p class="item-description">${item.description}</p>
+                        <div class="item-price-row">
+                            <div>
+                                <span class="item-quantity">${item.quantity}</span>
+                                <span class="item-price">× ${formatPrice(item.price)}</span>
+                            </div>
+                            <span class="item-total">${formatPrice(itemTotal)}</span>
+                        </div>
+                    </div>
+                `;
+                orderItemsContainer.appendChild(orderItemElement);
+            });
+        }
+
+        // Calculate and update order summary
+        function updateOrderSummary() {
+            const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discount = 0; // No discount in this example
+            const tax = subtotal * 0.1;
+            const total = subtotal - discount + tax;
+
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('discount').textContent = formatPrice(discount);
+            document.getElementById('tax').textContent = formatPrice(tax);
+            document.getElementById('total').textContent = formatPrice(total);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrderItems();
+            updateOrderSummary();
+
+            // Add event listeners to buttons
+            document.querySelector('.back-button').addEventListener('click', function() {
+                alert('Quay lại thực đơn');
+            });
+
+            document.querySelector('.proceed-button').addEventListener('click', function() {
+                alert('Tiến hành thanh toán');
+            });
+        });
     </script>
 
     <!--
