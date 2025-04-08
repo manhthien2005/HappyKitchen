@@ -9,39 +9,36 @@ CREATE TABLE Users (
     Email NVARCHAR(100) UNIQUE NULL,
     Address NVARCHAR(255) NULL,
     
-    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)) DEFAULT 0, -- 0 = Khách hàng, 1 = Nhân viên
+    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)), -- 0 = Khách hàng, 1 = Nhân viên
     PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
     Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
     
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0 -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
+    RoleID INT NULL, -- Gán role trực tiếp
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
-
+-- Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
     RoleName NVARCHAR(50) NOT NULL UNIQUE,
     Description NVARCHAR(255) NULL
 );
 
-CREATE TABLE UserRoles (
-    UserID INT NOT NULL,
-    RoleID INT NOT NULL,
-    PRIMARY KEY (UserID, RoleID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE,
-    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE CASCADE
-);
-
+-- Permissions
 CREATE TABLE Permissions (
     PermissionID INT IDENTITY(1,1) PRIMARY KEY,
     PermissionName NVARCHAR(100) NOT NULL UNIQUE,
     Description NVARCHAR(255) NULL
 );
 
+-- RolePermissions
 CREATE TABLE RolePermissions (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
     RoleID INT NOT NULL,
     PermissionID INT NOT NULL,
-    PRIMARY KEY (RoleID, PermissionID),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE CASCADE,
-    FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE
+    FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE,
+    CONSTRAINT UQ_Role_Permission UNIQUE (RoleID, PermissionID)
 );
 
 CREATE TABLE Areas (
