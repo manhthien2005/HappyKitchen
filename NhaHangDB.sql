@@ -1,4 +1,9 @@
-﻿CREATE DATABASE RestaurantDB;
+﻿
+
+CREATE DATABASE RestaurantDB;
+
+
+
 USE RestaurantDB;
 GO
 
@@ -13,7 +18,7 @@ CREATE TABLE Users (
     PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
     Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
     
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0 -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
     RoleID INT NULL, -- Gán role trực tiếp
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
@@ -200,24 +205,3 @@ VALUES
 (4, 1, 3, N'Bình thường, không có gì đặc biệt.','2025-03-13'),
 (4, 1, 5, N'Món này xuất sắc, rất đáng thử!','2025-03-13'),
 (4, 1, 2, N'Không hợp khẩu vị của mình lắm.','2025-03-13');
-
-DROP TABLE IF EXISTS Reviews;
-DROP TABLE IF EXISTS OrderDetails;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS MenuItemAttributes;
-DROP TABLE IF EXISTS MenuItemRatings;
-DROP TABLE IF EXISTS MenuItems;
-DROP TABLE IF EXISTS Categories;
-DROP TABLE IF EXISTS Reservations;
-DROP TABLE IF EXISTS Tables;
-DROP TABLE IF EXISTS TrustedDevices;
-DROP TABLE IF EXISTS Areas;
-DROP TABLE IF EXISTS RolePermissions;
-DROP TABLE IF EXISTS Permissions;
-DROP TABLE IF EXISTS UserRoles;
-DROP TABLE IF EXISTS Roles;
-DROP TABLE IF EXISTS Users;
-
-
-
-
