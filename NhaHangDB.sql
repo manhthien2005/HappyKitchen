@@ -15,7 +15,7 @@ CREATE TABLE Users (
     Address NVARCHAR(255) NULL,
     
     UserType TINYINT NOT NULL CHECK (UserType IN (0,1)), -- 0 = Khách hàng, 1 = Nhân viên
-    PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
+    PasswordHash VARCHAR(255) NOT NULL, -- Chỉ dùng cho nhân viên
     Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
     
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
