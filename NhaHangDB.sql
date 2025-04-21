@@ -111,7 +111,7 @@ CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL,
     EmployeeID INT NULL,
-    TableID INT NOT NULL UNIQUE,
+    TableID INT NOT NULL,
     OrderTime DATETIME DEFAULT GETDATE(),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
     PaymentMethod NVARCHAR(50) NOT NULL,
