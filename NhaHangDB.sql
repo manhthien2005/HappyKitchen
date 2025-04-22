@@ -8,7 +8,6 @@ CREATE TABLE Users (
     PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
     Email NVARCHAR(100) UNIQUE NULL,
     Address NVARCHAR(255) NULL,
-    
     UserType TINYINT NOT NULL CHECK (UserType IN (0,1)) DEFAULT 0, -- 0 = Khách hàng, 1 = Nhân viên
     PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
     Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
@@ -63,9 +62,10 @@ CREATE TABLE Tables (
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL, 
-    GuestName NVARCHAR(100) NOT NULL,
-    PhoneNumber NVARCHAR(15) NOT NULL,
+    CustomerName NVARCHAR(100) NOT NULL,
+    CustomerPhone NVARCHAR(15) NOT NULL,
     TableID INT NOT NULL,
+	Capacity INT NOT NULL,
     CreatedTime DATETIME DEFAULT GETDATE() NOT NULL, -- Thời gian tạo đặt chỗ
     ReservationTime DATETIME NOT NULL, -- Thời gian khách đặt chỗ thực tế
     Duration INT NOT NULL, --Thời lượng khách dùng bữa 
@@ -106,6 +106,7 @@ CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL,
     EmployeeID INT NULL,
+	ReservationID INT NULL,
     TableID INT NOT NULL UNIQUE,
     OrderTime DATETIME DEFAULT GETDATE(),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
@@ -258,7 +259,5 @@ DROP TABLE IF EXISTS Permissions;
 DROP TABLE IF EXISTS UserRoles;
 DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS Users;
-
-
 
 

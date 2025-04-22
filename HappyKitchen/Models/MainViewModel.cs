@@ -81,7 +81,7 @@ namespace HappyKitchen.Models
         [Key]
         public int ReservationID { get; set; }
 
-        public int UserID { get; set; }
+        public int? CustomerID { get; set; }
 
         [Required]
         public string CustomerName { get; set; }
@@ -90,12 +90,14 @@ namespace HappyKitchen.Models
         public int TableID { get; set; }
 
         [Required]
+        public int Duration { get; set; }
+        [Required]
+        public int Capacity { get; set; }
+        [Required]
         public DateTime CreatedTime { get; set; } = DateTime.Now;
 
         [Required]
         public DateTime ReservationTime { get; set; }
-        [Required]
-        public int Duration { get; set; }
         [Required]
         [Range(0, 2, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending), or 2 (Confirmed)")]
         public byte Status { get; set; }
@@ -209,39 +211,39 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
-    public class Order
-    {
-        [Key]
-        public int OrderID { get; set; }
+        public class Order
+        {
+            [Key]
+            public int OrderID { get; set; }
 
-        public int? CustomerID { get; set; }
+            public int? CustomerID { get; set; }
 
-        public int? EmployeeID { get; set; }
+            public int? EmployeeID { get; set; }
 
-        [Required]
-        public int TableID { get; set; }
+            [Required]
+            public int TableID { get; set; }
 
-        [Required]
-        public DateTime OrderTime { get; set; } = DateTime.Now;
+            [Required]
+            public DateTime OrderTime { get; set; } = DateTime.Now;
 
-        [Required]
-        [Range(0, 3, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending Confirmation), 2 (Preparing), or 3 (Completed)")]
-        public byte Status { get; set; }
+            [Required]
+            [Range(0, 3, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending Confirmation), 2 (Preparing), or 3 (Completed)")]
+            public byte Status { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string PaymentMethod { get; set; }
+            [Required]
+            [StringLength(50)]
+            public string PaymentMethod { get; set; }
 
-        // Navigation properties
-        [ForeignKey("CustomerID")]
-        public virtual User Customer { get; set; }
+            // Navigation properties
+            [ForeignKey("CustomerID")]
+            public virtual User Customer { get; set; }
 
-        [ForeignKey("EmployeeID")]
-        public virtual User Employee { get; set; }
+            [ForeignKey("EmployeeID")]
+            public virtual User Employee { get; set; }
 
-        [ForeignKey("TableID")]
-        public virtual Table Table { get; set; }
-    }
+            [ForeignKey("TableID")]
+            public virtual Table Table { get; set; }
+        }
 
     public class OrderDetail
     {
@@ -346,23 +348,40 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; }
     }
 
-    public class ReservationInformation
+    public class HomeIndexViewModel
     {
-        public string CustomerName { get; set; }
-        public string CustomerPhone { get; set; }
-        public int TableID { get; set; }
-        public int Capacity { get; set; }
-        public DateTime CreatedTime { get; set; } = DateTime.Now;
-        public DateTime ReservationTime { get; set; }
-        public int Duration { get; set; }
-        public string Notes { get; set; }
-        public Table Table { get; set; }
+        public List<Table> Tables { get; set; }
+        public List<CartItem> CartItems { get; set; }
     }
-
 
     public class MenuViewModel
     {
-        public ReservationInformation ReservationInformation { get; set; }
+        public Reservation ReservationInformation { get; set; }
         public List<Category> Categories { get; set; }
     }
+
+
+    // Cart Model 
+
+    public class CartItem
+    {
+        public int MenuItemID { get; set; }
+        public int Quantity { get; set; }
+
+        // Thông tin chi tiết món ăn
+        public MenuItem MenuItem { get; set; }
+
+        // Tổng giá tiền của món này (Quantity * MenuItem.Price)
+        public decimal TotalPrice => MenuItem != null ? MenuItem.Price * Quantity : 0;
+    }
+
+    public class Cart
+    {
+        // Danh sách món ăn trong giỏ
+        public List<CartItem> Items { get; set; } = new List<CartItem>();
+
+        // Tổng giá của giỏ hàng
+        public decimal TotalPrice => Items.Sum(item => item.TotalPrice);
+    }
+
 }
