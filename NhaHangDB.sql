@@ -1,4 +1,3 @@
-CREATE DATABASE RestaurantDB;
 
 
 USE RestaurantDB;
@@ -126,9 +125,9 @@ CREATE TABLE Orders (
     OrderTime DATETIME DEFAULT GETDATE(),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
     PaymentMethod NVARCHAR(50) NOT NULL,
-    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
-    FOREIGN KEY (EmployeeID) REFERENCES Users(UserID) ON DELETE SET NULL,
-    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE NO ACTION ON UPDATE CASCADE
+    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE NO ACTION,
+    FOREIGN KEY (EmployeeID) REFERENCES Users(UserID) ON DELETE NO ACTION,
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE NO ACTION
 );
 
 CREATE TABLE OrderDetails (
@@ -157,12 +156,14 @@ CREATE TABLE TrustedDevices (
     CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
+USE RestaurantDB;
+GO
 -- Thêm dữ liệu vào bảng Roles
 INSERT INTO Roles (RoleName, Description) VALUES
 (N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
 (N'Nhân viên phục vụ', N'Phục vụ khách hàng và xử lý đơn hàng'),
 (N'Đầu bếp', N'Chuẩn bị món ăn theo đơn hàng');
-
+GO
 -- Thêm dữ liệu vào bảng Permissions
 INSERT INTO Permissions (PermissionName, Description) VALUES
 (N'Quản lý đơn hàng', N'Quyền liên quan đến đơn hàng (xem, thêm, sửa, xóa)'),
@@ -171,6 +172,7 @@ INSERT INTO Permissions (PermissionName, Description) VALUES
 (N'Xem báo cáo', N'Quyền xem báo cáo doanh thu và thống kê'),
 (N'Chuẩn bị món ăn', N'Quyền đánh dấu món ăn đã được chuẩn bị');
 
+GO
 -- Thêm dữ liệu vào bảng RolePermissions
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
 -- Quản lý (RoleID = 1): Có tất cả quyền
@@ -185,6 +187,7 @@ INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, Can
 -- Đầu bếp (RoleID = 3): Chỉ chuẩn bị món ăn
 (3, 5, 1, 0, 1, 0); -- Chuẩn bị món ăn
 
+GO
 -- Thêm dữ liệu vào bảng Users (10 khách hàng, 10 nhân viên)
 INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status, RoleID) VALUES
 -- Khách hàng (UserType = 0)
@@ -210,12 +213,14 @@ INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, Pa
 ('staff_doan', N'Đoàn Thị Ngọc', '0912345609', 'ngoc.doan@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password9', 8600000, 0, 2), -- Nhân viên phục vụ
 ('staff_ngo', N'Ngô Văn Quang', '0912345610', 'quang.ngo@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password10', 8900000, 0, 3); -- Đầu bếp
 
+GO
 -- Thêm dữ liệu vào bảng Areas
 INSERT INTO Areas (AreaName, Description) VALUES
 (N'Tầng 1', N'Khu vực tầng trệt gần cửa chính, sôi động'),
 (N'Tầng 2', N'Khu vực lầu 1 yên tĩnh, phù hợp gia đình'),
 (N'Sân vườn', N'Khu vực ngoài trời thoáng mát, gần gũi thiên nhiên');
 
+GO
 -- Thêm dữ liệu vào bảng Tables
 INSERT INTO Tables (TableName, AreaID, Capacity, Status) VALUES
 (N'Bàn 01', 1, 4, 0), -- Trống
@@ -227,6 +232,7 @@ INSERT INTO Tables (TableName, AreaID, Capacity, Status) VALUES
 (N'Bàn 07', 3, 4, 0),
 (N'Bàn 08', 3, 6, 1);
 
+GO
 -- Thêm dữ liệu vào bảng Reservations
 INSERT INTO Reservations (CustomerID, GuestName, PhoneNumber, TableID, CreatedTime, ReservationTime, Status, Notes) VALUES
 (1, N'Nguyễn Văn An', '0901234561', 3, '2025-04-26 10:00:00', '2025-04-26 12:30:00', 2, N'Đặt cho bữa trưa gia đình'),
@@ -234,6 +240,7 @@ INSERT INTO Reservations (CustomerID, GuestName, PhoneNumber, TableID, CreatedTi
 (3, N'Phạm Văn Cường', '0901234563', 5, '2025-04-26 12:00:00', '2025-04-26 14:00:00', 2, N'Đặt cho buổi họp mặt'),
 (NULL, N'Khách vãng lai', '0901234571', 1, '2025-04-26 13:00:00', '2025-04-26 15:00:00', 0, N'Khách hủy vì thay đổi kế hoạch');
 
+GO
 -- Thêm dữ liệu vào bảng Categories
 INSERT INTO Categories (CategoryName) VALUES
 (N'Món khai vị'),
@@ -241,6 +248,7 @@ INSERT INTO Categories (CategoryName) VALUES
 (N'Tráng miệng'),
 (N'Đồ uống');
 
+GO
 -- Thêm dữ liệu vào bảng MenuItems
 INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status) VALUES
 (N'Gỏi cuốn tôm thịt', 'goi_cuon.jpg', 1, 50000, N'Gỏi cuốn tươi với tôm, thịt heo, rau sống và bún', 1),
@@ -263,6 +271,14 @@ INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Stat
 (N'Kem dâu', 'kem_dau.jpg', 3, 40000, N'Kem dâu tây mát lạnh, vị ngọt tự nhiên', 1),
 (N'Nước dừa tươi', 'nuoc_dua.jpg', 4, 35000, N'Nước dừa tươi ngọt thanh, giải nhiệt', 1),
 (N'Trà sữa trân châu', 'tra_sua.jpg', 4, 50000, N'Trà sữa trân châu thơm béo, trân châu dai giòn', 1);
+GO
+
+-- Thêm dữ liệu vào bảng Labels
+INSERT INTO Labels (Name, Description) VALUES
+('Bán chạy', 'Best Seller'),
+('Mới', 'New'),
+('Đặc biệt', 'Special');
+GO
 
 -- Thêm dữ liệu vào bảng MenuItemLabels
 INSERT INTO MenuItemLabels (MenuItemID, LabelID) VALUES
@@ -274,6 +290,7 @@ INSERT INTO MenuItemLabels (MenuItemID, LabelID) VALUES
 (15, 1), -- Gà nướng: Bán chạy
 (20, 2); -- Trà sữa: Mới
 
+GO
 -- Thêm dữ liệu vào bảng MenuItemAttributes
 INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
 (1, N'Calories', N'150 kcal'),
@@ -284,6 +301,7 @@ INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUE
 (15, N'Thời gian chế biến', N'20 phút'),
 (20, N'Caffeine', N'Có');
 
+GO
 -- Thêm dữ liệu vào bảng MenuItemRatings
 INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt) VALUES
 (1, 1, 5, N'Gỏi cuốn tươi ngon, nước chấm đậm đà!', '2025-04-26 12:30:00'),
@@ -314,6 +332,7 @@ INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentM
 (9, 19, 3, '2025-04-26 16:30:00', 2, N'Tiền mặt'),
 (10, 20, 4, '2025-04-26 16:45:00', 1, N'Thẻ tín dụng');
 
+GO
 -- Thêm dữ liệu vào bảng OrderDetails (mỗi đơn hàng có 2-4 món)
 INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity) VALUES
 (1, 1, 2), (1, 3, 1), (1, 10, 2), -- Gỏi cuốn, Phở bò, Nước ép cam
@@ -337,6 +356,7 @@ INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity) VALUES
 (19, 2, 1), (19, 8, 1), (19, 13, 1), -- Súp cua, Chè ba màu, Sinh tố bơ
 (20, 1, 1), (20, 9, 1), (20, 15, 1), (20, 20, 1); -- Gỏi cuốn, Bánh flan, Gà nướng, Trà sữa
 
+GO
 -- Thêm dữ liệu vào bảng TrustedDevices (cho nhân viên)
 INSERT INTO TrustedDevices (UserId, DeviceToken, CreatedAt) VALUES
 (11, 'device_token_1', '2025-04-26 09:00:00'), -- Quản lý
@@ -349,3 +369,21 @@ INSERT INTO TrustedDevices (UserId, DeviceToken, CreatedAt) VALUES
 (18, 'device_token_8', '2025-04-26 10:45:00'), -- Đầu bếp
 (19, 'device_token_9', '2025-04-26 11:00:00'), -- Nhân viên phục vụ
 (20, 'device_token_10', '2025-04-26 11:15:00'); -- Đầu bếp
+
+GO
+-- DROP TABLE IF EXISTS MenuItemAttributes;
+-- DROP TABLE IF EXISTS MenuItemRatings;
+-- DROP TABLE IF EXISTS MenuItemLabels;
+-- DROP TABLE IF EXISTS OrderDetails;
+-- DROP TABLE IF EXISTS Orders;
+-- DROP TABLE IF EXISTS Reservations;
+-- DROP TABLE IF EXISTS Tables;
+-- DROP TABLE IF EXISTS Areas;
+-- DROP TABLE IF EXISTS TrustedDevices;
+-- DROP TABLE IF EXISTS Users;
+-- DROP TABLE IF EXISTS RolePermissions;
+-- DROP TABLE IF EXISTS Permissions;
+-- DROP TABLE IF EXISTS Roles;
+-- DROP TABLE IF EXISTS MenuItems;
+-- DROP TABLE IF EXISTS Categories;
+-- DROP TABLE IF EXISTS Labels;
