@@ -44,6 +44,7 @@ CREATE TABLE Users (
     
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
     RoleID INT NULL, -- Gán role trực tiếp
+    UserCreated UserCreated DATETIME NOT NULL DEFAULT GETDATE();
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
 
