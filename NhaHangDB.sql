@@ -3,6 +3,9 @@
 USE RestaurantDB;
 GO
 
+USE RestaurantDB;
+GO
+
 -- Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
@@ -44,7 +47,7 @@ CREATE TABLE Users (
     
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
     RoleID INT NULL, -- Gán role trực tiếp
-    UserCreated UserCreated DATETIME NOT NULL DEFAULT GETDATE();
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
 
@@ -156,6 +159,7 @@ CREATE TABLE TrustedDevices (
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
+
 
 USE RestaurantDB;
 GO
