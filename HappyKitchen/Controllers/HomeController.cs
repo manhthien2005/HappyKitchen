@@ -25,15 +25,43 @@ namespace HappyKitchen.Controllers
             _configuration = configuration;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public IActionResult GetCartSession()
         {
+            string cartJson = HttpContext.Session.GetString("CartSession");
+            return Json(new { success = !string.IsNullOrEmpty(cartJson), data = cartJson });
+        }
+
+        public IActionResult Index()
+        { // Lấy session
+          string cartJson = HttpContext.Session.GetString("CartSession"); Console.WriteLine($"Data retrieved from session: {cartJson}");
+          // Deserialize cartJson
+            var cartItems = new List<CartItem>();
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                try
+                {
+                    cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
+                    Console.WriteLine($"cartItems count: {cartItems.Count}");
+                    foreach (var item in cartItems)
+                    {
+                        Console.WriteLine($"CartItem - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Deserialize error: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("cartJson is null or empty");
+            }
+
+            // Lấy danh sách bàn
             var tables = _context.Tables.ToList();
-            var cartJson = HttpContext.Session.GetString("CartSession");
 
-            var cartItems = string.IsNullOrEmpty(cartJson)
-                ? new List<CartItem>()
-                : JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
-
+            // Tạo view model
             var viewModel = new HomeIndexViewModel
             {
                 Tables = tables,

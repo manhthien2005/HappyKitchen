@@ -1199,14 +1199,14 @@
                     .button {
                         width: 100%;
                     }
-                }
+                }   
             </style>
             <section class="section event bg-black-10" aria-label="event" id="event">
                 <div class="container">
 
                     <p class="section-subtitle label-2 text-center">Cập Nhật Mới</p>
 
-                    <h2 class="section-title headline-1 text-center">Sự Kiện Sắp Tới</h2>
+                    <h2 class="section-title headline-1 text-center">Giỏ hàng của bạn</h2>
 
                     <div class="container">
 
@@ -1238,14 +1238,12 @@
                         </div>
 
                         <div class="action-buttons">
-                            <a href="#" class="btn btn-primary">
-                                <span class="text text-1">Quay lại thực đơn</span>
-
+                            <a href="#" class="btn btn-primary back-button">
+                                <span class="text text-">Quay lại thực đơn</span>
                                 <span class="text text-2" aria-hidden="true">Quay lại thực đơn</span>
                             </a>
-                            <a href="#" class="btn btn-secondary">
+                            <a href="javascript:void(0)" onclick="submitCartToDishChecking()" class="btn btn-secondary proceed-button">
                                 <span class="text text-1">Tiếp tục thanh toán</span>
-
                                 <span class="text text-2" aria-hidden="true">Tiếp tục thanh toán</span>
                             </a>
                         </div>
@@ -1258,7 +1256,7 @@
     
 
 
-    <!--                        - #EVENT-->
+    <!--- #EVENT-->
 
             <section class="section event bg-black-10" aria-label="event" id="event">
                 <div class="container">
@@ -1505,11 +1503,60 @@
             },
             minDate: new Date(),
         });
-    </script>
 
-   
+        @{
+            var cartItemsJson = Json.Serialize(
+            Model?.CartItems?.Select(item => new
+            {
+                MenuItemID = item.MenuItemID,
+                Quantity = item.Quantity
+            }) ?? Enumerable.Empty<object>()
+            );
+        }
 
-    <script>
+        const cartItems = @Html.Raw(
+            Model?.CartItems != null
+            ? Json.Serialize(Model.CartItems.Select(item => new
+            {
+                MenuItemID = item.MenuItemID,
+                Quantity = item.Quantity
+            }))
+            : "[]"
+            );
+
+        function buildCartJson() {
+            let selectedJson = JSON.stringify(cartItems);
+            console.log("Cart JSON gửi lên:", selectedJson);
+        }
+
+        function submitCartToDishChecking() {
+            const selectedJson = buildCartJson();
+            const url = '@Url.Action("DishChecking", "Reservation")';
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `SelectedItemsJson=${encodeURIComponent(selectedJson)}`
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi gửi JSON:", error);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu. Vui lòng thử lại.");
+                });
+        }
+
         function fetchAvailableTables() {
             let datetime = document.getElementById("reservationDate").value;
             let people = document.getElementById("people").value;
@@ -1540,37 +1587,26 @@
         document.getElementById("reservationDate").addEventListener("change", fetchAvailableTables);
         document.getElementById("people").addEventListener("change", fetchAvailableTables);
         document.getElementById("duration").addEventListener("change", fetchAvailableTables);
-    </script>
 
-    <script>
         // Sample order data (simulating items already chosen)
         const orderItems = [
+
+            @foreach (var item in Model?.CartItems ?? new List<CartItem>())
             {
-                id: 1,
-                name: "Lẩu Cua Đồng",
-                description: "Lẩu cua đồng thơm ngon với nước dùng đặc biệt",
-                price: 220000,
-                quantity: 1,
-                image: "/placeholder.svg?height=80&width=80"
-            },
-            {
-                id: 2,
-                name: "Bánh Bông Lan",
-                description: "Bánh bông lan mềm xốp, thơm mùi trứng và bơ",
-                price: 28000,
-                quantity: 1,
-                image: "/placeholder.svg?height=80&width=80"
-            },
-            {
-                id: 3,
-                name: "Canh Chua Cá Lóc",
-                description: "Canh chua cá lóc nấu với đầy đủ rau củ, chua ngọt đậm đà",
-                price: 60000,
-                quantity: 1,
-                image: "/placeholder.svg?height=80&width=80"
+                <text>
+                    {
+                    id: "@item.MenuItemID",
+                    name: "@item.MenuItem.Name",
+                    quantity:"@item.Quantity",
+                    description: "@item.MenuItem.Description",
+                    price: "@(Convert.ToInt32(item.MenuItem.Price))", // Chuyển decimal về int
+                    image: "@item.MenuItem.MenuItemImage",
+
+                            },
+                </text>   
             }
         ];
-
+        console.log('orderItems:', orderItems);
         // Format price with thousand separators
         function formatPrice(price) {
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ";
@@ -1586,7 +1622,7 @@
                 const orderItemElement = document.createElement('div');
                 orderItemElement.className = 'order-item';
                 orderItemElement.innerHTML = `
-                    <img src="${item.image}" alt="${item.name}" class="item-image">
+                        <img src="/images/MenuItem/${item.image}" alt="${item.name}" class="item-image">
                     <div class="item-details">
                         <h3 class="item-name">${item.name}</h3>
                         <p class="item-description">${item.description}</p>

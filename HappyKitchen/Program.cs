@@ -21,7 +21,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddSession();
 
 var app = builder.Build();
 
@@ -35,10 +34,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseSession();
 app.UseRouting();
 app.UseSession();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(

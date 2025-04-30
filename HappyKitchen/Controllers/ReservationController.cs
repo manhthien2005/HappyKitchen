@@ -69,16 +69,21 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DishChecking( string SelectedItemsJson)
+        public async Task<IActionResult> DishChecking(string SelectedItemsJson)
         {
-
-
+            // Debug dữ liệu đầu vào
+            Console.WriteLine($"SelectedItemsJson received: {SelectedItemsJson}");
 
             var selectedList = JsonConvert.DeserializeObject<List<CartItem>>(SelectedItemsJson);
 
+            // Debug sau khi deserialize
+            Console.WriteLine($"Deserialized list count: {selectedList?.Count ?? 0}");
+
             foreach (var item in selectedList)
             {
-                item.MenuItem =  _context.MenuItems.FirstOrDefault(m => m.MenuItemID == item.MenuItemID);
+                item.MenuItem = _context.MenuItems.FirstOrDefault(m => m.MenuItemID == item.MenuItemID);
+                // Debug từng item
+                Console.WriteLine($"Item processed - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
             }
 
             var dishPayingView = new Cart
@@ -86,9 +91,20 @@ namespace HappyKitchen.Controllers
                 Items = selectedList,
             };
 
-            HttpContext.Session.SetString("CartSession", JsonConvert.SerializeObject(selectedList));
+            // Serialize và lưu vào session
+            string serializedList = JsonConvert.SerializeObject(selectedList);
+            HttpContext.Session.SetString("CartSession", serializedList);
+
+            // Debug sau khi lưu vào session
+            Console.WriteLine($"Data saved to session: {serializedList}");
+
+            // Verify lại từ session
+            string sessionData = HttpContext.Session.GetString("CartSession");
+            Console.WriteLine($"Data retrieved from session: {sessionData}");
+            Console.WriteLine($"Session save successful: {string.Equals(serializedList, sessionData)}");
 
             return View(dishPayingView);
         }
     }
+    
 }
