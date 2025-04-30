@@ -35,7 +35,6 @@ CREATE TABLE RolePermissions (
 -- Tạo bảng Users (phải tạo sau Roles vì có khóa ngoại RoleID)
 CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
-    Username VARCHAR(50) UNIQUE NOT NULL, 
     FullName NVARCHAR(100) NOT NULL,
     PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
     Email NVARCHAR(100) UNIQUE NOT NULL,
