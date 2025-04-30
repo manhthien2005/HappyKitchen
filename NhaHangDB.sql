@@ -1,38 +1,38 @@
 
 
-USE RestaurantDB;
+USE RestaurantDB
 GO
 
-USE RestaurantDB;
-GO
-
--- Roles
+-- Tạo bảng Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
-    RoleName NVARCHAR(50) NOT NULL UNIQUE,
-    Description NVARCHAR(255) NULL
+    RoleKey NVARCHAR(50) NOT NULL UNIQUE,
+    RoleName NVARCHAR(100) NOT NULL,
+    Description NVARCHAR(255)
 );
 
--- Permissions
+-- Tạo bảng Permissions
 CREATE TABLE Permissions (
     PermissionID INT IDENTITY(1,1) PRIMARY KEY,
-    PermissionName NVARCHAR(100) NOT NULL UNIQUE,
+    PermissionKey NVARCHAR(50) NOT NULL UNIQUE, 
+    PermissionName NVARCHAR(100) NOT NULL,      
     Description NVARCHAR(255) NULL
 );
 
--- RolePermissions
+-- Tạo bảng RolePermissions (phải tạo sau Roles và Permissions vì có khóa ngoại)
 CREATE TABLE RolePermissions (
-    ID INT IDENTITY(1,1) PRIMARY KEY,
     RoleID INT NOT NULL,
     PermissionID INT NOT NULL,
     CanView BIT NOT NULL DEFAULT 0,
     CanAdd BIT NOT NULL DEFAULT 0,
     CanEdit BIT NOT NULL DEFAULT 0,
     CanDelete BIT NOT NULL DEFAULT 0,
+    PRIMARY KEY (RoleID, PermissionID),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE CASCADE,
-    FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE,
-    CONSTRAINT UQ_Role_Permission UNIQUE (RoleID, PermissionID)
+    FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE
 );
+
+-- Tạo bảng Users (phải tạo sau Roles vì có khóa ngoại RoleID)
 CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
     Username VARCHAR(50) UNIQUE NOT NULL, 
@@ -40,23 +40,23 @@ CREATE TABLE Users (
     PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
     Email NVARCHAR(100) UNIQUE NOT NULL,
     Address NVARCHAR(255) NULL,
-    
     UserType TINYINT NOT NULL CHECK (UserType IN (0,1)), -- 0 = Khách hàng, 1 = Nhân viên
     PasswordHash VARCHAR(255) NOT NULL, 
     Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
-    
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
     RoleID INT NULL, -- Gán role trực tiếp
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
 
+-- Tạo bảng Areas
 CREATE TABLE Areas (
     AreaID INT IDENTITY(1,1) PRIMARY KEY,
     AreaName NVARCHAR(50) NOT NULL UNIQUE,
     Description NVARCHAR(255) NULL
 );
 
+-- Tạo bảng Tables (phải tạo sau Areas vì có khóa ngoại AreaID)
 CREATE TABLE Tables (
     TableID INT IDENTITY(1,1) PRIMARY KEY,
     TableName NVARCHAR(50) NOT NULL,
@@ -66,7 +66,7 @@ CREATE TABLE Tables (
     FOREIGN KEY (AreaID) REFERENCES Areas(AreaID) ON DELETE SET NULL
 );
 
-
+-- Tạo bảng Reservations (phải tạo sau Users và Tables vì có khóa ngoại)
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL, 
@@ -81,21 +81,24 @@ CREATE TABLE Reservations (
     FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
 );
 
+-- Tạo bảng Categories
 CREATE TABLE Categories (
     CategoryID INT IDENTITY(1,1) PRIMARY KEY,
     CategoryName NVARCHAR(50) NOT NULL
 );
 
+-- Tạo bảng Labels
 CREATE TABLE Labels (
     LabelID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(50) NOT NULL,
     Description NVARCHAR(255) NULL
 );
 
+-- Tạo bảng MenuItems (phải tạo sau Categories vì có khóa ngoại CategoryID)
 CREATE TABLE MenuItems (
     MenuItemID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
-	  MenuItemImage VARCHAR(255) NULL,
+    MenuItemImage VARCHAR(255) NULL,
     CategoryID INT NOT NULL,
     Price DECIMAL(10,2) NOT NULL,
     Description NVARCHAR(255) NULL,
@@ -103,6 +106,7 @@ CREATE TABLE MenuItems (
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- Tạo bảng MenuItemLabels (phải tạo sau MenuItems và Labels vì có khóa ngoại)
 CREATE TABLE MenuItemLabels (
     MenuItemID INT NOT NULL,
     LabelID INT NOT NULL,
@@ -110,6 +114,8 @@ CREATE TABLE MenuItemLabels (
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE,
     FOREIGN KEY (LabelID) REFERENCES Labels(LabelID) ON DELETE CASCADE
 );
+
+-- Tạo bảng MenuItemRatings (phải tạo sau MenuItems và Users vì có khóa ngoại)
 CREATE TABLE MenuItemRatings (
     RatingID INT IDENTITY(1,1) PRIMARY KEY,
     MenuItemID INT NOT NULL,
@@ -121,6 +127,7 @@ CREATE TABLE MenuItemRatings (
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
+-- Tạo bảng Orders (phải tạo sau Users và Tables vì có khóa ngoại)
 CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL,
@@ -134,6 +141,7 @@ CREATE TABLE Orders (
     FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE NO ACTION
 );
 
+-- Tạo bảng OrderDetails (phải tạo sau Orders và MenuItems vì có khóa ngoại)
 CREATE TABLE OrderDetails (
     OrderDetailID INT IDENTITY(1,1) PRIMARY KEY,
     OrderID INT NOT NULL,
@@ -143,7 +151,7 @@ CREATE TABLE OrderDetails (
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-
+-- Tạo bảng MenuItemAttributes (phải tạo sau MenuItems vì có khóa ngoại)
 CREATE TABLE MenuItemAttributes (
     AttributeID INT IDENTITY(1,1) PRIMARY KEY,
     MenuItemID INT NOT NULL,
@@ -152,6 +160,7 @@ CREATE TABLE MenuItemAttributes (
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- Tạo bảng TrustedDevices (phải tạo sau Users vì có khóa ngoại)
 CREATE TABLE TrustedDevices (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     UserId INT NOT NULL,
@@ -160,235 +169,424 @@ CREATE TABLE TrustedDevices (
     CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
-
-USE RestaurantDB;
-GO
 -- Thêm dữ liệu vào bảng Roles
-INSERT INTO Roles (RoleName, Description) VALUES
-(N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
-(N'Nhân viên phục vụ', N'Phục vụ khách hàng và xử lý đơn hàng'),
-(N'Đầu bếp', N'Chuẩn bị món ăn theo đơn hàng');
-GO
+INSERT INTO Roles (RoleKey, RoleName, Description) VALUES
+(N'MANAGER', N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
+(N'WAITER', N'Nhân viên phục vụ', N'Phục vụ khách hàng và xử lý đơn hàng'),
+(N'CHEF', N'Đầu bếp', N'Chuẩn bị món ăn theo đơn hàng'),
+(N'ADMIN', N'Quản trị viên', N'Quản trị viên hệ thống'),
+(N'CASHIER', N'Thu ngân', N'Xử lý thanh toán và hóa đơn');
+
 -- Thêm dữ liệu vào bảng Permissions
-INSERT INTO Permissions (PermissionName, Description) VALUES
-(N'Quản lý đơn hàng', N'Quyền liên quan đến đơn hàng (xem, thêm, sửa, xóa)'),
-(N'Quản lý thực đơn', N'Quyền quản lý món ăn trong thực đơn'),
-(N'Quản lý đặt bàn', N'Quyền quản lý bàn và đặt bàn'),
-(N'Xem báo cáo', N'Quyền xem báo cáo doanh thu và thống kê'),
-(N'Chuẩn bị món ăn', N'Quyền đánh dấu món ăn đã được chuẩn bị');
+INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
+(N'ORDER_MANAGE', N'Quản lý đơn hàng', N'Quyền xem, tạo, chỉnh sửa và xóa đơn hàng'),
+(N'MENU_MANAGE', N'Quản lý thực đơn', N'Quyền quản lý toàn bộ món ăn trong thực đơn'),
+(N'MENU_CATEGORY_MANAGE', N'Quản lý danh mục món ăn', N'Quản lý các nhóm danh mục trong thực đơn'),
+(N'MENU_TAG_MANAGE', N'Quản lý thẻ thực đơn', N'Quản lý thẻ nhóm món ăn'),
+(N'TABLE_BOOKING_MANAGE', N'Quản lý đặt bàn', N'Xem và xử lý thông tin đặt bàn'),
+(N'TABLE_QR_MANAGE', N'Quản lý mã QR bàn', N'Tạo và quản lý mã QR cho bàn'),
+(N'CUSTOMER_ACCOUNT_MANAGE', N'Quản lý tài khoản khách hàng', N'Xem và chỉnh sửa thông tin khách hàng'),
+(N'STAFF_ACCOUNT_MANAGE', N'Quản lý tài khoản nhân viên', N'Quản lý hồ sơ nhân viên'),
+(N'ROLE_PERMISSION_MANAGE', N'Quản lý vai trò và phân quyền', N'Tạo, phân quyền, chỉnh sửa vai trò'),
+(N'VIEW_REPORT', N'Xem báo cáo', N'Xem các báo cáo thống kê và doanh thu'),
+(N'ORDER_PREPARE', N'Chuẩn bị món ăn', N'Đánh dấu món ăn đã sẵn sàng'),
+(N'PAYMENT_MANAGE', N'Thu ngân', N'Xử lý hóa đơn và thanh toán');
 
-GO
 -- Thêm dữ liệu vào bảng RolePermissions
+-- Admin (Toàn quyền) - RoleID = 4
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+SELECT 4, PermissionID, 1, 1, 1, 1 FROM Permissions;
+
+-- Manager (RoleID = 1)
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
--- Quản lý (RoleID = 1): Có tất cả quyền
-(1, 1, 1, 1, 1, 1), -- Quản lý đơn hàng
-(1, 2, 1, 1, 1, 1), -- Quản lý thực đơn
-(1, 3, 1, 1, 1, 1), -- Quản lý đặt bàn
-(1, 4, 1, 0, 0, 0), -- Xem báo cáo
-(1, 5, 1, 0, 1, 0), -- Chuẩn bị món ăn
--- Nhân viên phục vụ (RoleID = 2): Quyền liên quan đến đơn hàng và đặt bàn
-(2, 1, 1, 1, 1, 0), -- Quản lý đơn hàng (không xóa)
-(2, 3, 1, 1, 1, 0), -- Quản lý đặt bàn (không xóa)
--- Đầu bếp (RoleID = 3): Chỉ chuẩn bị món ăn
-(3, 5, 1, 0, 1, 0); -- Chuẩn bị món ăn
+(1, 1, 1, 1, 1, 1), -- ORDER_MANAGE
+(1, 2, 1, 1, 1, 1), -- MENU_MANAGE
+(1, 3, 1, 1, 1, 1), -- MENU_CATEGORY_MANAGE
+(1, 4, 1, 1, 1, 1), -- MENU_TAG_MANAGE
+(1, 5, 1, 1, 1, 1), -- TABLE_BOOKING_MANAGE
+(1, 6, 1, 1, 1, 1), -- TABLE_QR_MANAGE
+(1, 7, 1, 1, 1, 1), -- CUSTOMER_ACCOUNT_MANAGE
+(1, 10, 1, 0, 0, 0); -- VIEW_REPORT
 
-GO
--- Thêm dữ liệu vào bảng Users (10 khách hàng, 10 nhân viên)
-INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status, RoleID) VALUES
--- Khách hàng (UserType = 0)
-('nguyenvan_a', N'Nguyễn Văn An', '0901234561', 'an.nguyen@gmail.com', N'123 Đường Láng, Đống Đa, Hà Nội', 0, 'hashed_password', NULL, 0, NULL),
-('tranthi_b', N'Trần Thị Bình', '0901234562', 'binh.tran@gmail.com', N'45 Nguyễn Huệ, Quận 1, TP.HCM', 0, 'hashed_password', NULL, 0, NULL),
-('phamvan_c', N'Phạm Văn Cường', '0901234563', 'cuong.pham@gmail.com', N'67 Lê Lợi, Hải Châu, Đà Nẵng', 0, 'hashed_password', NULL, 0, NULL),
-('lethi_d', N'Lê Thị Duyên', '0901234564', 'duyen.le@gmail.com', N'89 Trần Phú, Nha Trang, Khánh Hòa', 0, 'hashed_password', NULL, 0, NULL),
-('hoangvan_e', N'Hoàng Văn Em', '0901234565', 'em.hoang@gmail.com', N'12 Phạm Ngũ Lão, TP. Huế', 0, 'hashed_password', NULL, 0, NULL),
-('vuthi_f', N'Vũ Thị Phượng', '0901234566', 'phuong.vu@gmail.com', N'34 Nguyễn Trãi, Thanh Xuân, Hà Nội', 0, 'hashed_password', NULL, 0, NULL),
-('dinhvan_g', N'Đinh Văn Giang', '0901234567', 'giang.dinh@gmail.com', N'56 Bùi Thị Xuân, Đà Lạt, Lâm Đồng', 0, 'hashed_password', NULL, 0, NULL),
-('buihoa_h', N'Bùi Hoa Hậu', '0901234568', 'hau.bui@gmail.com', N'78 Hùng Vương, Ninh Kiều, Cần Thơ', 0, 'hashed_password', NULL, 0, NULL),
-('doanminh_i', N'Đoàn Minh Ý', '0901234569', 'y.doan@gmail.com', N'90 Lý Thường Kiệt, TP. Vũng Tàu', 0, 'hashed_password', NULL, 0, NULL),
-('ngothuy_k', N'Ngô Thùy Kiều', '0901234570', 'kieu.ngo@gmail.com', N'11 Tôn Đức Thắng, Ba Đình, Hà Nội', 0, 'hashed_password', NULL, 0, NULL),
--- Nhân viên (UserType = 1)
-('staff_nguyen', N'Nguyễn Văn Hùng', '0912345601', 'hung.nguyen@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password1', 15000000, 0, 1), -- Quản lý
-('staff_tran', N'Trần Thị Lan', '0912345602', 'lan.tran@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password2', 8000000, 0, 2), -- Nhân viên phục vụ
-('staff_pham', N'Phạm Văn Nam', '0912345603', 'nam.pham@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password3', 9000000, 0, 3), -- Đầu bếp
-('staff_le', N'Lê Thị Mai', '0912345604', 'mai.le@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password4', 8500000, 0, 2), -- Nhân viên phục vụ
-('staff_hoang', N'Hoàng Văn Khánh', '0912345605', 'khanh.hoang@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password5', 8700000, 0, 2), -- Nhân viên phục vụ
-('staff_vu', N'Vũ Minh Tâm', '0912345606', 'tam.vu@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password6', 9200000, 0, 3), -- Đầu bếp
-('staff_dinh', N'Đinh Thị Hồng', '0912345607', 'hong.dinh@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password7', 8300000, 0, 2), -- Nhân viên phục vụ
-('staff_bui', N'Bùi Văn Long', '0912345608', 'long.bui@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password8', 8800000, 0, 3), -- Đầu bếp
-('staff_doan', N'Đoàn Thị Ngọc', '0912345609', 'ngoc.doan@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password9', 8600000, 0, 2), -- Nhân viên phục vụ
-('staff_ngo', N'Ngô Văn Quang', '0912345610', 'quang.ngo@xai.com', N'Nhà hàng, Hà Nội', 1, 'hashed_password10', 8900000, 0, 3); -- Đầu bếp
+-- Waiter (RoleID = 2)
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(2, 1, 1, 1, 1, 0), -- ORDER_MANAGE
+(2, 5, 1, 1, 1, 0), -- TABLE_BOOKING_MANAGE
+(2, 2, 1, 0, 0, 0); -- MENU_MANAGE (chỉ xem)
 
+-- Chef (RoleID = 3)
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(3, 11, 1, 0, 1, 0); -- ORDER_PREPARE
+
+-- Cashier (RoleID = 5)
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(5, 1, 1, 0, 0, 0), -- ORDER_MANAGE (xem đơn hàng)
+(5, 12, 1, 1, 1, 0); -- PAYMENT_MANAGE
+
+DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
+DECLARE @i INT = 1;
+DECLARE @EmployeeCount INT = 20;
+
+WHILE @i <= @EmployeeCount
+BEGIN
+    INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status, RoleID, CreatedAt)
+    VALUES (
+        'employee' + CAST(@i AS VARCHAR(5)),
+        CASE 
+            WHEN @i % 5 = 0 THEN N'Nguyễn Văn ' + CHAR(64 + @i)
+            WHEN @i % 5 = 1 THEN N'Trần Thị ' + CHAR(64 + @i)
+            WHEN @i % 5 = 2 THEN N'Lê Minh ' + CHAR(64 + @i)
+            WHEN @i % 5 = 3 THEN N'Phạm Hoàng ' + CHAR(64 + @i)
+            ELSE N'Hoàng Thị ' + CHAR(64 + @i)
+        END,
+        '17' + RIGHT('0' + CAST(@i AS VARCHAR(2)), 2) + '123456',
+        'employee' + CAST(@i AS VARCHAR(5)) + '@happykitchen.com',
+        CASE 
+            WHEN @i % 3 = 0 THEN N'123 Đường Lê Lợi, Quận 1, TP.HCM'
+            WHEN @i % 3 = 1 THEN N'456 Đường Nguyễn Huệ, Quận 3, TP.HCM'
+            ELSE N'789 Đường Trần Hưng Đạo, Quận 5, TP.HCM'
+        END,
+        1, -- Nhân viên
+        @PasswordHash,
+        CASE 
+            WHEN @i % 5 = 1 THEN 10000000 -- Quản lý
+            WHEN @i % 5 = 2 THEN 7000000 -- Đầu bếp
+            WHEN @i % 5 = 3 THEN 6000000 -- Thu ngân
+            WHEN @i % 5 = 4 THEN 5000000 -- Nhân viên phục vụ
+            ELSE 5000000 -- Nhân viên phục vụ
+        END,
+        0, -- Hoạt động
+        CASE 
+            WHEN @i = 1 THEN 4 -- Admin
+            WHEN @i % 5 = 1 THEN 1 -- Manager
+            WHEN @i % 5 = 2 THEN 3 -- Chef
+            WHEN @i % 5 = 3 THEN 5 -- Cashier
+            ELSE 2 -- Waiter
+        END,
+        DATEADD(DAY, -(@i * 7), GETDATE()) -- Ngày tạo cách nhau 1 tuần
+    );
+    SET @i = @i + 1;
+END;
+
+-- Thêm dữ liệu vào bảng Users (Khách hàng)
+DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
+DECLARE @i INT = 1;
+SET @i = 1;
+DECLARE @CustomerCount INT = 100;
+
+WHILE @i <= @CustomerCount
+BEGIN
+    DECLARE @CreatedDate DATETIME = DATEADD(DAY, -(RAND() * 60), GETDATE()); -- Ngẫu nhiên trong 60 ngày qua
+    
+    INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Status, CreatedAt)
+    VALUES (
+        'customer' + CAST(@i AS VARCHAR(5)),
+        CASE 
+            WHEN @i % 5 = 0 THEN N'Nguyễn Thị ' + CHAR(64 + (@i % 26))
+            WHEN @i % 5 = 1 THEN N'Trần Văn ' + CHAR(64 + (@i % 26))
+            WHEN @i % 5 = 2 THEN N'Lê Thị ' + CHAR(64 + (@i % 26))
+            WHEN @i % 5 = 3 THEN N'Phạm Văn ' + CHAR(64 + (@i % 26))
+            ELSE N'Hoàng Minh ' + CHAR(64 + (@i % 26))
+        END,
+        '01' + RIGHT('2' + CAST(@i AS VARCHAR(3)), 3) + '12345',
+        'customer' + CAST(@i AS VARCHAR(5)) + '@gmail.com',
+        CASE 
+            WHEN @i % 4 = 0 THEN N'123 Đường Nguyễn Trãi, Quận 5, TP.HCM'
+            WHEN @i % 4 = 1 THEN N'456 Đường Lý Thường Kiệt, Quận 10, TP.HCM'
+            WHEN @i % 4 = 2 THEN N'789 Đường Cách Mạng Tháng 8, Quận 3, TP.HCM'
+            ELSE N'101 Đường Võ Văn Tần, Quận 3, TP.HCM'
+        END,
+        0, -- Khách hàng
+        @PasswordHash,
+        0, -- Hoạt động
+        @CreatedDate
+    );
+    SET @i = @i + 1;
+END;
 GO
+
 -- Thêm dữ liệu vào bảng Areas
-INSERT INTO Areas (AreaName, Description) VALUES
-(N'Tầng 1', N'Khu vực tầng trệt gần cửa chính, sôi động'),
-(N'Tầng 2', N'Khu vực lầu 1 yên tĩnh, phù hợp gia đình'),
-(N'Sân vườn', N'Khu vực ngoài trời thoáng mát, gần gũi thiên nhiên');
-
+INSERT INTO Areas (AreaName, Description)
+VALUES 
+    (N'Khu vực trong nhà', N'Khu vực có điều hòa, phù hợp cho gia đình'),
+    (N'Khu vực ngoài trời', N'Khu vực sân vườn, thoáng mát'),
+    (N'Khu vực VIP', N'Khu vực riêng tư, dịch vụ cao cấp'),
+    (N'Khu vực sự kiện', N'Khu vực dành cho tổ chức tiệc, sự kiện');
 GO
+
 -- Thêm dữ liệu vào bảng Tables
-INSERT INTO Tables (TableName, AreaID, Capacity, Status) VALUES
-(N'Bàn 01', 1, 4, 0), -- Trống
-(N'Bàn 02', 1, 6, 0),
-(N'Bàn 03', 1, 8, 1), -- Đã đặt trước
-(N'Bàn 04', 2, 4, 0),
-(N'Bàn 05', 2, 6, 2), -- Đang sử dụng
-(N'Bàn 06', 2, 10, 0),
-(N'Bàn 07', 3, 4, 0),
-(N'Bàn 08', 3, 6, 1);
+DECLARE @i INT = 1;
+DECLARE @TableCount INT = 30;
 
+WHILE @i <= @TableCount
+BEGIN
+    INSERT INTO Tables (TableName, AreaID, Capacity, Status)
+    VALUES (
+        N'Bàn ' + CAST(@i AS NVARCHAR(5)),
+        CASE 
+            WHEN @i <= 10 THEN 1 -- Khu vực trong nhà
+            WHEN @i <= 20 THEN 2 -- Khu vực ngoài trời
+            WHEN @i <= 25 THEN 3 -- Khu vực VIP
+            ELSE 4 -- Khu vực sự kiện
+        END,
+        CASE 
+            WHEN @i % 3 = 0 THEN 2 -- Bàn 2 người
+            WHEN @i % 3 = 1 THEN 4 -- Bàn 4 người
+            ELSE 8 -- Bàn 8 người
+        END,
+        CASE 
+            WHEN @i % 5 = 0 THEN 1 -- Đã đặt trước
+            WHEN @i % 7 = 0 THEN 2 -- Đang sử dụng
+            ELSE 0 -- Trống
+        END
+    );
+    SET @i = @i + 1;
+END;
 GO
--- Thêm dữ liệu vào bảng Reservations
-INSERT INTO Reservations (CustomerID, GuestName, PhoneNumber, TableID, CreatedTime, ReservationTime, Status, Notes) VALUES
-(1, N'Nguyễn Văn An', '0901234561', 3, '2025-04-26 10:00:00', '2025-04-26 12:30:00', 2, N'Đặt cho bữa trưa gia đình'),
-(2, N'Trần Thị Bình', '0901234562', 8, '2025-04-26 11:00:00', '2025-04-26 13:00:00', 1, N'Đặt cho nhóm bạn'),
-(3, N'Phạm Văn Cường', '0901234563', 5, '2025-04-26 12:00:00', '2025-04-26 14:00:00', 2, N'Đặt cho buổi họp mặt'),
-(NULL, N'Khách vãng lai', '0901234571', 1, '2025-04-26 13:00:00', '2025-04-26 15:00:00', 0, N'Khách hủy vì thay đổi kế hoạch');
 
-GO
 -- Thêm dữ liệu vào bảng Categories
-INSERT INTO Categories (CategoryName) VALUES
-(N'Món khai vị'),
-(N'Món chính'),
-(N'Tráng miệng'),
-(N'Đồ uống');
-
-GO
--- Thêm dữ liệu vào bảng MenuItems
-INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status) VALUES
-(N'Gỏi cuốn tôm thịt', 'goi_cuon.jpg', 1, 50000, N'Gỏi cuốn tươi với tôm, thịt heo, rau sống và bún', 1),
-(N'Súp cua', 'sup_cua.jpg', 1, 60000, N'Súp cua thơm ngon với trứng, thịt cua và nấm', 1),
-(N'Phở bò tái', 'pho_bo.jpg', 2, 85000, N'Phở bò truyền thống với thịt tái, nước dùng đậm đà', 1),
-(N'Cơm chiên dương châu', 'com_chien.jpg', 2, 70000, N'Cơm chiên với tôm, trứng, xúc xích và rau củ', 1),
-(N'Bún bò Huế', 'bun_bo.jpg', 2, 90000, N'Bún bò Huế cay nồng với thịt bò, chả và rau thơm', 1),
-(N'Mì xào hải sản', 'mi_xao.jpg', 2, 95000, N'Mì xào giòn với tôm, mực, cá viên và rau củ', 1),
-(N'Lẩu thái hải sản', 'lau_thai.jpg', 2, 250000, N'Lẩu thái chua cay với tôm, mực, cá và nấm', 1),
-(N'Chè ba màu', 'che_ba_mau.jpg', 3, 35000, N'Chè ba màu ngọt mát với đậu đỏ, lá dứa và nước cốt dừa', 1),
-(N'Bánh flan', 'banh_flan.jpg', 3, 30000, N'Bánh flan caramel mềm mịn, thơm vị trứng', 1),
-(N'Nước ép cam', 'nuoc_ep_cam.jpg', 4, 45000, N'Nước ép cam tươi nguyên chất, giàu vitamin C', 1),
-(N'Trà đào cam sả', 'tra_dao.jpg', 4, 50000, N'Trà đào thơm mát với cam, sả và đào ngâm', 1),
-(N'Cà phê sữa đá', 'ca_phe_sua.jpg', 4, 40000, N'Cà phê sữa đá truyền thống, đậm vị Việt', 1),
-(N'Sinh tố bơ', 'sinh_to_bo.jpg', 4, 55000, N'Sinh tố bơ béo ngậy, thơm ngon', 1),
-(N'Salad trộn', 'salad.jpg', 1, 65000, N'Salad rau củ tươi với sốt dầu giấm và mè rang', 1),
-(N'Gà nướng muối ớt', 'ga_nuong.jpg', 2, 120000, N'Gà nướng thơm lừng với muối ớt, da giòn thịt mềm', 1),
-(N'Cá kho tộ', 'ca_kho_to.jpg', 2, 110000, N'Cá kho tộ đậm đà với nước mắm, tiêu và hành', 1),
-(N'Tôm rang muối hồng kông', 'tom_rang.jpg', 2, 150000, N'Tôm rang muối hồng kông giòn rụm, đậm vị', 1),
-(N'Kem dâu', 'kem_dau.jpg', 3, 40000, N'Kem dâu tây mát lạnh, vị ngọt tự nhiên', 1),
-(N'Nước dừa tươi', 'nuoc_dua.jpg', 4, 35000, N'Nước dừa tươi ngọt thanh, giải nhiệt', 1),
-(N'Trà sữa trân châu', 'tra_sua.jpg', 4, 50000, N'Trà sữa trân châu thơm béo, trân châu dai giòn', 1);
+INSERT INTO Categories (CategoryName)
+VALUES 
+    (N'Món khai vị'),
+    (N'Món chính'),
+    (N'Món tráng miệng'),
+    (N'Đồ uống'),
+    (N'Món đặc biệt'),
+    (N'Món chay'),
+    (N'Món nướng'),
+    (N'Món hải sản');
 GO
 
 -- Thêm dữ liệu vào bảng Labels
-INSERT INTO Labels (Name, Description) VALUES
-('Bán chạy', 'Best Seller'),
-('Mới', 'New'),
-('Đặc biệt', 'Special');
+INSERT INTO Labels (Name, Description)
+VALUES 
+    (N'Cay', N'Món ăn cay'),
+    (N'Chay', N'Món ăn chay'),
+    (N'Đặc biệt', N'Món đặc biệt của nhà hàng'),
+    (N'Mới', N'Món mới trong thực đơn'),
+    (N'Bán chạy', N'Món ăn bán chạy nhất'),
+    (N'Healthy', N'Món ăn tốt cho sức khỏe'),
+    (N'Không đường', N'Món không chứa đường');
+GO
+
+-- Thêm dữ liệu vào bảng MenuItems
+INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status)
+VALUES 
+    -- Món khai vị
+    (N'Gỏi cuốn tôm thịt', '/images/menu/goi-cuon.jpg', 1, 45000, N'Gỏi cuốn tươi với tôm, thịt heo và rau thơm', 1),
+    (N'Chả giò hải sản', '/images/menu/cha-gio.jpg', 1, 55000, N'Chả giò giòn với nhân hải sản thơm ngon', 1),
+    (N'Salad trộn kiểu Thái', '/images/menu/salad-thai.jpg', 1, 65000, N'Salad rau củ trộn chua cay kiểu Thái', 1),
+    (N'Súp hải sản', '/images/menu/sup-hai-san.jpg', 1, 75000, N'Súp hải sản đậm đà với tôm, mực và các loại hải sản', 1),
+    
+    -- Món chính
+    (N'Cơm chiên hải sản', '/images/menu/com-chien-hai-san.jpg', 2, 85000, N'Cơm chiên với hải sản tươi ngon', 1),
+    (N'Bò lúc lắc', '/images/menu/bo-luc-lac.jpg', 2, 120000, N'Thịt bò xào với ớt chuông và hành tây', 1),
+    (N'Cá hồi nướng', '/images/menu/ca-hoi-nuong.jpg', 2, 150000, N'Cá hồi Na Uy nướng với sốt chanh dây', 1),
+    (N'Gà nướng sả', '/images/menu/ga-nuong-sa.jpg', 2, 110000, N'Gà nướng với sả và gia vị đặc biệt', 1),
+    (N'Lẩu Thái hải sản', '/images/menu/lau-thai.jpg', 2, 250000, N'Lẩu Thái chua cay với hải sản tươi sống', 1),
+    (N'Bún chả Hà Nội', '/images/menu/bun-cha.jpg', 2, 95000, N'Bún chả truyền thống kiểu Hà Nội', 1),
+    
+    -- Món tráng miệng
+    (N'Chè hạt sen', '/images/menu/che-hat-sen.jpg', 3, 35000, N'Chè hạt sen với nước cốt dừa', 1),
+    (N'Bánh flan', '/images/menu/banh-flan.jpg', 3, 30000, N'Bánh flan mềm mịn với caramel', 1),
+    (N'Trái cây thập cẩm', '/images/menu/trai-cay.jpg', 3, 5000, N'Đĩa trái cây tươi theo mùa', 1),
+    
+    -- Đồ uống
+    (N'Nước ép cam', '/images/menu/nuoc-cam.jpg', 4, 35000, N'Nước ép cam tươi', 1),
+    (N'Sinh tố bơ', '/images/menu/sinh-to-bo.jpg', 4, 40000, N'Sinh tố bơ đặc creamy', 1),
+    (N'Trà đào', '/images/menu/tra-dao.jpg', 4, 35000, N'Trà đào với đào tươi', 1),
+    (N'Cà phê đen', '/images/menu/ca-phe-den.jpg', 4, 30000, N'Cà phê đen đậm đà', 1),
+    (N'Cà phê sữa', '/images/menu/ca-phe-sua.jpg', 4, 35000, N'Cà phê sữa đặc', 1),
+    
+    -- Món đặc biệt
+    (N'Cua rang me', '/images/menu/cua-rang-me.jpg', 5, 250000, N'Cua biển rang với sốt me chua ngọt', 1),
+    (N'Tôm hùm nướng phô mai', '/images/menu/tom-hum-nuong.jpg', 5, 450000, N'Tôm hùm nướng với phô mai béo ngậy', 1),
+    
+    -- Món chay
+    (N'Đậu hũ sốt nấm', '/images/menu/dau-hu-nam.jpg', 6, 75000, N'Đậu hũ non sốt nấm thơm ngon', 1),
+    (N'Canh rau củ', '/images/menu/canh-rau-cu.jpg', 6, 65000, N'Canh rau củ thanh đạm', 1),
+    
+    -- Món nướng
+    (N'Sườn nướng BBQ', '/images/menu/suon-nuong.jpg', 7, 135000, N'Sườn heo nướng với sốt BBQ', 1),
+    (N'Thịt xiên nướng', '/images/menu/thit-xien-nuong.jpg', 7, 95000, N'Thịt bò và heo xiên nướng', 1),
+    
+    -- Món hải sản
+    (N'Mực xào sa tế', '/images/menu/muc-xao.jpg', 8, 120000, N'Mực tươi xào với sa tế cay', 1),
+    (N'Tôm sú nướng muối ớt', '/images/menu/tom-nuong.jpg', 8, 150000, N'Tôm sú nướng với muối ớt', 1);
 GO
 
 -- Thêm dữ liệu vào bảng MenuItemLabels
-INSERT INTO MenuItemLabels (MenuItemID, LabelID) VALUES
-(1, 1), -- Gỏi cuốn: Bán chạy
-(3, 1), -- Phở bò: Bán chạy
-(5, 2), -- Bún bò: Mới
-(7, 3), -- Lẩu thái: Đặc biệt
-(11, 2), -- Trà đào: Mới
-(15, 1), -- Gà nướng: Bán chạy
-(20, 2); -- Trà sữa: Mới
-
+INSERT INTO MenuItemLabels (MenuItemID, LabelID)
+VALUES 
+    (3, 1), -- Salad Thái - Cay
+    (5, 5), -- Cơm chiên hải sản - Bán chạy
+    (6, 3), -- Bò lúc lắc - Đặc biệt
+    (7, 6), -- Cá hồi nướng - Healthy
+    (9, 1), -- Lẩu Thái - Cay
+    (9, 3), -- Lẩu Thái - Đặc biệt
+    (10, 5), -- Bún chả - Bán chạy
+    (13, 6), -- Trái cây - Healthy
+    (15, 6), -- Sinh tố bơ - Healthy
+    (16, 4), -- Trà đào - Mới
+    (19, 5), -- Cà phê sữa - Bán chạy
+    (20, 3), -- Cua rang me - Đặc biệt
+    (21, 3), -- Tôm hùm - Đặc biệt
+    (21, 4), -- Tôm hùm - Mới
+    (22, 2), -- Đậu hũ sốt nấm - Chay
+    (23, 2), -- Canh rau củ - Chay
+    (23, 6), -- Canh rau củ - Healthy
+    (24, 5), -- Sườn nướng - Bán chạy
+    (26, 1); -- Mực xào sa tế - Cay
 GO
+
 -- Thêm dữ liệu vào bảng MenuItemAttributes
-INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
-(1, N'Calories', N'150 kcal'),
-(3, N'Spiciness', N'Không cay'),
-(5, N'Spiciness', N'Cay vừa'),
-(7, N'Phù hợp', N'Nhóm 4-6 người'),
-(11, N'Caffeine', N'Có'),
-(15, N'Thời gian chế biến', N'20 phút'),
-(20, N'Caffeine', N'Có');
-
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue)
+VALUES 
+    (1, N'Calories', '120 kcal'),
+    (1, N'Protein', '10g'),
+    (2, N'Calories', '250 kcal'),
+    (3, N'Spiciness', N'Trung bình'),
+    (3, N'Calories', '100 kcal'),
+    (5, N'Portion', N'Phù hợp cho 2 người'),
+    (6, N'Spiciness', N'Nhẹ'),
+    (7, N'Omega-3', N'Cao'),
+    (9, N'Spiciness', N'Cay'),
+    (9, N'Portion', N'Phù hợp cho 4 người'),
+    (14, N'Sugar', '20g'),
+    (15, N'Calories', '180 kcal'),
+    (20, N'Portion', N'Phù hợp cho 2-3 người'),
+    (21, N'Weight', '500g'),
+    (22, N'Protein', '15g'),
+    (24, N'Calories', '350 kcal'),
+    (26, N'Spiciness', N'Cay');
 GO
+
 -- Thêm dữ liệu vào bảng MenuItemRatings
-INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt) VALUES
-(1, 1, 5, N'Gỏi cuốn tươi ngon, nước chấm đậm đà!', '2025-04-26 12:30:00'),
-(3, 2, 4, N'Phở thơm, nhưng nước dùng hơi nhạt.', '2025-04-26 13:00:00'),
-(5, 3, 5, N'Bún bò Huế cay đúng vị, rất đáng thử!', '2025-04-26 14:00:00'),
-(11, 4, 3, N'Trà đào ngon nhưng hơi ngọt.', '2025-04-26 15:00:00');
+DECLARE @i INT = 1;
+DECLARE @RatingCount INT = 200;
 
--- Thêm dữ liệu vào bảng Orders (20 đơn hàng)
-INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod) VALUES
-(1, 11, 1, '2025-04-26 12:00:00', 3, N'Tiền mặt'), -- Hoàn thành
-(2, 12, 2, '2025-04-26 12:15:00', 3, N'Thẻ tín dụng'),
-(3, 13, 3, '2025-04-26 12:30:00', 2, N'Momo'), -- Đang chuẩn bị
-(4, 14, 4, '2025-04-26 12:45:00', 2, N'Tiền mặt'),
-(5, 15, 5, '2025-04-26 13:00:00', 1, N'Thẻ tín dụng'), -- Chờ xác nhận
-(6, 16, 6, '2025-04-26 13:15:00', 1, N'Momo'),
-(7, 17, 7, '2025-04-26 13:30:00', 0, N'Tiền mặt'), -- Đã hủy
-(8, 18, 8, '2025-04-26 13:45:00', 3, N'Thẻ tín dụng'),
-(9, 19, 1, '2025-04-26 14:00:00', 2, N'Momo'),
-(10, 20, 2, '2025-04-26 14:15:00', 1, N'Tiền mặt'),
-(1, 11, 3, '2025-04-26 14:30:00', 3, N'Thẻ tín dụng'),
-(2, 12, 4, '2025-04-26 14:45:00', 2, N'Momo'),
-(3, 13, 5, '2025-04-26 15:00:00', 1, N'Tiền mặt'),
-(4, 14, 6, '2025-04-26 15:15:00', 0, N'Thẻ tín dụng'), -- Đã hủy
-(5, 15, 7, '2025-04-26 15:30:00', 3, N'Momo'),
-(6, 16, 8, '2025-04-26 15:45:00', 2, N'Tiền mặt'),
-(7, 17, 1, '2025-04-26 16:00:00', 1, N'Thẻ tín dụng'),
-(8, 18, 2, '2025-04-26 16:15:00', 3, N'Momo'),
-(9, 19, 3, '2025-04-26 16:30:00', 2, N'Tiền mặt'),
-(10, 20, 4, '2025-04-26 16:45:00', 1, N'Thẻ tín dụng');
-
+WHILE @i <= @RatingCount
+BEGIN
+    DECLARE @UserID INT = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
+    DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
+    DECLARE @RatingDate DATETIME = DATEADD(DAY, -(RAND() * 60), GETDATE()); -- Ngẫu nhiên trong 60 ngày qua
+    
+    INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt)
+    VALUES (
+        @MenuItemID,
+        @UserID,
+        CAST((RAND() * 4) + 1 AS TINYINT), -- Rating từ 1-5
+        CASE 
+            WHEN @i % 5 = 0 THEN N'Món ăn rất ngon, tôi sẽ quay lại!'
+            WHEN @i % 5 = 1 THEN N'Chất lượng tốt, giá cả hợp lý.'
+            WHEN @i % 5 = 2 THEN N'Khá ngon nhưng giá hơi cao.'
+            WHEN @i % 5 = 3 THEN N'Phục vụ nhanh, món ăn đúng vị.'
+            ELSE N'Tôi thích cách trình bày món ăn này.'
+        END,
+        @RatingDate
+    );
+    SET @i = @i + 1;
+END;
 GO
--- Thêm dữ liệu vào bảng OrderDetails (mỗi đơn hàng có 2-4 món)
-INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity) VALUES
-(1, 1, 2), (1, 3, 1), (1, 10, 2), -- Gỏi cuốn, Phở bò, Nước ép cam
-(2, 2, 1), (2, 4, 2), (2, 11, 1), (2, 15, 1), -- Súp cua, Cơm chiên, Trà đào, Gà nướng
-(3, 5, 1), (3, 7, 1), (3, 12, 2), -- Bún bò, Lẩu thái, Cà phê sữa
-(4, 6, 2), (4, 8, 1), (4, 13, 1), -- Mì xào, Chè ba màu, Sinh tố bơ
-(5, 9, 2), (5, 14, 1), (5, 16, 1), (5, 20, 1), -- Bánh flan, Salad, Cá kho, Trà sữa
-(6, 1, 1), (6, 17, 1), (6, 19, 2), -- Gỏi cuốn, Tôm rang, Nước dừa
-(7, 3, 1), (7, 5, 1), (7, 11, 1), -- Phở bò, Bún bò, Trà đào
-(8, 4, 2), (8, 6, 1), (8, 12, 1), (8, 18, 1), -- Cơm chiên, Mì xào, Cà phê, Kem dâu
-(9, 7, 1), (9, 9, 1), (9, 15, 1), -- Lẩu thái, Bánh flan, Gà nướng
-(10, 2, 1), (10, 8, 1), (10, 10, 2), (10, 20, 1), -- Súp cua, Chè ba màu, Nước ép cam, Trà sữa
-(11, 1, 2), (11, 3, 1), (11, 12, 1), -- Gỏi cuốn, Phở bò, Cà phê
-(12, 5, 1), (12, 7, 1), (12, 13, 2), (12, 19, 1), -- Bún bò, Lẩu thái, Sinh tố bơ, Nước dừa
-(13, 4, 1), (13, 6, 1), (13, 11, 1), -- Cơm chiên, Mì xào, Trà đào
-(14, 2, 1), (14, 8, 1), (14, 14, 1), (14, 20, 1), -- Súp cua, Chè ba màu, Salad, Trà sữa
-(15, 9, 1), (15, 15, 1), (15, 17, 1), -- Bánh flan, Gà nướng, Tôm rang
-(16, 1, 1), (16, 3, 1), (16, 10, 2), (16, 18, 1), -- Gỏi cuốn, Phở bò, Nước ép cam, Kem dâu
-(17, 5, 1), (17, 7, 1), (17, 12, 1), -- Bún bò, Lẩu thái, Cà phê
-(18, 4, 1), (18, 6, 1), (18, 11, 1), (18, 19, 1), -- Cơm chiên, Mì xào, Trà đào, Nước dừa
-(19, 2, 1), (19, 8, 1), (19, 13, 1), -- Súp cua, Chè ba màu, Sinh tố bơ
-(20, 1, 1), (20, 9, 1), (20, 15, 1), (20, 20, 1); -- Gỏi cuốn, Bánh flan, Gà nướng, Trà sữa
 
-GO
--- Thêm dữ liệu vào bảng TrustedDevices (cho nhân viên)
-INSERT INTO TrustedDevices (UserId, DeviceToken, CreatedAt) VALUES
-(11, 'device_token_1', '2025-04-26 09:00:00'), -- Quản lý
-(12, 'device_token_2', '2025-04-26 09:15:00'), -- Nhân viên phục vụ
-(13, 'device_token_3', '2025-04-26 09:30:00'), -- Đầu bếp
-(14, 'device_token_4', '2025-04-26 09:45:00'), -- Nhân viên phục vụ
-(15, 'device_token_5', '2025-04-26 10:00:00'), -- Nhân viên phục vụ
-(16, 'device_token_6', '2025-04-26 10:15:00'), -- Đầu bếp
-(17, 'device_token_7', '2025-04-26 10:30:00'), -- Nhân viên phục vụ
-(18, 'device_token_8', '2025-04-26 10:45:00'), -- Đầu bếp
-(19, 'device_token_9', '2025-04-26 11:00:00'), -- Nhân viên phục vụ
-(20, 'device_token_10', '2025-04-26 11:15:00'); -- Đầu bếp
+-- Thêm dữ liệu vào bảng Orders và OrderDetails
+DECLARE @CurrentDate DATETIME = GETDATE();
+DECLARE @FirstDayLastMonth DATETIME = DATEADD(MONTH, -1, DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate));
+DECLARE @FirstDayCurrentMonth DATETIME = DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate);
 
+DECLARE @i INT = 1;
+DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
+
+WHILE @i <= @OrderCount
+BEGIN
+    DECLARE @CustomerID INT = NULL;
+    DECLARE @EmployeeID INT = NULL;
+    DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
+    
+    -- 80% đơn hàng có thông tin khách hàng
+    IF RAND() < 0.8
+    BEGIN
+        SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
+    END
+    
+    -- Tất cả đơn hàng đều có nhân viên phục vụ
+    SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
+    
+    -- Tạo thời gian đặt hàng ngẫu nhiên trong tháng hiện tại và tháng trước
+    DECLARE @OrderTime DATETIME;
+    IF @i <= @OrderCount * 0.6 -- 60% đơn hàng trong tháng hiện tại
+        SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayCurrentMonth);
+    ELSE -- 40% đơn hàng trong tháng trước
+        SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayLastMonth);
+    
+    -- Xác định trạng thái đơn hàng
+    DECLARE @Status TINYINT;
+    DECLARE @RandomStatus FLOAT = RAND();
+    
+    IF @RandomStatus < 0.05 -- 5% đơn hàng bị hủy
+        SET @Status = 0;
+    ELSE IF @RandomStatus < 0.1 -- 5% đơn hàng đang chờ xác nhận
+        SET @Status = 1;
+    ELSE IF @RandomStatus < 0.2 -- 10% đơn hàng đang chuẩn bị
+        SET @Status = 2;
+    ELSE -- 80% đơn hàng đã hoàn thành
+        SET @Status = 3;
+    
+    -- Phương thức thanh toán
+    DECLARE @PaymentMethod NVARCHAR(50);
+    DECLARE @RandomPayment FLOAT = RAND();
+    
+    IF @RandomPayment < 0.4
+        SET @PaymentMethod = N'Tiền mặt';
+    ELSE IF @RandomPayment < 0.7
+        SET @PaymentMethod = N'Thẻ tín dụng';
+    ELSE IF @RandomPayment < 0.9
+        SET @PaymentMethod = N'Ví điện tử';
+    ELSE
+        SET @PaymentMethod = N'Chuyển khoản ngân hàng';
+    
+    -- Thêm đơn hàng
+    INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
+    VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
+    
+    -- Lấy OrderID vừa thêm
+    DECLARE @OrderID INT = SCOPE_IDENTITY();
+    
+    -- Thêm chi tiết đơn hàng (1-5 món ăn mỗi đơn)
+    DECLARE @ItemCount INT = CAST((RAND() * 4) + 1 AS INT);
+    DECLARE @j INT = 1;
+    
+    WHILE @j <= @ItemCount
+    BEGIN
+        DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
+        DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT); -- 1-4 món mỗi loại
+        
+        INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
+        VALUES (@OrderID, @MenuItemID, @Quantity);
+        
+        SET @j = @j + 1;
+    END;
+    
+    SET @i = @i + 1;
+END;
 GO
--- DROP TABLE IF EXISTS MenuItemAttributes;
--- DROP TABLE IF EXISTS MenuItemRatings;
--- DROP TABLE IF EXISTS MenuItemLabels;
--- DROP TABLE IF EXISTS OrderDetails;
--- DROP TABLE IF EXISTS Orders;
--- DROP TABLE IF EXISTS Reservations;
--- DROP TABLE IF EXISTS Tables;
--- DROP TABLE IF EXISTS Areas;
--- DROP TABLE IF EXISTS TrustedDevices;
--- DROP TABLE IF EXISTS Users;
--- DROP TABLE IF EXISTS RolePermissions;
--- DROP TABLE IF EXISTS Permissions;
--- DROP TABLE IF EXISTS Roles;
--- DROP TABLE IF EXISTS MenuItems;
--- DROP TABLE IF EXISTS Categories;
--- DROP TABLE IF EXISTS Labels;
+
+-- Cập nhật TotalAmount cho bảng Orders
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Orders') AND name = 'TotalAmount')
+BEGIN
+    ALTER TABLE Orders ADD TotalAmount DECIMAL(10,2) DEFAULT 0;
+END
+GO
+
+-- Cập nhật giá trị TotalAmount dựa trên OrderDetails
+UPDATE o
+SET o.TotalAmount = (
+    SELECT SUM(od.Quantity * mi.Price)
+    FROM OrderDetails od
+    JOIN MenuItems mi ON od.MenuItemID = mi.MenuItemID
+    WHERE od.OrderID = o.OrderID
+)
+FROM Orders o;
+GO
+
+PRINT N'Đã tạo dữ liệu mẫu thành công!';
