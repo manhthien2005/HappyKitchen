@@ -183,6 +183,8 @@ CREATE TABLE TrustedDevices (
     CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
+
+GO
 -- Thêm dữ liệu vào bảng Roles
 INSERT INTO Roles (RoleKey, RoleName, Description) VALUES
 (N'MANAGER', N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
@@ -206,35 +208,69 @@ INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
 (N'ORDER_PREPARE', N'Chuẩn bị món ăn', N'Đánh dấu món ăn đã sẵn sàng'),
 (N'PAYMENT_MANAGE', N'Thu ngân', N'Xử lý hóa đơn và thanh toán');
 
--- Thêm dữ liệu vào bảng RolePermissions
--- Admin (Toàn quyền) - RoleID = 4
+
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-SELECT 4, PermissionID, 1, 1, 1, 1 FROM Permissions;
+SELECT 4, Permissions.PermissionID, 1, 1, 1, 1 FROM Permissions;
 
--- Manager (RoleID = 1)
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(1, 1, 1, 1, 1, 1), -- ORDER_MANAGE
-(1, 2, 1, 1, 1, 1), -- MENU_MANAGE
-(1, 3, 1, 1, 1, 1), -- MENU_CATEGORY_MANAGE
-(1, 4, 1, 1, 1, 1), -- MENU_TAG_MANAGE
-(1, 5, 1, 1, 1, 1), -- TABLE_BOOKING_MANAGE
-(1, 6, 1, 1, 1, 1), -- TABLE_QR_MANAGE
-(1, 7, 1, 1, 1, 1), -- CUSTOMER_ACCOUNT_MANAGE
-(1, 10, 1, 0, 0, 0); -- VIEW_REPORT
 
--- Waiter (RoleID = 2)
+-- MANAGER - Quyền cao, trừ chuẩn bị món ăn
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(2, 1, 1, 1, 1, 0), -- ORDER_MANAGE
-(2, 5, 1, 1, 1, 0), -- TABLE_BOOKING_MANAGE
-(2, 2, 1, 0, 0, 0); -- MENU_MANAGE (chỉ xem)
+(1, 1, 1, 1, 1, 1),  -- ORDER_MANAGE
+(1, 2, 1, 1, 1, 1),  -- MENU_MANAGE
+(1, 3, 1, 1, 1, 1),  -- MENU_CATEGORY_MANAGE
+(1, 4, 1, 1, 1, 1),  -- MENU_TAG_MANAGE
+(1, 5, 1, 1, 1, 1),  -- TABLE_BOOKING_MANAGE
+(1, 6, 1, 1, 1, 1),  -- TABLE_QR_MANAGE
+(1, 7, 1, 1, 1, 1),  -- CUSTOMER_ACCOUNT_MANAGE
+(1, 8, 1, 1, 1, 1),  -- STAFF_ACCOUNT_MANAGE
+(1, 9, 1, 1, 1, 1),  -- ROLE_PERMISSION_MANAGE
+(1, 10, 1, 1, 1, 1), -- VIEW_REPORT
+(1, 11, 0, 0, 0, 0), -- ORDER_PREPARE
+(1, 12, 1, 1, 1, 1); -- PAYMENT_MANAGE
 
--- Chef (RoleID = 3)
+-- WAITER - Phục vụ khách, xử lý đơn và đặt bàn
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(3, 11, 1, 0, 1, 0); -- ORDER_PREPARE
+(2, 1, 1, 1, 1, 0),  -- ORDER_MANAGE
+(2, 2, 0, 0, 0, 0),
+(2, 3, 0, 0, 0, 0),
+(2, 4, 0, 0, 0, 0),
+(2, 5, 1, 1, 1, 0),  -- TABLE_BOOKING_MANAGE
+(2, 6, 0, 0, 0, 0),
+(2, 7, 0, 0, 0, 0),
+(2, 8, 0, 0, 0, 0),
+(2, 9, 0, 0, 0, 0),
+(2, 10, 0, 0, 0, 0),
+(2, 11, 0, 0, 0, 0),
+(2, 12, 0, 0, 0, 0);
 
--- Cashier (RoleID = 5)
+-- CHEF - Chỉ chuẩn bị món ăn
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(5, 1, 1, 0, 0, 0), -- ORDER_MANAGE (xem đơn hàng)
+(3, 1, 1, 0, 0, 0),  -- ORDER_MANAGE (để xem món cần nấu)
+(3, 2, 0, 0, 0, 0),
+(3, 3, 0, 0, 0, 0),
+(3, 4, 0, 0, 0, 0),
+(3, 5, 0, 0, 0, 0),
+(3, 6, 0, 0, 0, 0),
+(3, 7, 0, 0, 0, 0),
+(3, 8, 0, 0, 0, 0),
+(3, 9, 0, 0, 0, 0),
+(3, 10, 0, 0, 0, 0),
+(3, 11, 1, 1, 1, 0),  -- ORDER_PREPARE
+(3, 12, 0, 0, 0, 0);
+
+-- CASHIER - Chỉ xử lý thanh toán
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(5, 1, 1, 0, 0, 0),  -- ORDER_MANAGE (xem đơn để tính tiền)
+(5, 2, 0, 0, 0, 0),
+(5, 3, 0, 0, 0, 0),
+(5, 4, 0, 0, 0, 0),
+(5, 5, 0, 0, 0, 0),
+(5, 6, 0, 0, 0, 0),
+(5, 7, 0, 0, 0, 0),
+(5, 8, 0, 0, 0, 0),
+(5, 9, 0, 0, 0, 0),
+(5, 10, 1, 0, 0, 0), -- VIEW_REPORT
+(5, 11, 0, 0, 0, 0),
 (5, 12, 1, 1, 1, 0); -- PAYMENT_MANAGE
 
 DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
@@ -282,8 +318,6 @@ BEGIN
 END;
 
 -- Thêm dữ liệu vào bảng Users (Khách hàng)
-DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
-DECLARE @i INT = 1;
 SET @i = 1;
 DECLARE @CustomerCount INT = 100;
 
@@ -602,3 +636,4 @@ FROM Orders o;
 GO
 
 PRINT N'Đã tạo dữ liệu mẫu thành công!';
+
