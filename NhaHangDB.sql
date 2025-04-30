@@ -2,7 +2,22 @@
 
 USE RestaurantDB
 GO
-
+DROP TABLE IF EXISTS MenuItemAttributes;
+DROP TABLE IF EXISTS MenuItemRatings;
+DROP TABLE IF EXISTS MenuItemLabels;
+DROP TABLE IF EXISTS OrderDetails;
+DROP TABLE IF EXISTS Orders;
+DROP TABLE IF EXISTS Reservations;
+DROP TABLE IF EXISTS Tables;
+DROP TABLE IF EXISTS Areas;
+DROP TABLE IF EXISTS TrustedDevices;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS RolePermissions;
+DROP TABLE IF EXISTS Permissions;
+DROP TABLE IF EXISTS Roles;
+DROP TABLE IF EXISTS MenuItems;
+DROP TABLE IF EXISTS Categories;
+DROP TABLE IF EXISTS Labels;
 -- Tạo bảng Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
@@ -228,9 +243,8 @@ DECLARE @EmployeeCount INT = 20;
 
 WHILE @i <= @EmployeeCount
 BEGIN
-    INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status, RoleID, CreatedAt)
+    INSERT INTO Users (FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status, RoleID, CreatedAt)
     VALUES (
-        'employee' + CAST(@i AS VARCHAR(5)),
         CASE 
             WHEN @i % 5 = 0 THEN N'Nguyễn Văn ' + CHAR(64 + @i)
             WHEN @i % 5 = 1 THEN N'Trần Thị ' + CHAR(64 + @i)
@@ -277,9 +291,8 @@ WHILE @i <= @CustomerCount
 BEGIN
     DECLARE @CreatedDate DATETIME = DATEADD(DAY, -(RAND() * 60), GETDATE()); -- Ngẫu nhiên trong 60 ngày qua
     
-    INSERT INTO Users (Username, FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Status, CreatedAt)
+    INSERT INTO Users (FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Status, CreatedAt)
     VALUES (
-        'customer' + CAST(@i AS VARCHAR(5)),
         CASE 
             WHEN @i % 5 = 0 THEN N'Nguyễn Thị ' + CHAR(64 + (@i % 26))
             WHEN @i % 5 = 1 THEN N'Trần Văn ' + CHAR(64 + (@i % 26))
