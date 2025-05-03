@@ -51,7 +51,7 @@
                 } else {
                     toastr.success(data.message);
                     setTimeout(() => {
-                        window.location.href = "/User/TEMP"; // Trang Menu hoặc trang chủ
+                        window.location.href = "/Home/Index"; // Trang Menu hoặc trang chủ
                     }, 1500);
                 }
             } else {
