@@ -223,24 +223,44 @@
 
             <!-- Login Button / User Avatar -->
             <div class="login-container">
-                <div id="loginButton" class="login-btn">
-                    <a href="login.html" class="btn btn-outline-primary">
-                        <i class="bi bi-person"></i>
-                        <span>Đăng Nhập</span>
-                    </a>
-                </div>
+                @if (Context.Session.GetString("Email") != null)
+                {
+                    <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
 
-                <div id="userAvatar" class="user-avatar dropdown" style="display: none;">
-                    <img src="images/avatar.png" class="avatar-img dropdown-toggle" alt="User"
-                         data-bs-toggle="dropdown" aria-expanded="false">
-
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="account.html">Thông tin tài khoản</a></li>
-                        <li><a class="dropdown-item" href="reservations.html">Đơn Đặt Bàn</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" id="logoutBtn">Đăng Xuất</a></li>
-                    </ul>
-                </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
             </div>
 
 
