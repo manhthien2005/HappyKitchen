@@ -1,7 +1,4 @@
-
-﻿using Microsoft.AspNetCore.Mvc;
-
-﻿using HappyKitchen.Data;
+using HappyKitchen.Data;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-
 namespace HappyKitchen.Controllers
 {
     public class AdminController : Controller
     {
-        public IActionResult Dashboard() {  return View(); }
 
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
@@ -61,11 +56,6 @@ namespace HappyKitchen.Controllers
                 }
             }
 
-            return View();
-        }
-
-        public IActionResult BillManagement()
-        {
             return View();
         }
 
