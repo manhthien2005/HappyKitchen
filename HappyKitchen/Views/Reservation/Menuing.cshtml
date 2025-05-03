@@ -467,10 +467,10 @@
             <!-- Menu Tabs -->
             <div class="menu-tabs">
                 <button class="tab-button active" data-tab="all">Tất cả</button>
-                <button class="tab-button" data-tab="1">Món chính</button>
-                <button class="tab-button" data-tab="2">Món khai vị</button>
-                <button class="tab-button" data-tab="3">Đồ uống</button>
-                <button class="tab-button" data-tab="4">Món tráng miệng</button>
+                @foreach(var cate in Model.Categories)
+                {
+                    <button class="tab-button" data-tab="@cate.CategoryID">@cate.CategoryName</button>
+                }
             </div>
             <!-- Menu Items -->
             <div class="menu-items" id="menu-items-container">
