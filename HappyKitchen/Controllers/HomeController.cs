@@ -25,37 +25,58 @@ namespace HappyKitchen.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet]
-        public IActionResult GetCartSession()
-        {
-            string cartJson = HttpContext.Session.GetString("CartSession");
-            return Json(new { success = !string.IsNullOrEmpty(cartJson), data = cartJson });
-        }
 
         public IActionResult Index()
-        { // Lấy session
-          string cartJson = HttpContext.Session.GetString("CartSession"); Console.WriteLine($"Data retrieved from session: {cartJson}");
-          // Deserialize cartJson
-            var cartItems = new List<CartItem>();
+        {
+            // Lấy session
+            string cartJson = HttpContext.Session.GetString("CartSession");
+            Console.WriteLine($"DEBUG: Data retrieved from session: {cartJson ?? "null"}");
+
+            // Khởi tạo cartItems mặc định
+            DishCheckingViewModel cartItems = new DishCheckingViewModel
+            {
+                ReservationInformation = null,
+                CartItems = new List<CartItem>()
+            };
+
+            // Deserialize cartJson nếu tồn tại
             if (!string.IsNullOrEmpty(cartJson))
             {
                 try
                 {
-                    cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
-                    Console.WriteLine($"cartItems count: {cartItems.Count}");
-                    foreach (var item in cartItems)
+                    cartItems = JsonConvert.DeserializeObject<DishCheckingViewModel>(cartJson);
+                    Console.WriteLine($"DEBUG: Deserialized cartItems: {(cartItems != null ? $"CartItems count: {cartItems.CartItems?.Count ?? 0}" : "null")}");
+
+                    // Kiểm tra và khởi tạo CartItems nếu null
+                    if (cartItems != null && cartItems.CartItems == null)
                     {
-                        Console.WriteLine($"CartItem - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
+                        Console.WriteLine("DEBUG: CartItems is null, initializing to empty list");
+                        cartItems.CartItems = new List<CartItem>();
+                    }
+
+                    // Log chi tiết các CartItem
+                    if (cartItems?.CartItems != null)
+                    {
+                        foreach (var item in cartItems.CartItems)
+                        {
+                            Console.WriteLine($"DEBUG: CartItem - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Deserialize error: {ex.Message}");
+                    Console.WriteLine($"DEBUG: Deserialize error: {ex.Message}");
+                    // Giữ cartItems mặc định (rỗng) nếu deserialize thất bại
+                    cartItems = new DishCheckingViewModel
+                    {
+                        ReservationInformation = null,
+                        CartItems = new List<CartItem>()
+                    };
                 }
             }
             else
             {
-                Console.WriteLine("cartJson is null or empty");
+                Console.WriteLine("DEBUG: cartJson is null or empty, using default empty cart");
             }
 
             // Lấy danh sách bàn
@@ -65,7 +86,7 @@ namespace HappyKitchen.Controllers
             var viewModel = new HomeIndexViewModel
             {
                 Tables = tables,
-                CartItems = cartItems
+                Cart = cartItems
             };
 
             return View(viewModel);

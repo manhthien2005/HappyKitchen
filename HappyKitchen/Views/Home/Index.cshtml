@@ -161,6 +161,14 @@
                     </li>
 
                     <li class="navbar-item">
+                        <a href="#cart" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Giỏ hàng</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
                         <a href="#event" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
@@ -831,9 +839,17 @@
                             </p>
 
                             <div class="input-wrapper">
-                                <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field" required>
+                                @if (Model?.Cart?.ReservationInformation  == null)
+                                {
 
-                                <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" required>
+                                    <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field" required />
+                                    <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" required />
+                                }
+                                else
+                                {
+                                    <input type="text" name="name" value="@Model.Cart.ReservationInformation.CustomerName" placeholder="Họ & Tên" autocomplete="off" class="input-field" disabled required />
+                                    <input type="tel" name="phone" value="@Model.Cart.ReservationInformation.CustomerPhone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" disabled required />
+                                }
                             </div>
 
                             <div class="input-wrapper">
@@ -841,71 +857,143 @@
                                 <div class="icon-wrapper">
                                     <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                                    <select id="people" name="person" class="input-field" required>
-                                        <option value="" disabled selected>Chọn sức chứa</option>
-                                        <option value="1">1 Người</option>
-                                        <option value="2">2 Người</option>
-                                        <option value="3">3 Người</option>
-                                        <option value="4">4 Người</option>
-                                        <option value="5">5 Người</option>
-                                        <option value="6">6 Người</option>
-                                        <option value="7">7 Người</option>
-                                        <option value="8">8 Người</option>
-                                        <option value="9">9 Người</option>
-                                        <option value="10">10 người</option>
-                                      
-                                    </select>
+                                    @if (Model?.Cart?.ReservationInformation == null)
+                                    {
+                                        <select id="people" name="person" class="input-field" required>
+                                            <option value="" disabled selected>Chọn sức chứa</option>
+                                            @for (int i = 1; i <= 10; i++)
+                                            {
+                                                <option value="@i">@i Người</option>
+                                            }
+                                        </select>
+                                    }
+                                    else if (Model?.Cart != null)
+                                    {
+                                        <select id="people" name="person" class="input-field" disabled required>
+                                            <option value="" disabled>Chọn sức chứa</option>
+                                            @for (int i = 1; i <= 10; i++)
+                                            {
+                                                if (Model.Cart.ReservationInformation.Capacity == i)
+                                                {
+                                                    <option value="@i" selected>@i Người</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i Người</option>
+                                                }
+                                            }
+                                        </select>
+                                    }
 
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                                 </div>
 
-                                <div class="icon-wrapper">
-                                    <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <div class="icon-wrapper">
+                                        <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
 
-                                    <input type="text" id="reservationDate" name="reservationDate" class="input-field" placeholder="Chọn ngày giờ">
+                                        <input type="text" id="reservationDate" name="reservationDate" class="input-field" placeholder="Chọn ngày giờ">
 
-                                    <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
-                                </div>
+                                        <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="icon-wrapper">
+                                        <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+                                        <input type="text" id="reservationDate" name="reservationDate" value="@Model.Cart.ReservationInformation.ReservationTime.ToString("dd/MM/yyyy HH:mm")" class="input-field" placeholder="Chọn ngày giờ" disabled required />
+                                        <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                                    </div>
+                                }
 
                                 <div class="icon-wrapper">
                                     <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
-
-                                    <select id="duration" name="duration" class="input-field" required>
-                                        <option value="" disabled selected>Chọn thời lượng</option>
-                                        <option value="1">1 giờ</option>
-                                        <option value="2">2 giờ</option>
-                                        <option value="3">3 giờ</option>
-                                        <option value="4">4 giờ</option>
-
-
-                                    </select>
+                                    
+                                    @if (Model?.Cart?.ReservationInformation == null)
+                                    {
+                                        <select id="duration" name="duration" class="input-field" required>
+                                            <option value="" disabled selected>Chọn thời lượng</option>
+                                            <option value="1">1 giờ</option>
+                                            <option value="2">2 giờ</option>
+                                            <option value="3">3 giờ</option>
+                                            <option value="4">4 giờ</option>
+                                        </select>
+                                    }
+                                    else if (Model?.Cart != null)
+                                    {
+                                        <select id="duration" name="duration" class="input-field" disabled required>
+                                            <option value="" disabled>Chọn thời lượng</option>
+                                            @for (int i = 1; i <= 4; i++)
+                                            {
+                                                if (Model.Cart.ReservationInformation.Duration == i)
+                                                {
+                                                    <option value="@i" selected>@i giờ</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i giờ</option>
+                                                }
+                                            }
+                                        </select>
+                                    }
 
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                                 </div>
 
-                                
 
-                            </div> 
+
+                            </div>
 
                             <div class="icon-wrapper">
                                 <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
 
-                                <select id="table" name="table" class="input-field" required>
-                                    <option value="" disabled selected>Chọn bàn</option>
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <select id="table" name="table" class="input-field" required>
+                                        <option value="" disabled selected>Chọn bàn</option>
 
+                                    </select>
+                                }
+                                else if (Model?.Cart != null)
+                                {
+                                    <select id="table" name="table" class="input-field" disabled required>
+                                        <option value="" disabled>Chọn bàn</option>
+                                        @foreach (var table in Model?.Tables ?? new List<Table>())
+                                        {
+                                            if (Model.Cart.ReservationInformation.TableID == table.TableID)
+                                            {
+                                                <option value="@table.TableID" selected>@table.TableName</option>
+                                            }
 
-                                </select>
+                                        }
+                                    </select>
+                                }
 
                                 <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                             </div>
 
-                            <textarea name="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
+                            @if (Model?.Cart?.ReservationInformation == null)
+                            {
+                                <textarea name="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
 
-                            <button type="submit" class="btn btn-secondary">
-                                <span class="text text-1">Đặt Bàn</span>
+                                <button type="submit" class="btn btn-secondary">
+                                    <span class="text text-1">Đặt Bàn</span>
 
-                                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
-                            </button>
+                                    <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+                                </button>
+                            }
+                            else if (Model?.Cart != null)
+                            {
+                                <textarea name="message" class="input-field" readonly>@Model.Cart.ReservationInformation.Notes</textarea>
+
+                                <a href="#cart" class="btn btn-secondary">
+                                    <span class="text text-1" style="text-align: center;">Trở lại giỏ hàng</span>
+
+                                    <span class="text text-2" aria-hidden="true">Trở lại giỏ hàng</span>
+                                </a>
+                            }
+                            
 
                         </form>
 
@@ -1201,7 +1289,7 @@
                     }
                 }   
             </style>
-            <section class="section event bg-black-10" aria-label="event" id="event">
+            <section class="section event bg-black-10" aria-label="event" id="cart">
                 <div class="container">
 
                     <p class="section-subtitle label-2 text-center">Cập Nhật Mới</p>
@@ -1504,56 +1592,90 @@
             minDate: new Date(),
         });
 
-        @{
-            var cartItemsJson = Json.Serialize(
-            Model?.CartItems?.Select(item => new
+        const cartData = @Html.Raw(
+            Model?.Cart != null
+            ? Json.Serialize(new
             {
-                MenuItemID = item.MenuItemID,
-                Quantity = item.Quantity
-            }) ?? Enumerable.Empty<object>()
+                ReservationInformation = Model.Cart.ReservationInformation,
+                CartItems = Model.Cart.CartItems.Select(item => new
+                {
+                    MenuItemID = item.MenuItemID,
+                    Quantity = item.Quantity
+                        }).ToList()
+                    })
+                    : "{}"
             );
-        }
-
-        const cartItems = @Html.Raw(
-            Model?.CartItems != null
-            ? Json.Serialize(Model.CartItems.Select(item => new
-            {
-                MenuItemID = item.MenuItemID,
-                Quantity = item.Quantity
-            }))
-            : "[]"
-            );
-
         function buildCartJson() {
-            let selectedJson = JSON.stringify(cartItems);
-            console.log("Cart JSON gửi lên:", selectedJson);
+            console.log("DEBUG: Bắt đầu buildCartJson");
+
+
+            // Log dữ liệu
+            console.log("DEBUG: cartData trước khi stringify:", cartData);
+
+            let cartInfoJson;
+            try {
+                cartInfoJson = JSON.stringify(cartData);
+                console.log("DEBUG: Cart JSON gửi lên:", cartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi stringify JSON:", error.message);
+                return JSON.stringify({ ReservationInformation: {}, CartItems: [] });
+            }
+
+            return cartInfoJson;
         }
 
         function submitCartToDishChecking() {
-            const selectedJson = buildCartJson();
+            console.log("DEBUG: Bắt đầu submitCartToDishChecking");
+
+            const cartInfoJson = buildCartJson();
+
+            // Kiểm tra nếu JSON rỗng
+            if (cartInfoJson === JSON.stringify({ ReservationInformation: {}, CartItems: [] })) {
+                console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng kiểm tra.");
+                return;
+            }
+
             const url = '@Url.Action("DishChecking", "Reservation")';
+            console.log("DEBUG: URL yêu cầu:", url);
 
             fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json'
                 },
-                body: `SelectedItemsJson=${encodeURIComponent(selectedJson)}`
+                body: cartInfoJson
             })
                 .then(response => {
+                    console.log("DEBUG: Phản hồi từ server - Status:", response.status, "OK:", response.ok);
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        return response.text().then(errorText => {
+                            console.error("DEBUG: Nội dung lỗi từ server:", errorText);
+                            throw new Error(errorText || `Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                        });
                     }
                     return response.text();
                 })
                 .then(html => {
+                    if (!html || html.trim() === "") {
+                        console.error("DEBUG: Phản hồi HTML rỗng hoặc không hợp lệ");
+                        alert("Không nhận được nội dung hợp lệ từ server.");
+                        return;
+                    }
+                    if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {
+                        console.error("DEBUG: Phản hồi không phải HTML:", html);
+                        alert("Phản hồi từ server không phải trang HTML hợp lệ.");
+                        return;
+                    }
+                    console.log("DEBUG: Nhận được HTML, bắt đầu tải view");
                     document.open();
                     document.write(html);
                     document.close();
+                    console.log("DEBUG: View đã được tải");
                 })
                 .catch(error => {
-                    console.error("Lỗi khi gửi JSON:", error);
-                    alert("Có lỗi xảy ra khi gửi dữ liệu. Vui lòng thử lại.");
+                    console.error("DEBUG: Lỗi khi gửi JSON:", error.message);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
                 });
         }
 
@@ -1591,7 +1713,7 @@
         // Sample order data (simulating items already chosen)
         const orderItems = [
 
-            @foreach (var item in Model?.CartItems ?? new List<CartItem>())
+        @foreach (var item in Model ?.Cart.CartItems ?? new List<CartItem>())
             {
                 <text>
                     {
@@ -1666,6 +1788,8 @@
                 alert('Tiến hành thanh toán');
             });
         });
+
+
     </script>
 
     <!--
@@ -1674,6 +1798,7 @@
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <script src="assets/js/section.js"></script>
+
 </body>
 
 </html>

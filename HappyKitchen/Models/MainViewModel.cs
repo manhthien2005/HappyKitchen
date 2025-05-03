@@ -351,7 +351,7 @@ namespace HappyKitchen.Models
     public class HomeIndexViewModel
     {
         public List<Table> Tables { get; set; }
-        public List<CartItem> CartItems { get; set; }
+        public DishCheckingViewModel Cart { get; set; }
     }
 
     public class MenuViewModel
@@ -360,6 +360,15 @@ namespace HappyKitchen.Models
         public List<Category> Categories { get; set; }
     }
 
+    public class DishCheckingViewModel
+    {
+        public Reservation ReservationInformation { get; set; }
+        // Danh sách món ăn trong giỏ
+        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
+
+        // Tổng giá của giỏ hàng
+        public decimal TotalPrice => CartItems.Sum(item => item.TotalPrice);
+    }
 
     // Cart Model 
 
@@ -375,13 +384,6 @@ namespace HappyKitchen.Models
         public decimal TotalPrice => MenuItem != null ? MenuItem.Price * Quantity : 0;
     }
 
-    public class Cart
-    {
-        // Danh sách món ăn trong giỏ
-        public List<CartItem> Items { get; set; } = new List<CartItem>();
-
-        // Tổng giá của giỏ hàng
-        public decimal TotalPrice => Items.Sum(item => item.TotalPrice);
-    }
+    
 
 }

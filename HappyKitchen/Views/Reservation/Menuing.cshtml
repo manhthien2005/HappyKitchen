@@ -490,10 +490,9 @@
 
             <!-- Navigation Buttons -->
             <div class="navigation-buttons">
-                <form id="menu-form" action="@Url.Action("DishChecking")" method="post">
-                    <input type="hidden" id="SelectedItemsJson" name="SelectedItemsJson">
-                    <button class="back-button" type="submit">TRỞ LẠI</button>
-                    <button class="next-button" type="submit" onclick="buildCartJson()">TIẾP THEO</button>
+                <form id="menu-form" onsubmit="event.preventDefault(); submitCartToDishChecking();">
+                    <button class="back-button" type="button" onclick="goBack()">TRỞ LẠI</button>
+                    <button class="next-button" type="submit">TIẾP THEO</button>
                 </form>
             </div>
         </div>
@@ -514,6 +513,8 @@
         let totalPrice = 0;
         let activeTab = "all";
 
+        
+
         // Menu items data
         const menuItems = [
         @foreach (var cate in Model?.Categories ?? new List<Category>())
@@ -533,19 +534,125 @@
                 </text>
             }
         }
-            ];
+        ];
 
-        //Add quantity to JSON
+        function goBack() {
+            // Logic quay lại trang trước, ví dụ:
+            window.history.back();
+        }
+
         function buildCartJson() {
-            const cart = selectedItems.map(item => ({
+            // Debug: Bắt đầu hàm
+            console.log("DEBUG: Bắt đầu buildCartJson");
+
+            // Debug: Kiểm tra Model và ReservationInformation
+            let reservationInfo;
+            try {
+                reservationInfo = @Html.Raw(Model != null && Model.ReservationInformation != null ? Json.Serialize(Model.ReservationInformation) : "{}") || {};
+                console.log("DEBUG: reservationInfo sau khi gán:", reservationInfo);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi gán reservationInfo:", error.message);
+                reservationInfo = {};
+            }
+
+
+
+            // Debug: Tạo cartItems
+            const cartItems = selectedItems.map(item => ({
                 MenuItemID: item.id,
                 Quantity: quantities[item.id] || 0
             }));
-            let selectedJson = JSON.stringify(cart);
-            console.log("Cart JSON gửi lên:", selectedJson);
-            document.getElementById("SelectedItemsJson").value = selectedJson;
+
+            // Debug: Kiểm tra cartItems sau khi tạo
+            console.log("DEBUG: cartItems sau khi lọc:", cartItems);
+
+            // Tạo JSON kết hợp
+            const combinedJson = {
+                ReservationInformation: reservationInfo,
+                CartItems: cartItems
+            };
+
+            // Debug: Kiểm tra JSON cuối cùng
+            console.log("DEBUG: combinedJson trước khi stringify:", combinedJson);
+
+            let cartInfoJson;
+            try {
+                cartInfoJson = JSON.stringify(combinedJson);
+                console.log("DEBUG: Cart JSON gửi lên:", cartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi stringify JSON:", error.message);
+                cartInfoJson = JSON.stringify({ ReservationInformation: {}, CartItems: [] });
+            }
+
+            return cartInfoJson;
         }
 
+        function submitCartToDishChecking() {
+            console.log("DEBUG: Bắt đầu submitCartToDishChecking");
+
+            let CartInfoJson;
+            try {
+                CartInfoJson = buildCartJson();
+                console.log("DEBUG: CartInfoJson từ buildCartJson:", CartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi trong buildCartJson:", error.message);
+                alert("Lỗi khi tạo dữ liệu gửi đi: " + error.message);
+                return;
+            }
+
+            if (CartInfoJson === JSON.stringify({ ReservationInformation: {}, CartItems: [] })) {
+                console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng điền thông tin.");
+                return;
+            }
+
+            const url = '@Url.Action("DishChecking", "Reservation")';
+            console.log("DEBUG: URL yêu cầu:", url);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: CartInfoJson
+            })
+                .then(response => {
+                    console.log("DEBUG: Phản hồi từ server - Status:", response.status, "OK:", response.ok);
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            console.error("DEBUG: Nội dung lỗi từ server:", errorText);
+                            try {
+                                const errorJson = JSON.parse(errorText);
+                                throw new Error(errorJson.message || errorText);
+                            } catch {
+                                throw new Error(errorText || `Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                            }
+                        });
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (!html || html.trim() === "") {
+                        console.error("DEBUG: Phản hồi HTML rỗng hoặc không hợp lệ");
+                        alert("Không nhận được nội dung hợp lệ từ server.");
+                        return;
+                    }
+                    if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {
+                        console.error("DEBUG: Phản hồi không phải HTML:", html);
+                        alert("Phản hồi từ server không phải trang HTML hợp lệ.");
+                        return;
+                    }
+                    console.log("DEBUG: Nhận được HTML, bắt đầu tải view");
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    console.log("DEBUG: View đã được tải");
+                })
+                .catch(error => {
+                    console.error("DEBUG: Lỗi khi gửi JSON:", error.message);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+                });
+        }
         // Format price with thousand separators
         function formatPrice(price) {
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");

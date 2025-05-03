@@ -2,7 +2,7 @@
     Layout = null;
 }
 
-@model Cart
+@model DishCheckingViewModel
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -294,8 +294,8 @@
 
     <main class="container">
         <div class="order-items">
-            <h2 class="order-title">Đơn hàng (@Model.Items.Count() sản phẩm)</h2>
-            @foreach(var item in Model.Items)
+            <h2 class="order-title">Đơn hàng (@Model.CartItems.Count() sản phẩm)</h2>
+            @foreach (var item in Model.CartItems)
             {
                 <div class="order-item">
                     <img src="/images/MenuItem/@item.MenuItem.MenuItemImage?height=80&width=80" alt="@item.MenuItem.Name">
@@ -378,7 +378,7 @@
                 discountInput.value = '';
             }
         });
-
+        console.log("DEBUG: cartItems sau khi lọc:", @Model.CartItems);
         // Add payment method handling
         const paymentOptions = document.querySelectorAll('input[name="payment"]');
         paymentOptions.forEach(option => {

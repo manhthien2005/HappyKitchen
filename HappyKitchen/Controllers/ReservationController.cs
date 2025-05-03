@@ -69,41 +69,31 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DishChecking(string SelectedItemsJson)
+        public async Task<IActionResult> DishChecking([FromBody] DishCheckingViewModel viewModel)
         {
-            // Debug dữ liệu đầu vào
-            Console.WriteLine($"SelectedItemsJson received: {SelectedItemsJson}");
+            if (viewModel == null || viewModel.CartItems == null)
+            {
+                Console.WriteLine("ViewModel is null or invalid");
+                return BadRequest("Dữ liệu JSON không hợp lệ.");
+            }
 
-            var selectedList = JsonConvert.DeserializeObject<List<CartItem>>(SelectedItemsJson);
+            Console.WriteLine($"Deserialized list count: {viewModel.CartItems?.Count ?? 0}");
 
-            // Debug sau khi deserialize
-            Console.WriteLine($"Deserialized list count: {selectedList?.Count ?? 0}");
-
-            foreach (var item in selectedList)
+            foreach (var item in viewModel.CartItems)
             {
                 item.MenuItem = _context.MenuItems.FirstOrDefault(m => m.MenuItemID == item.MenuItemID);
-                // Debug từng item
                 Console.WriteLine($"Item processed - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
             }
 
-            var dishPayingView = new Cart
-            {
-                Items = selectedList,
-            };
+            string jsonString = JsonConvert.SerializeObject(viewModel);
+            HttpContext.Session.SetString("CartSession", jsonString);
 
-            // Serialize và lưu vào session
-            string serializedList = JsonConvert.SerializeObject(selectedList);
-            HttpContext.Session.SetString("CartSession", serializedList);
-
-            // Debug sau khi lưu vào session
-            Console.WriteLine($"Data saved to session: {serializedList}");
-
-            // Verify lại từ session
+            Console.WriteLine($"Data saved to session: {jsonString}");
             string sessionData = HttpContext.Session.GetString("CartSession");
             Console.WriteLine($"Data retrieved from session: {sessionData}");
-            Console.WriteLine($"Session save successful: {string.Equals(serializedList, sessionData)}");
+            Console.WriteLine($"Session save successful: {string.Equals(jsonString, sessionData)}");
 
-            return View(dishPayingView);
+            return View(viewModel);
         }
     }
     
