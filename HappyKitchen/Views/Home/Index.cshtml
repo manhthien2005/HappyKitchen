@@ -1346,17 +1346,30 @@
                                 </div>
                             </div>
                         </div>
+                        @if (Model?.Cart?.ReservationInformation == null)
+                        {
+                            <div class="action-buttons">
+                                <a href="#booking" class="btn btn-primary ">
+                                    <span class="text text-">Tiến hành đặt bàn</span>
+                                    <span class="text text-2" aria-hidden="true">Tiến hành đặt bàn</span>
+                                </a>
 
-                        <div class="action-buttons">
-                            <a href="#" class="btn btn-primary back-button">
-                                <span class="text text-">Quay lại thực đơn</span>
-                                <span class="text text-2" aria-hidden="true">Quay lại thực đơn</span>
-                            </a>
-                            <a href="javascript:void(0)" onclick="submitCartToDishChecking()" class="btn btn-secondary proceed-button">
-                                <span class="text text-1">Tiếp tục thanh toán</span>
-                                <span class="text text-2" aria-hidden="true">Tiếp tục thanh toán</span>
-                            </a>
-                        </div>
+                            </div>
+                        }
+                        else if (Model?.Cart != null)
+                        {
+                            <div class="action-buttons">
+                                <a href="#" class="btn btn-primary back-button">
+                                    <span class="text text-">Quay lại thực đơn</span>
+                                    <span class="text text-2" aria-hidden="true">Quay lại thực đơn</span>
+                                </a>
+                                <a href="javascript:void(0)" onclick="submitCartToDishChecking()" class="btn btn-secondary proceed-button">
+                                    <span class="text text-1">Tiếp tục thanh toán</span>
+                                    <span class="text text-2" aria-hidden="true">Tiếp tục thanh toán</span>
+                                </a>
+                            </div>
+                        }
+                        
                     </div>
 
                 </div>
