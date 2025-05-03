@@ -1,0 +1,91 @@
+﻿@{
+    Layout = null;
+}
+
+@model EmployeeRegister
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Happy Kitchen - Đăng Ký</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css" href="~/css/signup.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row px-3">
+            <div class="col-lg-10 col-xl-9 card flex-row mx-auto px-0">
+                <div class="img-left d-none d-md-flex"></div>
+
+                <div class="card-body">
+                    <h4 class="title text-center mt-4">
+                        Đăng Ký Tài Khoản
+                    </h4>
+                    <form method="post" class="form-box px-3">
+                        <div class="form-input">
+                            <span><i class="fa fa-user-circle-o"></i></span>
+                            <input type="text" id="fullName" asp-for="FullName" placeholder="Họ và tên" maxlength="60" required>
+                        </div>
+                        <span asp-validation-for="FullName" id="nameError" class="text-danger"></span>
+
+                        <div class="form-input">
+                            <span><i class="fa fa-phone"></i></span>
+                            <input type="tel" id="phoneNumber" asp-for="PhoneNumber" placeholder="Số điện thoại" maxlength="10" required>
+                        </div>
+                        <span asp-validation-for="PhoneNumber" id="phoneError" class="text-danger"></span>
+
+                        <div class="form-input">
+                            <span><i class="fa fa-envelope-o"></i></span>
+                            <input type="email" asp-for="Email" id="email" placeholder="Email" required>
+                        </div>
+                        <span asp-validation-for="Email" id="emailError" class="text-danger"></span>
+
+                        <div class="form-input">
+                            <span><i class="fa fa-key"></i></span>
+                            <input type="password" asp-for="Password" id="password" placeholder="Mật khẩu" required>
+                            <span class="toggle-password" onclick="togglePassword('password')">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                        <span asp-validation-for="Password" id="passError" class="text-danger"></span>
+
+                        <div class="form-input">
+                            <span><i class="fa fa-key"></i></span>
+                            <input type="password" asp-for="ConfirmPassword" id="confirm-password" placeholder="Nhập lại mật khẩu" required>
+                            <span class="toggle-password" onclick="togglePassword('confirm-password')">
+                                <i class="fa fa-eye"></i>
+                            </span>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" id="confirm-passError" class="text-danger"></span>
+
+
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-block text-uppercase">Đăng Ký</button>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center mb-2">
+                            Đã có tài khoản?
+                            <a href="@Url.Action("Login", "User")" class="register-link">Đăng Nhập Ngay</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <img src="~/images/shape-5.png" width="921" height="1036" loading="lazy" alt="shape"
+             class="shape shape-1 move-anim">
+        <img src="~/images/shape-2.png" width="343" height="345" loading="lazy" alt="shape"
+             class="shape shape-2 move-anim">
+        <img src="/images/shape-4.png" width="179" height="359" loading="lazy" alt="" class="shape shape-3 move-anim">
+    </div>
+    <script src="~/js/User/SignUp/signup.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+</body>
+</html>

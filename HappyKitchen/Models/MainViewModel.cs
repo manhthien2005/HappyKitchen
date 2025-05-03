@@ -296,6 +296,14 @@ namespace HappyKitchen.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public string RecaptchaToken { get; set; }
+        public bool RememberMe { get; set; }
+    }
+
+    public class UserLogin
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string RecaptchaToken { get; set; }
     }
 
     public class EmployeeRegister
@@ -317,9 +325,29 @@ namespace HappyKitchen.Models
         public string ConfirmPassword { get; set; }
     }
 
+    public class UserRegister
+    {
+        [Required, MaxLength(60)]
+        public string FullName { get; set; }
+
+        [Required, MaxLength(10)]
+        public string PhoneNumber { get; set; }
+
+        [MaxLength(100)]
+        [EmailAddress]
+        public string Email { get; set; }
+
+        [Required, MinLength(6)]
+        public string Password { get; set; }
+
+        [Required, Compare("Password", ErrorMessage = "Mật khẩu nhập lại không khớp.")]
+        public string ConfirmPassword { get; set; }
+    }
+
     public class OTPModel
     {
         public string OTPCode { get; set; }
+        public bool RememberMe { get; set; }
     }
 
     public class OTPPasswordModel
@@ -346,6 +374,13 @@ namespace HappyKitchen.Models
         public int UserID { get; set; } // ID của người dùng
         public string DeviceToken { get; set; } // Token định danh duy nhất cho thiết bị
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class CommentRequestModel
+    {
+        public int MenuItemId { get; set; }
+        public int Rating { get; set; }
+        public string Comment { get; set; }
     }
 
     public class HomeIndexViewModel
@@ -385,5 +420,6 @@ namespace HappyKitchen.Models
     }
 
     
+
 
 }
