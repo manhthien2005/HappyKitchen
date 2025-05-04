@@ -23,42 +23,60 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Menuing(string name, string phone, int table, int person, DateTime reservationDate, int duration, string message)
+        public async Task<IActionResult> Menuing([FromBody] DishCheckingViewModel cartInfoJson)
         {
-            var selectTable = await _context.Tables
-                .Where(c => c.TableID == table)
-                .FirstOrDefaultAsync();
-            var reservation = new Reservation
+            // Kiểm tra dish hoặc ReservationInformation có null không
+            if (cartInfoJson == null )
             {
-                CustomerName = name,
-                CustomerPhone = phone,
-                TableID = table,
-                Capacity = person,
-                ReservationTime = reservationDate,
-                Duration = duration,
-                Notes = message,
-                Status = 1,
-                Table = selectTable
+                
+                return BadRequest("Dữ liệu đặt bàn không hợp lệ.");
+            }
 
-            };
+            Console.WriteLine("alooooooo", cartInfoJson.ReservationInformation);
 
+            // Lấy danh sách danh mục món ăn
             var categories = await _context.Categories
                 .Include(c => c.MenuItems)
                 .Where(c => c.MenuItems.Any(m => m.Status == 1))
                 .ToListAsync();
 
-            _context.Reservations.Add(reservation);
-            _context.SaveChanges();
+            // Kiểm tra bàn được chọn
+            var selectTable = await _context.Tables
+                .Where(c => c.TableID == cartInfoJson.ReservationInformation.TableID)
+                .FirstOrDefaultAsync();
 
-            reservation.Table = selectTable;
+            if (selectTable == null)
+            {
+                return BadRequest("Bàn được chọn không tồn tại.");
+            }
+            cartInfoJson.ReservationInformation.Table = selectTable;
+            // Kiểm tra xem đặt bàn đã tồn tại chưa
+            var existingReservation = await _context.Reservations
+                .FirstOrDefaultAsync(r =>
+                    r.CustomerPhone == cartInfoJson.ReservationInformation.CustomerPhone &&
+                    r.ReservationTime == cartInfoJson.ReservationInformation.ReservationTime &&
+                    r.TableID == cartInfoJson.ReservationInformation.TableID);
 
+
+
+            // Nếu chưa tồn tại, thêm mới vào database
+            if (existingReservation == null)
+            {
+                _context.Reservations.Add(cartInfoJson.ReservationInformation);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                // Có thể ghi log hoặc xử lý thêm nếu cần
+                Console.WriteLine("Đặt bàn đã tồn tại, không thêm mới.");
+            }
+
+            // Tạo view model để trả về
             var menuView = new MenuViewModel
             {
-                ReservationInformation = reservation,
+                Cart = cartInfoJson,
                 Categories = categories
             };
-
-
 
             return View(menuView);
         }

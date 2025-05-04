@@ -391,7 +391,7 @@ namespace HappyKitchen.Models
 
     public class MenuViewModel
     {
-        public Reservation ReservationInformation { get; set; }
+        public DishCheckingViewModel Cart { get; set; }
         public List<Category> Categories { get; set; }
     }
 

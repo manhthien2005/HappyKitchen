@@ -36,11 +36,11 @@
         <div class="sidebar">
             <h2>Thông tin đặt bàn</h2>
             <div class="booking-info">
-                <p>Họ tên: @(Model?.ReservationInformation?.CustomerName ?? "")</p>
-                <p>Số điện thoại: @(Model?.ReservationInformation?.CustomerPhone ?? "")</p>
-                <p>Thời gian đặt bàn: @(Model?.ReservationInformation?.ReservationTime != null ? Model.ReservationInformation.ReservationTime.ToString("dd/MM/yyyy HH:mm") : "")</p>
-                <p>Số người: @(Model?.ReservationInformation?.Table?.TableName ?? "Chưa có bàn") - @(Model?.ReservationInformation?.Table?.Capacity ?? 0) người</p>
-                <p>Ghi chú: @(Model?.ReservationInformation?.Notes ?? "")</p>
+                <p>Họ tên: @(Model?.Cart?.ReservationInformation?.CustomerName ?? "")</p>
+                <p>Số điện thoại: @(Model?.Cart?.ReservationInformation?.CustomerPhone ?? "")</p>
+                <p>Thời gian đặt bàn: @(Model?.Cart?.ReservationInformation?.ReservationTime != null ? Model.Cart.ReservationInformation.ReservationTime.ToString("dd/MM/yyyy HH:mm") : "")</p>
+                <p>Số người: @(Model?.Cart?.ReservationInformation?.Table?.TableName ?? "Chưa có bàn") - @(Model?.Cart?.ReservationInformation?.Table?.Capacity ?? 0) người</p>
+                <p>Ghi chú: @(Model?.Cart?.ReservationInformation?.Notes ?? "")</p>
             </div>
         </div>
 
@@ -133,7 +133,7 @@
             // Debug: Kiểm tra Model và ReservationInformation
             let reservationInfo;
             try {
-                reservationInfo = @Html.Raw(Model != null && Model.ReservationInformation != null ? Json.Serialize(Model.ReservationInformation) : "{}") || {};
+                reservationInfo = @Html.Raw(Model != null && Model.Cart.ReservationInformation != null ? Json.Serialize(Model.Cart.ReservationInformation) : "{}") || {};
                 console.log("DEBUG: reservationInfo sau khi gán:", reservationInfo);
             } catch (error) {
                 console.error("DEBUG: Lỗi khi gán reservationInfo:", error.message);
@@ -243,6 +243,7 @@
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
+
         // Update quantity and selected items
         function updateQuantity(itemId, amount) {
             const currentQuantity = quantities[itemId] || 0;
@@ -264,7 +265,6 @@
             updateSelectedItemsDisplay();
             updateTotalPrice();
             printDish();
-
         }
 
         function printDish() {
@@ -303,7 +303,6 @@
             return groupedItems;
         }
 
-        // Update selected items display
         function updateSelectedItemsDisplay() {
             const selectedItemsContainer = document.getElementById('selected-items-container');
 
@@ -343,7 +342,7 @@
                         <tr>
                             <td>
                                 <div class="selected-item-image">
-                                        <img src="/images/MenuItem/${item.image}" alt="${item.name}" >
+                                    <img src="/images/MenuItem/${item.image}" alt="${item.name}" >
                                 </div>
                                 ${item.name}
                             </td>
@@ -453,8 +452,46 @@
             });
         }
 
-        // Initialize the application
+        // Initialize the application with model data
         function init() {
+            // Log để kiểm tra menuItems
+            console.log("DEBUG: menuItems:", menuItems);
+
+            // Load cart items from model
+            const cartItemsFromModel = @Html.Raw(Model?.Cart?.CartItems != null ? Json.Serialize(Model.Cart.CartItems) : "[]");
+            console.log("DEBUG: typeof cartItemsFromModel:", typeof cartItemsFromModel);
+            console.log("DEBUG: cartItemsFromModel:", cartItemsFromModel);
+
+            // Kiểm tra xem cartItemsFromModel có phải mảng không
+            if (!Array.isArray(cartItemsFromModel)) {
+                console.error("DEBUG: cartItemsFromModel không phải mảng:", cartItemsFromModel);
+                return;
+            }
+
+            cartItemsFromModel.forEach(cartItem => {
+                // Log để kiểm tra từng cartItem
+                console.log("DEBUG: cartItem:", cartItem);
+                console.log("DEBUG: cartItem keys:", Object.keys(cartItem));
+
+                // Chuyển đổi kiểu để so sánh
+                const menuItem = menuItems.find(item => String(item.id) === String(cartItem.menuItemID));
+                console.log("DEBUG: menuItem:", menuItem);
+
+                if (menuItem && cartItem.quantity > 0) {
+                    quantities[menuItem.id] = cartItem.quantity;
+
+                    if (!selectedItems.some(i => String(i.id) === String(menuItem.id))) {
+                        console.log("DEBUG: cart:", cartItem.menuItemID);
+                        console.log("DEBUG: cart qty:", cartItem.quantity);
+                        console.log("DEBUG: Trước khi push - selectedItems:", selectedItems);
+                        selectedItems.push(menuItem);
+                        console.log("DEBUG: Sau khi push - selectedItems:", selectedItems);
+                    }
+                } else {
+                    console.warn("DEBUG: Không tìm thấy menuItem hoặc quantity không hợp lệ:", cartItem);
+                }
+            });
+
             renderMenuItems();
             initTabs();
             initScrollToTop();
