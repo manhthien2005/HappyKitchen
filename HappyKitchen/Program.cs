@@ -21,6 +21,15 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IMenuItemService, MenuItemService>(); 
+builder.Services.AddScoped<ICategoryService, CategoryService>(); 
+builder.Services.AddScoped<IQRCodeService, QRCodeService>(); 
+builder.Services.AddScoped<ITableService, TableService>(); 
+builder.Services.AddScoped<IAreaTableService, AreaTableService>();
+builder.Services.AddScoped<IPosService, PosService>();
 
 var app = builder.Build();
 

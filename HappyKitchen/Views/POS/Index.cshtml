@@ -1,0 +1,131 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen POS";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/pos.css">
+}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Hệ thống Đặt món (POS)</h1>
+    <p>Quản lý đơn hàng nhà hàng</p>
+</div>
+
+<!-- POS Management Content -->
+<div class="pos-management-container">
+    <!-- Table, Customer, and Payment Selection -->
+    <div class="selection-bar mb-3">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <select class="form-select" id="tableSelect">
+                    <option value="0">Chọn bàn...</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <div class="customer-search-container">
+                    <input type="text" class="form-control" id="customerSearchInput" placeholder="Tìm khách hàng...">
+                    <input type="hidden" id="customerIdInput" value="0">
+                    <div class="customer-search-results" id="customerSearchResults"></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="paymentMethodSelect">
+                    <option value="cash">Tiền mặt</option>
+                    <option value="card">Thẻ</option>
+                    <option value="mobile">Thanh toán di động</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-end">
+                <button class="btn btn-success btn-lg" id="submitOrderBtn" disabled>
+                    <i class="fas fa-check me-2"></i> Đặt món
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items and Order -->
+    <div class="row g-3">
+        <!-- Menu Items -->
+        <div class="col-lg-8">
+            <div class="pos-container">
+                <div class="row g-3 mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" id="menuItemSearchInput"
+                                placeholder="Tìm món ăn...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select" id="categoryFilter">
+                            <option value="0">Tất cả danh mục</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="menu-items-grid">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="menuItemsGrid"></div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container mt-4">
+                    <nav aria-label="Menu items pagination">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <li class="page-item disabled" id="paginationPrev">
+                                <a class="page-link" href="#" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <div class="d-flex" id="paginationItems">
+                                <!-- Các số trang sẽ được thêm vào đây bằng JavaScript -->
+                            </div>
+                            <li class="page-item" id="paginationNext">
+                                <a class="page-link" href="#" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="order-summary">
+                <h5>Giỏ hàng</h5>
+                <div class="order-items" id="orderItems"></div>
+                <div class="order-total">
+                    <strong>Tổng cộng: <span id="orderTotal">0 đ</span></strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Order Modal -->
+<div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-labelledby="confirmOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmOrderModalLabel">Xác nhận đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Đặt đơn hàng cho <span id="confirmTableName" class="fw-bold"></span>?</p>
+                <p>Phương thức thanh toán: <span id="confirmPaymentMethod" class="fw-bold"></span></p>
+                <p>Tổng tiền: <span id="confirmOrderTotal" class="fw-bold"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmitOrderBtn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/pos.js"></script>
+}

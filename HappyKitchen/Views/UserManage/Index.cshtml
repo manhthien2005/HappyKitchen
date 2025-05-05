@@ -1,0 +1,455 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/user-management.css">
+}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Cài đặt hệ thống</h1>
+    <p>Quản lý người dùng, vai trò và phân quyền cho hệ thống</p>
+</div>
+
+<!-- User Management Tabs -->
+<div class="user-management-container">
+    <ul class="nav nav-tabs" id="userManagementTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button"
+                role="tab" aria-controls="users" aria-selected="true">
+                <i class="fas fa-users me-2"></i> Người dùng
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles" type="button"
+                role="tab" aria-controls="roles" aria-selected="false">
+                <i class="fas fa-user-tag me-2"></i> Vai trò
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="permissions-tab" data-bs-toggle="tab" data-bs-target="#permissions"
+                type="button" role="tab" aria-controls="permissions" aria-selected="false">
+                <i class="fas fa-lock me-2"></i> Phân quyền
+            </button>
+        </li>
+    </ul>
+
+    <!-- Content -->
+
+    <div class="tab-content" id="userManagementTabContent">
+
+        <!-- Users Tab -->
+        <div class="tab-pane fade show active" id="users" role="tabpanel" aria-labelledby="users-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Danh sách người dùng</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fas fa-plus me-2"></i> Thêm người dùng
+                </button>
+            </div>
+
+            <div class="filter-container">
+                <div class="search-filter-col">
+                    <div class="filter-label">Tìm kiếm</div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="userSearchInput"
+                            placeholder="Tìm kiếm người dùng...">
+                    </div>
+                </div>
+                <div class="status-filter-col">
+                    <div class="filter-label">Trạng thái</div>
+                    <select class="form-select" id="statusFilter">
+                        <option value="all">Tất cả</option>
+                        <option value="0">Hoạt động</option>
+                        <option value="1">Không hoạt động</option>
+                        <option value="2">Nghỉ việc</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="user-cards-container">
+                <div class="row" id="userCardsRow">
+                </div>
+            </div>
+
+            <nav aria-label="User pagination" class="mt-4">
+                <ul class="pagination justify-content-center" id="userPagination">
+                    <li class="page-item disabled" id="paginationPrev">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <div id="paginationItems" class="d-flex">
+                    </div>
+                    <li class="page-item" id="paginationNext">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+
+        <!-- Roles Tab -->
+        <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Danh sách vai trò</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoleModal">
+                    <i class="fas fa-plus me-2"></i> Thêm vai trò
+                </button>
+            </div>
+
+            <div class="search-box mb-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0" id="roleSearchInput"
+                        placeholder="Tìm kiếm vai trò...">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Tên vai trò</th>
+                            <th scope="col">Mô tả</th>
+                            <th scope="col">Số người dùng</th>
+                            <th scope="col" class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rolesTableBody">
+                        <!-- data -->
+                    </tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Permissions Tab -->
+        <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Phân quyền theo vai trò</h2>
+                <div>
+                    <button class="btn btn-outline-secondary me-2" id="refreshPermissionsBtn">
+                        <i class="fas fa-sync-alt me-2"></i> Cập nhật
+                    </button>
+                    <button class="btn btn-primary" id="savePermissionsBtn">
+                        <i class="fas fa-save me-2"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="roleSelect" class="form-label fw-bold">Chọn vai trò</label>
+                <select class="form-select" id="roleSelect">
+                </select>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered permission-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Chức năng</th>
+                            <th scope="col" class="text-center">Xem</th>
+                            <th scope="col" class="text-center">Thêm</th>
+                            <th scope="col" class="text-center">Sửa</th>
+                            <th scope="col" class="text-center">Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="permissionsTableBody">
+                        <!-- data -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered"> <!-- Changed to modal-lg -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Thêm người dùng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm" novalidate>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="userFullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="userFullName" required maxlength="100">
+                                <div class="invalid-feedback">Vui lòng nhập họ tên (tối đa 100 ký tự)</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="userPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="userPhone" required pattern="[0-9]{10,15}">
+                                <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-15 chữ số)</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="userEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="userEmail">
+                                <div class="invalid-feedback">Email không đúng định dạng</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="userPassword" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="userPassword" required minlength="6">
+                                    <span class="position-absolute top-50 end-0 translate-middle-y pe-3 password-toggle" style="cursor: pointer;">
+                                        <i class="fas fa-eye-slash text-muted"></i>
+                                    </span>
+                                    <div class="invalid-feedback">Mật khẩu phải có ít nhất 6 ký tự</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="userSalary" class="form-label">Lương cơ bản</label>
+                                <input type="number" class="form-control" id="userSalary" min="0" step="1000" required>
+                                <div class="invalid-feedback">Vui lòng nhập lương hợp lệ</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="userRole" class="form-label">Vai trò</label>
+                                <select class="form-select" id="userRole">
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="userStatus" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="userStatus">
+                                    <option value="0">Hoạt động</option>
+                                    <option value="1">Tạm khóa</option>
+                                    <option value="2">Nghỉ việc</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="userAddress" class="form-label">Địa chỉ</label>
+                                <textarea class="form-control" id="userAddress" rows="2" maxlength="200"></textarea>
+                                <div class="invalid-feedback">Địa chỉ không được vượt quá 200 ký tự</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveUserBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered"> <!-- Changed to modal-lg -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Chỉnh sửa người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" novalidate>
+                    <input type="hidden" id="editUserId">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="editFullName" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="editFullName" required maxlength="100">
+                                <div class="invalid-feedback">Vui lòng nhập họ tên (tối đa 100 ký tự)</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="editUserPhone" required pattern="[0-9]{10,15}">
+                                <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-15 chữ số)</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="editUserEmail">
+                                <div class="invalid-feedback">Email không đúng định dạng</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserPassword" class="form-label">Mật khẩu mới (để trống nếu không thay đổi)</label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="editUserPassword" minlength="6">
+                                    <span class="position-absolute top-50 end-0 translate-middle-y pe-3 password-toggle" style="cursor: pointer;">
+                                        <i class="fas fa-eye-slash text-muted"></i>
+                                    </span>
+                                    <div class="invalid-feedback">Mật khẩu phải có ít nhất 6 ký tự</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserSalary" class="form-label">Lương cơ bản</label>
+                                <input type="number" class="form-control" id="editUserSalary" min="0" step="1000">
+                                <div class="invalid-feedback">Vui lòng nhập lương hợp lệ</div>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserRole" class="form-label">Vai trò</label>
+                                <select class="form-select" id="editUserRole">
+                                    <!-- Options will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserStatus" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="editUserStatus">
+                                    <option value="0">Hoạt động</option>
+                                    <option value="1">Tạm khóa</option>
+                                    <option value="2">Nghỉ việc</option>
+                                </select>
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="editUserAddress" class="form-label">Địa chỉ</label>
+                                <textarea class="form-control" id="editUserAddress" rows="2" maxlength="200"></textarea>
+                                <div class="invalid-feedback">Địa chỉ không được vượt quá 200 ký tự</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditUserBtn">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Delete User Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa người dùng <span id="deleteFullName" class="fw-bold"></span>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác.</p>
+                <input type="hidden" id="deleteUserId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteUserBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Role Modal -->
+<div class="modal fade" id="addRoleModal" tabindex="-1" aria-labelledby="addRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoleModalLabel">Thêm vai trò mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRoleForm" novalidate>
+                    <div class="mb-3">
+                        <label for="roleKey" class="form-label">Mã vai trò <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="roleKey" required maxlength="50" placeholder="VD: MANAGER, ADMIN">
+                        <div class="form-text">Mã vai trò dùng để xác định vai trò trong hệ thống, viết hoa và không dấu</div>
+                        <div class="invalid-feedback">Vui lòng nhập mã vai trò (tối đa 50 ký tự)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="roleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="roleName" required maxlength="50">
+                        <div class="invalid-feedback">Vui lòng nhập tên vai trò (tối đa 50 ký tự)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="roleDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="roleDescription" rows="3" maxlength="255"></textarea>
+                        <div class="invalid-feedback">Mô tả không được vượt quá 255 ký tự</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveRoleBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Role Modal -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRoleModalLabel">Chỉnh sửa vai trò</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoleForm" novalidate>
+                    <input type="hidden" id="editRoleId">
+                    <div class="mb-3">
+                        <label for="editRoleKey" class="form-label">Mã vai trò <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editRoleKey" required maxlength="50">
+                        <div class="form-text">Mã vai trò dùng để xác định vai trò trong hệ thống, viết hoa và không dấu</div>
+                        <div class="invalid-feedback">Vui lòng nhập mã vai trò (tối đa 50 ký tự)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="editRoleName" required maxlength="50">
+                        <div class="invalid-feedback">Vui lòng nhập tên vai trò (tối đa 50 ký tự)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editRoleDescription" class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="editRoleDescription" rows="3" maxlength="255"></textarea>
+                        <div class="invalid-feedback">Mô tả không được vượt quá 255 ký tự</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditRoleBtn">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Role Confirmation Modal -->
+<div class="modal fade" id="deleteRoleModal" tabindex="-1" aria-labelledby="deleteRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteRoleModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa vai trò <span id="deleteRoleName" class="fw-bold"></span>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác và có thể ảnh hưởng đến người dùng đang sử dụng
+                    vai trò này.</p>
+                <input type="hidden" id="deleteRoleId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteRoleBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/admin/js/user-management.js"></script>
+}

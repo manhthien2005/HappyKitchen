@@ -1,0 +1,186 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen - Quản lý đơn hàng";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/order-management.css">
+    <style>
+        .table-responsive { max-height: 600px; overflow-y: auto; }
+        .table thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; }
+        .search-section { margin-bottom: 20px; }
+        .filter-result { font-size: 0.9rem; color: #6c757d; margin-top: 10px; }
+        .status-badge-active { background-color: #28a745; color: white; padding: 5px 10px; border-radius: 12px; }
+        .status-badge-inactive { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 12px; }
+        .status-badge-pending { background-color: #ffc107; color: black; padding: 5px 10px; border-radius: 12px; }
+        .status-badge-preparing { background-color: #17a2b8; color: white; padding: 5px 10px; border-radius: 12px; }
+        .order-detail-item { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .order-detail-item:last-child { border-bottom: none; }
+        .menu-item-select, .quantity, .note { font-size: 0.85rem; }
+        .detail-remove { transition: color 0.2s; }
+        .detail-remove:hover { color: #dc3545 !important; }
+    </style>
+}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Quản lý đơn hàng</h1>
+    <p>Quản lý các đơn hàng của nhà hàng</p>
+</div>
+
+<!-- Order Management Content -->
+<div class="order-management-container">
+    <!-- Search and Filter Section -->
+    <div class="search-section card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="orderSearchInput" placeholder="Tìm mã đơn, khách, món...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" id="startDateInput" placeholder="Từ ngày">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" class="form-control" id="endDateInput" placeholder="Đến ngày">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="clearFiltersBtn">
+                        <i class="fas fa-times me-1"></i> Xóa bộ lọc
+                    </button>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="btn-group" id="statusFilter">
+                    <button type="button" class="btn btn-outline-primary active" data-status="all">Tất cả</button>
+                    <button type="button" class="btn btn-outline-primary" data-status="0">Đã hủy</button>
+                    <button type="button" class="btn btn-outline-primary" data-status="1">Chờ xác nhận</button>
+                    <button type="button" class="btn btn-outline-primary" data-status="2">Đang chuẩn bị</button>
+                    <button type="button" class="btn btn-outline-primary" data-status="3">Hoàn thành</button>
+                </div>
+            </div>
+            <div class="filter-result" id="filterResult"></div>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Bàn</th>
+                            <th>Khách hàng</th>
+                            <th>Nhân viên</th>
+                            <th>Thời gian</th>
+                            <th>Thanh toán</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersGrid"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Order pagination">
+        <ul class="pagination justify-content-center mt-5" id="orderPagination">
+            <li class="page-item" id="paginationPrev">
+                <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">«</span>
+                </a>
+            </li>
+            <div class="d-flex" id="paginationItems"></div>
+            <li class="page-item" id="paginationNext">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">»</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Edit Order Modal -->
+<div class="modal fade order-modal" id="editOrderModal" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editOrderModalLabel">Chỉnh sửa Đơn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editOrderForm">
+                    <input type="hidden" id="editOrderId">
+                    <div class="row">
+                        <!-- Order Info -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editOrderStatus" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editOrderStatus" required>
+                                    <option value="0">Đã hủy</option>
+                                    <option value="1">Chờ xác nhận</option>
+                                    <option value="2">Đang chuẩn bị</option>
+                                    <option value="3">Hoàn thành</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="editPaymentMethod" class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                                <select class="form-select" id="editPaymentMethod" required>
+                                    <option value="cash">Tiền mặt</option>
+                                    <option value="card">Thẻ</option>
+                                    <option value="online">Chuyển khoản</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Order Details -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Chi tiết đơn hàng <span class="text-danger">*</span></label>
+                                <div class="order-details-container" id="editOrderDetails"></div>
+                                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addOrderDetailBtn">
+                                    <i class="fas fa-plus me-1"></i> Thêm món
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="updateOrderBtn">Cập nhật Đơn hàng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Order Modal -->
+<div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-labelledby="deleteOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteOrderModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa đơn hàng <span id="deleteOrderName" class="fw-bold"></span>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác.</p>
+                <input type="hidden" id="deleteOrderId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteOrderBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/order-management.js"></script>
+}

@@ -1,0 +1,86 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Chi tiết đơn hàng - Happy Kitchen";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/customer-management.css">
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Chi tiết đơn hàng</h1>
+    <p>Thông tin chi tiết về đơn hàng và khách hàng</p>
+</div>
+
+<!-- Order Detail Container -->
+<div class="management-container">
+    <div class="order-detail-container">
+        <!-- Order Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="order-history-title">Thông tin đơn hàng</h2>
+            </div>
+            <div class="card-body">
+                <div class="order-header mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="order-id" id="orderId"></div>
+                        <div class="order-date ms-3" id="orderDate"></div>
+                    </div>
+                    <div class="order-status" id="orderStatus"></div>
+                </div>
+                <div class="customer-info">
+                    <h4>Thông tin khách hàng</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-user"></i>
+                        <span id="customerName"></span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span id="customerPhone"></span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span id="customerEmail"></span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="customerAddress"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Products -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="order-history-title">Danh sách sản phẩm</h2>
+            </div>
+            <div class="card-body">
+                <div class="order-products">
+                    <div class="order-products-header">
+                        <div class="product-name">Tên sản phẩm</div>
+                        <div class="product-unit-price">Đơn giá</div>
+                        <div class="product-quantity">Số lượng</div>
+                        <div class="product-price">Thành tiền</div>
+                    </div>
+                    <div id="orderProductsBody"></div>
+                </div>
+                <div class="order-footer mt-3">
+                    <div>
+                        <span class="order-total-label">Tổng tiền:</span>
+                        <span class="order-total-value" id="orderTotal"></span>
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn btn-sm btn-outline-secondary print-order-btn" id="printOrderBtn">
+                            <i class="fas fa-print me-1"></i> In hóa đơn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/admin/js/order-detail.js"></script>
+}
