@@ -31,6 +31,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
 
 
@@ -297,20 +298,21 @@
                         <h3>Đánh Giá Của Khách Hàng</h3>
 
                         <div class="comment-list" id="comment-list">
-                            @foreach (var cmt in @Model.Ratings)
-                            {
-                                <div class="comment">
-                                    <div class="comment-header">
-                                        <span class="comment-author">@cmt.User.FullName</span>
-                                        <span class="comment-date">@cmt.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            @*
+                                @foreach (var cmt in @Model.Ratings)
+                                {
+                                    <div class="comment">
+                                        <div class="comment-header">
+                                            <span class="comment-author">@cmt.User.FullName</span>
+                                            <span class="comment-date">@cmt.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                        <div class="rating-stars" id="@cmt.UserID" data-rating="@cmt.Rating"></div>
+                                        <div class="comment-text">
+                                            @cmt.Comment
+                                        </div>
                                     </div>
-                                    <div class="rating-stars" id="@cmt.UserID" data-rating="@cmt.Rating"></div>
-                                    <div class="comment-text">
-                                        @cmt.Comment
-                                    </div>
-                                </div>
-                            }
-
+                                }
+                            *@
                         </div>
 
                         <!-- Pagination Controls -->
@@ -327,16 +329,20 @@
                             <div class="form-group">
                                 <label for="rating">Đánh giá của bạn:</label>
                                 <div class="star-rating">
-                                    <input type="radio" id="star1" name="rating" value="1">
-                                    <label for="star1">★</label>
-                                    <input type="radio" id="star2" name="rating" value="2">
-                                    <label for="star2">★</label>
-                                    <input type="radio" id="star3" name="rating" value="3">
-                                    <label for="star3">★</label>
-                                    <input type="radio" id="star4" name="rating" value="4">
-                                    <label for="star4">★</label>
                                     <input type="radio" id="star5" name="rating" value="5">
                                     <label for="star5">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1">★</label>
+                                    
+                                    
+                                    
+                                    
                                 </div>
                             </div>
 
@@ -364,9 +370,16 @@
             <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
                 <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
             </a>
-
             <script>
-
+                var allComments = @Html.Raw(Json.Serialize(Model.Ratings.Select(cmt => new
+                    {
+                        author = cmt.User.FullName,
+                        date = cmt.CreatedAt.ToString("dd/MM/yyyy"),
+                        rating = cmt.Rating,
+                        text = cmt.Comment
+                    })));
+            </script>
+            <script>
                 function showDetails(name, image, price, description) {
                     document.getElementById("detailModalLabel").textContent = name;
                     document.getElementById("modalImage").src = "/images/MenuItem/" + image;
@@ -381,7 +394,6 @@
             <script>
                 var isLoggedIn = @((Context.Session.GetString("Email") != null).ToString().ToLower());
                 var menuItemId = @Model.MenuItemID;
-
             </script>
 
             <script src="~/js/menu_script.js"></script>
@@ -433,25 +445,55 @@
                         element.appendChild(starWrapper);
                     }
                 }
-
                 // Generate stars for all rating elements when the page loads
                 document.addEventListener('DOMContentLoaded', function () {
-                    // Generate stars for the main average rating
+                    // Generate stars cho phần rating trung bình
                     const averageRatingElement = document.getElementById('average-rating');
                     if (averageRatingElement) {
+                        // Chuyển đổi giá trị thành số và định dạng với 1 chữ số thập phân
                         const averageRating = parseFloat(averageRatingElement.textContent);
+                        const formattedAverage = averageRating.toFixed(1);
+                        averageRatingElement.textContent = formattedAverage;
+
                         const starsContainer = document.getElementById('rating-stars-display');
                         if (starsContainer) {
-                            starsContainer.setAttribute('data-rating', averageRating);
+                            starsContainer.setAttribute('data-rating', formattedAverage);
                             generateStarForElement(starsContainer);
                         }
                     }
 
-                    // Generate stars for all comment ratings
+                    // Generate stars cho các bình luận (nếu có)
                     const commentRatingElements = document.querySelectorAll('.rating-stars[id]');
                     commentRatingElements.forEach(function (element) {
                         generateStarForElement(element);
                     });
+                });
+
+            </script>
+            <script>
+                // Function to handle the display of the user avatar dropdown
+                function toggleUserDropdown() {
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userDropdown = document.getElementById('userDropdown');
+
+                    if (userDropdown.style.display === 'block') {
+                        userDropdown.style.display = 'none';
+                    } else {
+                        userDropdown.style.display = 'block';
+                    }
+                }
+
+                // Event listener for the user avatar click
+                document.getElementById('userAvatar').addEventListener('click', toggleUserDropdown);
+
+                // Close the dropdown if clicked outside
+                window.addEventListener('click', function (event) {
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userDropdown = document.getElementById('userDropdown');
+
+                    if (!userAvatar.contains(event.target) && !userDropdown.contains(event.target)) {
+                        userDropdown.style.display = 'none';
+                    }
                 });
             </script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
