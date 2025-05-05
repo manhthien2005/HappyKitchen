@@ -1,0 +1,359 @@
+﻿@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+      - primary meta tags
+    -->
+    <title>Happy Kitchen - Nơi ẩm thực thăng hoa</title>
+    <meta name="title" content="Happy Kitchen - Nơi ẩm thực thăng hoa">
+    <meta name="description" content="Team: TKT">
+
+    <!--
+      - favicon
+    -->
+    <link rel="shortcut icon" href="~/images/favicon.svg" type="image/svg+xml">
+
+    <!--
+      - google font link
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+
+    <!--
+      - custom css link
+    -->
+    <link rel="stylesheet" href="~/css/style.css">
+
+    <!--
+      - preload images
+    -->
+    <link rel="preload" as="image" href="~/images/hero-slider-1.jpg">
+    <link rel="preload" as="image" href="~/images/hero-slider-2.jpg">
+    <link rel="preload" as="image" href="~/images/hero-slider-3.jpg">
+
+</head>
+
+<body id="top">
+
+    <!--
+      - #PRELOADER
+    -->
+
+    <div class="preload" data-preaload>
+        <div class="circle"></div>
+        <p class="text">HAPPY KITCHEN</p>
+    </div>
+
+
+
+
+
+    <!--
+      - #TOP BAR
+    -->
+
+    <div class="topbar">
+        <div class="container">
+
+            <address class="topbar-item">
+                <div class="icon">
+                    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">
+                    Happy Kitchen, 01 Thảo Điền, Hồ Chí Minh, VN
+                </span>
+            </address>
+
+            <div class="separator"></div>
+
+            <div class="topbar-item item-2">
+                <div class="icon">
+                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">Mở cửa : 8.00 AM - 10.00 PM</span>
+            </div>
+
+            <a href="tel:+11234567890" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">+84 977139203</span>
+            </a>
+
+            <div class="separator"></div>
+
+            <a href="mailto:booking@restaurant.com" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+                </div>
+
+                <span class="span">happykitchenvn2025@gmail.com</span>
+            </a>
+
+        </div>
+    </div>
+
+
+
+
+
+    <!--
+      - #HEADER
+    -->
+
+    <header class="header" data-header>
+        <div class="container">
+
+            <a href="#" class="logo">
+                <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+
+            <nav class="navbar" data-navbar>
+
+                <button class="close-btn" aria-label="close menu" data-nav-toggler>
+                    <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+                </button>
+
+                <a href="#" class="logo">
+                    <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
+                </a>
+
+                <ul class="navbar-list">
+
+                    <li class="navbar-item">
+                        <a href="#home" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Trang Chủ</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="#about" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Giới Thiệu</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="#menu" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Thực Đơn</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="#event" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="#connect" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Kết Nối</span>
+                        </a>
+                    </li>
+
+                </ul>
+
+                <div class="text-center">
+                    <p class="headline-1 navbar-title">Visit Us</p>
+
+                    <address class="body-4">
+                        Restaurant St, Delicious City, <br>
+                        London 9578, UK
+                    </address>
+
+                    <p class="body-4 navbar-text">Open: 9.30 am - 2.30pm</p>
+
+                    <a href="mailto:booking@grilli.com" class="body-4 sidebar-link">booking@grilli.com</a>
+
+                    <div class="separator"></div>
+
+                    <p class="contact-label">Booking Request</p>
+
+                    <a href="tel:+88123123456" class="body-1 contact-number hover-underline">
+                        +88-123-123456
+                    </a>
+                </div>
+
+            </nav>
+
+            <a href="#booking" class="btn btn-secondary">
+                <span class="text text-1">Đặt Bàn</span>
+
+                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+            </a>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <span class="line line-1"></span>
+                <span class="line line-2"></span>
+                <span class="line line-3"></span>
+            </button>
+
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                @if (Context.Session.GetString("Email") != null)
+                {
+                    <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
+            </div>
+
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="overlay" data-nav-toggler data-overlay></div>
+
+
+        </div>
+    </header>
+
+
+
+
+
+    <main>
+        
+    </main>
+
+
+
+
+
+    <!--
+      - #FOOTER
+    -->
+
+    
+
+
+
+
+
+    <!--
+      - #BACK TO TOP
+    -->
+
+    <a href="#top" class="back-top-btn active" aria-label="back to top" data-back-top-btn>
+        <ion-icon name="chevron-up" aria-hidden="true"></ion-icon>
+    </a>
+
+
+
+
+
+    <!--
+      - custom js link
+    -->
+    <script src="~/js/script.js"></script>
+
+    <!--
+      - ionicon link
+    -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="assets/js/section.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatar = document.getElementById('avatarDropdown');
+            const dropdownMenu = document.getElementById('userDropdown');
+
+            if (avatar && dropdownMenu) {
+                // Toggle dropdown khi click avatar
+                avatar.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Ngăn click lan ra ngoài
+                    dropdownMenu.classList.toggle('show');
+
+                    // Add aria attributes for accessibility
+                    const isExpanded = dropdownMenu.classList.contains('show');
+                    avatar.setAttribute('aria-expanded', isExpanded.toString());
+                });
+
+                // Ẩn dropdown khi click ra ngoài
+                document.addEventListener('click', (e) => {
+                    if (dropdownMenu.classList.contains('show') &&
+                        !avatar.contains(e.target) &&
+                        !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                        avatar.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Ẩn dropdown khi nhấn ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.classList.remove('show');
+                        avatar.setAttribute('aria-expanded', 'false');
+                        avatar.focus(); // Return focus to avatar
+                    }
+                });
+
+                // Prevent clicks inside dropdown from closing it
+                dropdownMenu.addEventListener('click', (e) => {
+                    // Only stop propagation if not clicking on a link
+                    if (!e.target.closest('a')) {
+                        e.stopPropagation();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

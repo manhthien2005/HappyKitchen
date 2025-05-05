@@ -19,6 +19,11 @@ namespace HappyKitchen.Controllers
             _configuration = configuration;
         }
 
+        public IActionResult Profile()
+        {
+            return View();
+        }
+
         public IActionResult Login()
         {
             return View();
@@ -46,6 +51,12 @@ namespace HappyKitchen.Controllers
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash) || (user.UserType != 0 && user.UserType != 1))
             {
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
+            }
+
+            // Kiểm tra trạng thái người dùng
+            if (user.Status == 1 || user.Status == 2)
+            {
+                return Json(new { success = false, message = "Tài khoản của bạn đã bị đình chỉ." });
             }
 
             // Kiểm tra cookie trusted device

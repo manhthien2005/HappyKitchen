@@ -83,6 +83,12 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
 
+            // Kiểm tra trạng thái người dùng
+            if (user.Status == 1 || user.Status == 2)
+            {
+                return Json(new { success = false, message = "Tài khoản của bạn đã bị đình chỉ." });
+            }
+
             // Kiểm tra cookie trusted device
             if (Request.Cookies.ContainsKey("TrustedDevice"))
             {
