@@ -1,0 +1,215 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/table-management.css">
+}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Quản lý Khu vực và Bàn</h1>
+    <p>Quản lý khu vực và bàn trong nhà hàng</p>
+</div>
+
+<!-- Table Management Content -->
+<div class="table-management-container">
+    <ul class="nav nav-tabs mb-4" id="managementTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="areas-tab" data-bs-toggle="tab" data-bs-target="#areas" type="button" role="tab" aria-controls="areas" aria-selected="true"><i class="fas fa-map-marker-alt me-2"></i>Khu vực</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tables-tab" data-bs-toggle="tab" data-bs-target="#tables" type="button" role="tab" aria-controls="tables" aria-selected="false"><i class="fas fa-chair me-2"></i>Bàn</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="managementTabContent">
+        <!-- Areas Tab -->
+        <div class="tab-pane fade show active" id="areas" role="tabpanel" aria-labelledby="areas-tab">
+            <div class="row g-3 mb-4 align-items-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="areaSearchInput" placeholder="Tìm kiếm khu vực...">
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" id="createAreaBtn" data-bs-toggle="modal" data-bs-target="#areaModal">
+                        <i class="fas fa-plus"></i> Thêm khu vực
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tên khu vực</th>
+                            <th>Mô tả</th>
+                            <th>Số bàn</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="areaTable"></tbody>
+                </table>
+            </div>
+            <nav aria-label="Area pagination">
+                <ul class="pagination justify-content-center mt-4" id="areaPagination">
+                    <li class="page-item" id="areaPaginationPrev">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <div class="d-flex" id="areaPaginationItems"></div>
+                    <li class="page-item" id="areaPaginationNext">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Tables Tab -->
+        <div class="tab-pane fade" id="tables" role="tabpanel" aria-labelledby="tables-tab">
+            <div class="row g-3 mb-4 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" id="tableSearchInput" placeholder="Tìm kiếm bàn...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="areaFilter">
+                        <option value="0" selected>Tất cả khu vực</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <div class="btn-group" role="group" id="statusFilter">
+                        <button type="button" class="btn btn-outline-primary active" data-status="all">Tất cả</button>
+                        <button type="button" class="btn btn-outline-primary" data-status="0">Trống</button>
+                        <button type="button" class="btn btn-outline-primary" data-status="1">Đã đặt</button>
+                        <button type="button" class="btn btn-outline-primary" data-status="2">Đang sử dụng</button>
+                    </div>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button class="btn btn-primary" id="createTableBtn" data-bs-toggle="modal" data-bs-target="#tableModal">
+                        <i class="fas fa-plus"></i> Thêm bàn
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tên bàn</th>
+                            <th>Khu vực</th>
+                            <th>Sức chứa</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableTable"></tbody>
+                </table>
+            </div>
+            <nav aria-label="Table pagination">
+                <ul class="pagination justify-content-center mt-4" id="tablePagination">
+                    <li class="page-item" id="tablePaginationPrev">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">«</span>
+                        </a>
+                    </li>
+                    <div class="d-flex" id="tablePaginationItems"></div>
+                    <li class="page-item" id="tablePaginationNext">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">»</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="areaModal" tabindex="-1" aria-labelledby="areaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="areaModalLabel">Thêm khu vực</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="create-edit-product">
+                    <form id="areaForm">
+                        <input type="hidden" id="areaId" name="areaId" value="0">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="areaName" class="form-label">Tên khu vực <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="areaName" name="areaName" maxlength="50" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="areaDescription" class="form-label">Mô tả</label>
+                                <textarea class="form-control" id="areaDescription" name="areaDescription" rows="4" maxlength="255"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveAreaBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="tableModal" tabindex="-1" aria-labelledby="tableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tableModalLabel">Thêm bàn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="create-edit-product">
+                    <form id="tableForm">
+                        <input type="hidden" id="tableId" name="tableId" value="0">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="tableName" class="form-label">Tên bàn <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="tableName" name="tableName" maxlength="50" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="tableAreaId" class="form-label">Khu vực</label>
+                                <select class="form-select" id="tableAreaId" name="tableAreaId">
+                                    <option value="0" selected>Không có khu vực</option>
+                                </select>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="tableCapacity" class="form-label">Sức chứa <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="tableCapacity" name="tableCapacity" min="1" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="tableStatus" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                <select class="form-select" id="tableStatus" name="tableStatus" required>
+                                    <option value="0">Trống</option>
+                                    <option value="1">Đã đặt trước</option>
+                                    <option value="2">Đang sử dụng</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveTableBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="~/admin/js/table-management.js"></script>
+}
