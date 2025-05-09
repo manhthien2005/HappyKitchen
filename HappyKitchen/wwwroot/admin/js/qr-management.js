@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="col">
                     <div class="qr-card">
                         <div class="qr-card-image">
-                            <div class="qr-status-badge ${qr.status === 1 ? 'status-badge-active' : 'status-badge-inactive'}">
-                                ${qr.status === 1 ? 'Hoạt động' : 'Không hoạt động'}
+                            <div class="qr-status-badge ${qr.status === 0 ? 'status-badge-active' : 'status-badge-inactive'}">
+                                ${qr.status === 0 ? 'Hoạt động' : 'Không hoạt động'}
                             </div>
                             <img src="/images/QRCodes/${qr.qrCodeImage}" alt="QR Code for Table ${qr.tableNumber}" class="qr-image" data-qr-id="${qr.qrCodeID}">
                         </div>
