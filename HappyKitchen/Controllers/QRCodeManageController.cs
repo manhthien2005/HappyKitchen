@@ -1,17 +1,11 @@
 using HappyKitchen.Attributes;
-using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class QRCodeManageController : Controller
     {
         private readonly IQRCodeService _qrCodeService;

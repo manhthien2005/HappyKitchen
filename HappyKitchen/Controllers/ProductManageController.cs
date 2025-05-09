@@ -3,10 +3,10 @@ using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class ProductManageController : Controller
     {
         private readonly IMenuItemService _menuItemService;

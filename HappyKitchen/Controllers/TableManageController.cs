@@ -2,12 +2,11 @@ using HappyKitchen.Attributes;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class TableManageController : Controller
     {
         private readonly IAreaTableService _areaTableService;
@@ -89,12 +88,12 @@ namespace HappyKitchen.Controllers
             {
                 if (string.IsNullOrWhiteSpace(model.AreaName))
                 {
-                    return Json(new { success = false, message = "Area name is required" });
+                    return Json(new { success = false, message = "Vui lòng nhập tên khu vực" });
                 }
 
                 if ((await _areaTableService.GetAllAreasAsync(model.AreaName)).Any(a => a.AreaName.ToLower() == model.AreaName.ToLower()))
                 {
-                    return Json(new { success = false, message = "Area name already exists" });
+                    return Json(new { success = false, message = "Tên khu vực đã tồn tại, hãy thử tên khác đi bé." });
                 }
 
                 var area = new Area
@@ -131,13 +130,12 @@ namespace HappyKitchen.Controllers
 
                 if (string.IsNullOrWhiteSpace(model.AreaName))
                 {
-                    return Json(new { success = false, message = "Area name is required" });
+                    return Json(new { success = false, message = "Vui lòng nhập tên khu vực" });
                 }
 
-                if ((await _areaTableService.GetAllAreasAsync(model.AreaName))
-                    .Any(a => a.AreaName.ToLower() == model.AreaName.ToLower() && a.AreaID != model.AreaID))
+                if ((await _areaTableService.GetAllAreasAsync(model.AreaName)).Any(a => a.AreaName.ToLower() == model.AreaName.ToLower()))
                 {
-                    return Json(new { success = false, message = "Area name already exists" });
+                    return Json(new { success = false, message = "Tên khu vực đã tồn tại, hãy thử tên khác đi bé." });
                 }
 
                 area.AreaName = model.AreaName.Trim();
@@ -165,6 +163,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpDelete]
+        [AuthorizeAccess("TABLE_MANAGE", "delete")]
         public async Task<IActionResult> DeleteArea(int id)
         {
             _logger.LogDebug("[API] DeleteArea: AreaID={AreaID}", id);

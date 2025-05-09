@@ -3,9 +3,7 @@ using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace HappyKitchen.Controllers
 {
@@ -29,6 +27,13 @@ namespace HappyKitchen.Controllers
 
         public IActionResult Login()
         {
+            // Check if user is already logged in
+            if (HttpContext.Session.GetString("StaffID") != null)
+            {
+                _logger.LogInformation("User already logged in, redirecting to Dashboard");
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             _logger.LogInformation("Login page accessed");
             var email = Request.Cookies["RememberMe_Email"];
             _logger.LogInformation($"RememberMe cookie found: {!string.IsNullOrEmpty(email)}");
@@ -50,11 +55,13 @@ namespace HappyKitchen.Controllers
                     HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
                     HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
-                    return RedirectToAction("index", "Dashboard");
+                    return RedirectToAction("Index", "Dashboard");
                 }
                 else
                 {
                     _logger.LogWarning($"Auto-login failed: User not found or inactive for email: {email}");
+                    // Clear the invalid RememberMe cookie to prevent login loops
+                    Response.Cookies.Delete("RememberMe_Email");
                 }
             }
 
@@ -661,8 +668,8 @@ namespace HappyKitchen.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            // Response.Cookies.Delete("RememberMe_Email");
-            // Response.Cookies.Delete("TrustedDevice");
+            Response.Cookies.Delete("RememberMe_Email");
+            Response.Cookies.Delete("TrustedDevice");
             return RedirectToAction("Login");
         }
 

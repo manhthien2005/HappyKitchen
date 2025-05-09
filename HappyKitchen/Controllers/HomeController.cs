@@ -1,14 +1,7 @@
 ﻿using HappyKitchen.Data;
 using HappyKitchen.Models;
-using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System.Configuration;
-using System.Diagnostics;
-using System.Net.WebSockets;
-using static System.Net.WebRequestMethods;
 
 namespace HappyKitchen.Controllers
 {

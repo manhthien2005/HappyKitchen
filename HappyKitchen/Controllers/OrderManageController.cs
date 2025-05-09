@@ -5,10 +5,10 @@ using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class OrderManageController : Controller
     {
         private readonly IPosService _posService;
@@ -25,6 +25,7 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();

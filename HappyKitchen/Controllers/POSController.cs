@@ -4,11 +4,11 @@ using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using HappyKitchen.Attributes;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class PosController : Controller
     {
         private readonly IMenuItemService _menuItemService;
