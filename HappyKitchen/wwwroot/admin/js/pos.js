@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         menuItems: [],
         selectedTable: null,
         selectedCustomer: null,
-        selectedPaymentMethod: "cash",
+        selectedPaymentMethod: 0,
         orderItems: [],
         categories: [],
         searchTerm: "",
@@ -146,8 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.tableSelect.innerHTML = `
             <option value="0">Chọn bàn...</option>
             ${state.tables.map(table => `
-                <option value="${table.tableID}" class="${table.status === 1 ? 'text-success' : 'text-danger'}">
-                    ${table.tableName} (${table.status === 1 ? 'Trống' : 'Đang sử dụng'})
+                <option value="${table.tableID}" 
+                    class="${table.status === 0 ? 'text-success' : table.status === 1 ? 'text-warning' : 'text-danger'}"
+                    ${table.status === 2 ? 'disabled' : ''}>
+                    ${table.tableName} (${table.status === 0 ? 'Trống' : table.status === 1 ? 'Đã đặt trước' : 'Đang sử dụng'})
                 </option>
             `).join('')}
         `;
@@ -205,7 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderOrderItems() {
-        // Hiển thị nút "Xóa hết" nếu có món trong giỏ hàng
         const clearCartButton = state.orderItems.length > 0 ? `
             <div class="d-flex justify-content-end mb-2">
                 <button id="clearCartBtn" class="btn btn-outline-danger btn-sm">
@@ -335,8 +336,6 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             utils.showLoadingOverlay(true);
             
-            // Không cần thu thập notes từ input fields vì đã được cập nhật vào state mỗi khi thay đổi
-
             const order = {
                 TableID: state.selectedTable.tableID,
                 CustomerID: parseInt(DOM.customerIdInput.value) || null,
@@ -347,13 +346,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     Note: item.note || ''
                 }))
             };
-
+    
             const response = await fetch(API.createOrder, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 body: JSON.stringify(order)
             });
-
+    
             const result = await response.json();
             if (result.success) {
                 utils.showToast("Đặt món thành công", "success");
@@ -361,18 +360,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 state.orderItems = [];
                 DOM.customerSearchInput.value = "";
                 DOM.customerIdInput.value = "0";
-                DOM.paymentMethodSelect.value = "cash";
-                state.selectedPaymentMethod = "cash";
+                DOM.paymentMethodSelect.value = 0;
+                state.selectedPaymentMethod = 0;
                 DOM.confirmTableName.textContent = state.selectedTable.tableName;
                 renderOrderItems();
                 loadTables();
                 bootstrap.Modal.getInstance(document.getElementById('confirmOrderModal')).hide();
             } else {
                 utils.showToast(result.message || "Lỗi khi đặt món", "error");
+                if (result.message === "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.") {
+                    window.location.href = "/Admin/Login";
+                }
             }
         } catch (error) {
             console.error('Submit order error:', error);
-            utils.showToast("Đã xảy ra lỗi khi đặt món", "error");
+            utils.showToast("Bạn không thể sử dụng tính năng này!", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }

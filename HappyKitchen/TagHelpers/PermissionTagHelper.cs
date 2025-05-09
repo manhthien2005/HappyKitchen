@@ -25,7 +25,7 @@ namespace HappyKitchen.TagHelpers
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {
             var httpContext = _httpContextAccessor.HttpContext;
-            var userIdString = httpContext.Session.GetString("UserID");
+            var userIdString = httpContext.Session.GetString("StaffID");
 
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             {

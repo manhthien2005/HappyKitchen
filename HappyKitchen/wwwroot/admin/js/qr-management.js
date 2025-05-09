@@ -265,8 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm mã QR", "error");
             }
         } catch (error) {
-            console.error("Create QR code error:", error);
-            utils.showToast("Đã xảy ra lỗi khi thêm mã QR", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -298,8 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật mã QR", "error");
             }
         } catch (error) {
-            console.error("Update QR code error:", error);
-            utils.showToast("Đã xảy ra lỗi khi cập nhật mã QR", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -328,8 +326,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     utils.showToast(result.message || "Lỗi khi xóa mã QR", "error");
                 }
             } catch (error) {
-                console.error("Delete QR code error:", error);
-                utils.showToast("Đã xảy ra lỗi khi xóa mã QR", "error");
+                utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
             } finally {
                 utils.showLoadingOverlay(false);
                 confirmBtn.removeEventListener("click", deleteHandler);

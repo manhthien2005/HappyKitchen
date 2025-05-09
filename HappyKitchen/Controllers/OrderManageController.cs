@@ -1,3 +1,4 @@
+using HappyKitchen.Attributes;
 using HappyKitchen.Data;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
@@ -30,6 +31,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpGet]
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public async Task<IActionResult> GetOrders(
             int page = 1,
             int pageSize = 8,
@@ -143,6 +145,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("ORDER_MANAGE", "edit")]
         public async Task<IActionResult> UpdateOrder([FromBody] OrderUpdateModel model)
         {
             _logger.LogDebug("[API] UpdateOrder: OrderID={OrderID}, Status={Status}, PaymentMethod={PaymentMethod}, ItemCount={ItemCount}",
@@ -177,15 +180,15 @@ namespace HappyKitchen.Controllers
                     return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
                 }
 
-                if (!Enum.IsDefined(typeof(OrderStatus), model.Status))
-                {
-                    return Json(new { success = false, message = "Trạng thái đơn hàng không hợp lệ" });
-                }
+                // if (!Enum.IsDefined(typeof(OrderStatus), model.Status))
+                // {
+                //     return Json(new { success = false, message = "Trạng thái đơn hàng không hợp lệ" });
+                // }
 
-                if (string.IsNullOrWhiteSpace(model.PaymentMethod))
-                {
-                    return Json(new { success = false, message = "Phương thức thanh toán không hợp lệ" });
-                }
+                // if (model.PaymentMethod == 0)
+                // {
+                //     return Json(new { success = false, message = "Phương thức thanh toán không hợp lệ" });
+                // }
 
                 order.Status = model.Status;
                 order.PaymentMethod = model.PaymentMethod;
@@ -221,6 +224,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("ORDER_MANAGE", "delete")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             _logger.LogDebug("[API] DeleteOrder: OrderID={OrderID}", id);
@@ -256,19 +260,19 @@ namespace HappyKitchen.Controllers
         }
     }
 
-    public enum OrderStatus : byte
-    {
-        Canceled = 0,
-        PendingConfirmation = 1,
-        Preparing = 2,
-        Completed = 3
-    }
+    // public enum OrderStatus : byte
+    // {
+    //     Canceled = 0,
+    //     PendingConfirmation = 1,
+    //     Preparing = 2,
+    //     Completed = 3
+    // }
 
     public class OrderUpdateModel
     {
         public int OrderID { get; set; }
         public byte Status { get; set; }
-        public string PaymentMethod { get; set; }
+        public byte PaymentMethod { get; set; }
         public List<OrderDetailModel> OrderDetails { get; set; }
     }
 

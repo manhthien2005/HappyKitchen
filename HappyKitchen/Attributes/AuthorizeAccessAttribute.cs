@@ -36,7 +36,7 @@ namespace HappyKitchen.Attributes
             }
 
             var user = await permissionService.GetUserAsync(userId);
-            if (user == null || user.UserType != 1) // Only admins (UserType = 1)
+            if (user == null || user.UserType != 1)
             {
                 HandleUnauthorized(context, "Admin access required");
                 return;
@@ -64,9 +64,7 @@ namespace HappyKitchen.Attributes
             }
             else
             {
-                context.Result = _permissionKey == null
-                    ? new RedirectToActionResult("Login", "Admin", null)
-                    : new ViewResult { ViewName = "AccessDenied" };
+                context.Result =  new RedirectToActionResult("Login", "Admin", null);
             }
         }
     }

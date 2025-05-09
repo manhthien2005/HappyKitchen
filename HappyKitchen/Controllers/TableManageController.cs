@@ -1,3 +1,4 @@
+using HappyKitchen.Attributes;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [AuthorizeAccess("TABLE_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
@@ -25,6 +27,7 @@ namespace HappyKitchen.Controllers
 
         // Area Endpoints
         [HttpGet]
+        [AuthorizeAccess("TABLE_MANAGE", "view")]
         public async Task<IActionResult> GetAreas(string searchTerm = "", int page = 1, int pageSize = 10)
         {
             _logger.LogDebug("[API] GetAreas: search={Search}, page={Page}, size={Size}", searchTerm, page, pageSize);
@@ -76,6 +79,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("TABLE_MANAGE", "add")]
         public async Task<IActionResult> CreateArea([FromBody] Area model)
         {
             _logger.LogDebug("[API] CreateArea: AreaName={AreaName}", model.AreaName);
@@ -115,6 +119,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPut]
+        [AuthorizeAccess("TABLE_MANAGE", "edit")]
         public async Task<IActionResult> UpdateArea([FromBody] Area model)
         {
             _logger.LogDebug("[API] UpdateArea: AreaID={AreaID}, AreaName={AreaName}", model.AreaID, model.AreaName);
@@ -190,6 +195,7 @@ namespace HappyKitchen.Controllers
 
         // Table Endpoints
         [HttpGet]
+        [AuthorizeAccess("TABLE_MANAGE", "view")]
         public async Task<IActionResult> GetTables(string searchTerm = "", int areaId = 0, string status = "all", int page = 1, int pageSize = 10)
         {
             _logger.LogDebug("[API] GetTables: search={Search}, area={AreaID}, status={Status}, page={Page}, size={Size}",
@@ -245,6 +251,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("TABLE_MANAGE", "add")]
         public async Task<IActionResult> CreateTable([FromBody] Table model)
         {
             _logger.LogDebug("[API] CreateTable: TableName={TableName}, AreaID={AreaID}", model.TableName, model.AreaID);
@@ -292,6 +299,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPut]
+        [AuthorizeAccess("TABLE_MANAGE", "edit")]
         public async Task<IActionResult> UpdateTable([FromBody] Table model)
         {
             _logger.LogDebug("[API] UpdateTable: TableID={TableID}, TableName={TableName}, AreaID={AreaID}",
@@ -344,6 +352,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpDelete]
+        [AuthorizeAccess("TABLE_MANAGE", "delete")]
         public async Task<IActionResult> DeleteTable(int id)
         {
             _logger.LogDebug("[API] DeleteTable: TableID={TableID}", id);

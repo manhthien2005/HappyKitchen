@@ -21,6 +21,8 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [AuthorizeAccess("CUSTOMER_ACCOUNT_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
@@ -200,7 +202,6 @@ namespace HappyKitchen.Controllers
                     user.PasswordHash = existingUser.PasswordHash;
                 }
 
-                user.UserType = user.UserType == 0 ? existingUser.UserType : user.UserType;
                 await _userService.UpdateUserAsync(user);
                 _logger.LogInformation("Người dùng được cập nhật thành công: {UserId}", user.UserID);
                 return Json(new { success = true });

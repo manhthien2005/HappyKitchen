@@ -1,3 +1,4 @@
+using HappyKitchen.Attributes;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -24,13 +25,16 @@ namespace HappyKitchen.Controllers
             _logger = logger;
             _environment = environment;
         }
-
+        
+        [HttpGet]
+        [AuthorizeAccess("MENU_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpGet]
+        [AuthorizeAccess("MENU_MANAGE", "view")]
         public async Task<IActionResult> GetMenuItems(
                 int page = 1,
                 int pageSize = 8,
@@ -136,6 +140,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpGet]
+        [AuthorizeAccess("MENU_MANAGE", "view")]
         public async Task<IActionResult> GetCategories()
         {
             _logger.LogDebug("[API] GetCategories");
@@ -169,6 +174,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("MENU_MANAGE", "add")]
         public async Task<IActionResult> CreateMenuItem([FromForm] MenuItemCreateModel model, IFormFile image)
         {
             _logger.LogDebug("[API] CreateMenuItem: Tên={Name}, Giá={Price}, DanhMục={CategoryID}, Trạng thái={Status}, SốThuộcTính={AttrCount}", 
@@ -260,6 +266,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("MENU_MANAGE", "edit")]
         public async Task<IActionResult> UpdateMenuItem([FromForm] MenuItemUpdateModel model, IFormFile image, [FromForm] bool isDeleted = false)
         {
             if (model?.MenuItem == null)
@@ -393,6 +400,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("MENU_MANAGE", "delete")]
         public async Task<JsonResult> DeleteMenuItem(int id)
         {
             _logger.LogDebug("[API] DeleteMenuItem: ID={ID}", id);
@@ -421,6 +429,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("MENU_MANAGE", "add")]
         public async Task<JsonResult> CreateCategory([FromBody] Category category)
         {
             _logger.LogDebug("[API] CreateCategory: Tên={Name}", category.CategoryName);

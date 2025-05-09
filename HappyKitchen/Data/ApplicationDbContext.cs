@@ -31,7 +31,8 @@ namespace HappyKitchen.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            modelBuilder.Entity<Order>()
+                .ToTable("Orders", t => t.HasTrigger("trg_UpdateTableStatus_Orders"));
             // Removed MenuItemLabel configurations
             // Configure RolePermission composite key and relationships
             modelBuilder.Entity<RolePermission>()
