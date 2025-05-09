@@ -427,4 +427,12 @@ namespace HappyKitchen.Models
         public virtual Table Table { get; set; }
     }
 
+    // Thêm class mới vào MainViewModel.cs
+    public class UserProfileViewModel
+    {
+        public User User { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public bool IsPhoneVerified { get; set; }
+    }
+
 }

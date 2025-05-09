@@ -92,6 +92,19 @@ namespace HappyKitchen.Services
             SendEmailAsync(toEmail, subject, body);
         }
 
+        public async Task SendEmailVerificationOTP(string toEmail, string otpCode)
+        {
+            string subject = "📧 Xác thực email của bạn";
+            string body = GetEmailTemplate(
+                "📧 Xác thực địa chỉ email",
+                $"<p>Chúng tôi đã nhận được yêu cầu xác thực email của bạn. Vui lòng sử dụng mã OTP bên dưới để xác thực địa chỉ email của bạn:</p>" +
+                $"<div style='background: #e8f5e9; padding: 10px; border-radius: 5px; text-align: center; font-size: 20px; font-weight: bold; color: #2e7d32;'>{otpCode}</div>" +
+                "<p>Mã OTP này có hiệu lực trong <strong>5 phút</strong>.</p>" +
+                "<p>Nếu bạn không yêu cầu xác thực email này, vui lòng bỏ qua email này.<br><strong>Thân ái, Happy Kitchen.</strong></p>"
+            );
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
         private string GetEmailTemplate(string title, string content)
         {
             return $@"
