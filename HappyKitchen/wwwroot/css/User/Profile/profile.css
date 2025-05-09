@@ -1,0 +1,553 @@
+/* Custom Properties */
+:root {
+    /* Colors */
+    --gold-crayola: hsl(38, 61%, 73%);
+    --quick-silver: hsla(0, 0%, 65%, 1);
+    --davys-grey: hsla(30, 3%, 34%, 1);
+    --smoky-black-1: hsla(40, 12%, 5%, 1);
+    --smoky-black-2: hsla(30, 8%, 5%, 1);
+    --smoky-black-3: hsla(0, 3%, 7%, 1);
+    --eerie-black-1: hsla(210, 4%, 9%, 1);
+    --eerie-black-2: hsla(210, 4%, 11%, 1);
+    --eerie-black-3: hsla(180, 2%, 8%, 1);
+    --eerie-black-4: hsla(0, 0%, 13%, 1);
+    --white: hsla(0, 0%, 100%, 1);
+    --white-alpha-20: hsla(0, 0%, 100%, 0.2);
+    --white-alpha-10: hsla(0, 0%, 100%, 0.1);
+    --black: hsla(0, 0%, 0%, 1);
+    --black-alpha-80: hsla(0, 0%, 0%, 0.8);
+    --black-alpha-15: hsla(0, 0%, 0%, 0.15);
+
+    /* Typography */
+    --fontFamily-forum: 'Forum', cursive;
+    --fontFamily-dm_sans: 'DM Sans', sans-serif;
+    --fontSize-display-1: calc(1.3rem + 6.7vw);
+    --fontSize-headline-1: calc(2rem + 2.5vw);
+    --fontSize-headline-2: calc(1.3rem + 2.4vw);
+    --fontSize-title-1: calc(1.6rem + 1.2vw);
+    --fontSize-title-2: 2.2rem;
+    --fontSize-title-3: 2.1rem;
+    --fontSize-title-4: calc(1.6rem + 1.2vw);
+    --fontSize-body-1: 2.4rem;
+    --fontSize-body-2: 1.6rem;
+    --fontSize-body-3: 1.8rem;
+    --fontSize-body-4: 1.6rem;
+    --fontSize-label-1: 1.4rem;
+    --fontSize-label-2: 1.2rem;
+    --weight-regular: 400;
+    --weight-bold: 700;
+    --lineHeight-1: 1em;
+    --lineHeight-2: 1.2em;
+    --lineHeight-3: 1.5em;
+    --lineHeight-4: 1.6em;
+    --lineHeight-5: 1.85em;
+    --lineHeight-6: 1.4em;
+    --letterSpacing-1: 0.15em;
+    --letterSpacing-2: 0.4em;
+    --letterSpacing-3: 0.2em;
+    --letterSpacing-4: 0.3em;
+    --letterSpacing-5: 3px;
+
+    /* Spacing & Others */
+    --section-space: 70px;
+    --shadow-1: 0px 0px 25px 0px hsla(0, 0%, 0%, 0.25);
+    --radius-24: 24px;
+    --radius-circle: 50%;
+    --transition-1: 250ms ease;
+    --transition-2: 500ms ease;
+    --transition-3: 1000ms ease;
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--eerie-black-1);
+    color: var(--white);
+    font-family: var(--fontFamily-dm_sans);
+    font-size: var(--fontSize-body-4);
+    font-weight: var(--weight-regular);
+    line-height: var(--lineHeight-5);
+    overflow-x: visible;
+    overflow-y: auto;
+    overflow-x: visible !important;
+}
+
+input,
+button,
+select,
+textarea {
+    background: none;
+    border: none;
+    font: inherit;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    outline: none;
+}
+
+button { cursor: pointer; }
+
+/* Typography */
+.headline-1,
+.title-2,
+.title-3 {
+    color: var(--white);
+    font-family: var(--fontFamily-forum);
+    font-weight: var(--weight-regular);
+    line-height: var(--lineHeight-2);
+}
+
+.headline-1 { 
+    font-size: var(--fontSize-headline-1); 
+    text-align: center;
+    color: var(--gold-crayola);
+    font-size: 3rem;
+}
+
+.title-2 { 
+    font-size: var(--fontSize-title-2); 
+    color: var(--gold-crayola);
+    margin-bottom: 5px;
+}
+
+.title-3 { 
+    font-size: var(--fontSize-title-3); 
+    color: var(--white);
+}
+
+.body-4 { 
+    font-size: var(--fontSize-body-4); 
+    color: var(--quick-silver);
+    margin-bottom: 15px;
+}
+
+/* Profile Section Styles */
+.section {
+    position: relative;
+    padding: 150px 0 100px;
+    width: 100%;
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+.container {
+    padding-inline: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Profile Container */
+.profile-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background-color: var(--smoky-black-1);
+    border-radius: 15px;
+    overflow: visible;
+    box-shadow: var(--shadow-1);
+    margin-top: 150px;
+}
+
+.profile-header {
+    padding: 30px;
+    background-color: var(--eerie-black-2);
+    border-bottom: 1px solid var(--white-alpha-20);
+}
+
+.profile-content {
+    padding: 40px;
+}
+
+.profile-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+/* Avatar Section */
+.profile-avatar-section {
+    flex: 0 0 250px;
+    text-align: center;
+}
+
+.avatar-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+}
+
+.avatar-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--gold-crayola);
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: var(--gold-crayola);
+    color: var(--smoky-black-1);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    opacity: 0.7;
+    transition: opacity var(--transition-1);
+}
+
+.avatar-upload-btn:hover {
+    opacity: 1;
+}
+
+.avatar-upload-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Status Badges */
+.profile-status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.profile-status-active {
+    background-color: #22c55e;
+    color: white;
+}
+
+.profile-type-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: var(--gold-crayola);
+    color: var(--smoky-black-1);
+    font-size: 12px;
+}
+
+/* Details Section */
+.profile-details-section {
+    flex: 1;
+    min-width: 300px;
+}
+
+.profile-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.profile-form-label {
+    display: block;
+    color: var(--gold-crayola);
+    margin-bottom: 10px;
+}
+
+/* Input Fields */
+.input-field {
+    background-color: var(--eerie-black-2);
+    color: var(--white);
+    height: 56px;
+    padding: 10px 20px;
+    border: 1px solid var(--white-alpha-10);
+    margin-block-end: 20px;
+    outline: none;
+    transition: border-color var(--transition-2), opacity var(--transition-1);
+    width: 100%;
+}
+
+.input-field::placeholder {
+    color: inherit;
+    opacity: 0.5;
+}
+
+.input-field:focus {
+    border-color: var(--gold-crayola);
+}
+
+.input-field:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: var(--eerie-black-3);
+}
+
+/* Input Fields with Verify Button */
+.field-with-verify {
+    position: relative;
+}
+
+.verify-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--gold-crayola);
+    color: var(--smoky-black-1);
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 2;
+    display: none;
+}
+
+/* OTP Verification Styles */
+.otp-container {
+    background-color: var(--eerie-black-2);
+    border: 1px solid var(--white-alpha-20);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: none;
+}
+
+.otp-title {
+    color: var(--gold-crayola);
+    font-size: var(--fontSize-title-3);
+    margin-bottom: 15px;
+}
+
+.otp-description {
+    color: var(--white);
+    margin-bottom: 20px;
+}
+
+.otp-input-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.otp-input {
+    width: 50px;
+    height: 60px;
+    font-size: 24px;
+    text-align: center;
+    border: 1px solid var(--white-alpha-20);
+    background-color: var(--smoky-black-3);
+    color: var(--white);
+    border-radius: 8px;
+}
+
+.otp-input:focus {
+    border-color: var(--gold-crayola);
+    outline: none;
+}
+
+.otp-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.otp-timer {
+    color: var(--quick-silver);
+    font-size: var(--fontSize-body-4);
+}
+
+.otp-resend {
+    color: var(--gold-crayola);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: var(--fontSize-body-4);
+    text-decoration: underline;
+}
+
+.otp-resend:disabled {
+    color: var(--quick-silver);
+    text-decoration: none;
+    cursor: not-allowed;
+}
+
+.otp-verify-btn {
+    margin-top: 15px;
+}
+
+/* Button Styles */
+.btn {
+    position: relative;
+    color: var(--gold-crayola);
+    font-size: var(--fontSize-label-2);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--letterSpacing-5);
+    max-width: max-content;
+    border: 2px solid var(--gold-crayola);
+    padding: 12px 45px;
+    overflow: hidden;
+    z-index: 1;
+    transition: var(--transition-2);
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200%;
+    height: 200%;
+    border-radius: var(--radius-circle);
+    background-color: var(--gold-crayola);
+    transition: var(--transition-2);
+    z-index: -1;
+}
+
+.btn .text {
+    transition: var(--transition-1);
+}
+
+.btn .text-2 {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: max-content;
+    color: var(--smoky-black-1);
+}
+
+.btn:is(:hover, :focus-visible)::before {
+    bottom: -50%;
+}
+
+.btn:is(:hover, :focus-visible) .text-1 {
+    transform: translateY(-40px);
+}
+
+.btn:is(:hover, :focus-visible) .text-2 {
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn-secondary {
+    background-color: var(--gold-crayola);
+    color: var(--black);
+    padding: 10px 20px;
+}
+
+.btn-secondary::before {
+    background-color: var(--smoky-black-1);
+}
+
+.btn-secondary .text-2 {
+    color: var(--white);
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-icon i {
+    font-size: 1.6rem;
+}
+
+/* Password Section */
+.password-section {
+    margin-top: 40px;
+    border-top: 1px solid var(--white-alpha-20);
+    padding-top: 30px;
+}
+
+.password-fields {
+    display: none;
+}
+
+/* Edit Mode Styles */
+.edit-mode .input-field:not([type="password"]) {
+    background-color: var(--eerie-black-2);
+    opacity: 1;
+}
+
+.edit-buttons {
+    display: none;
+}
+
+.edit-mode .edit-buttons {
+    display: flex;
+}
+
+.edit-mode .edit-button {
+    display: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .profile-flex {
+        flex-direction: column;
+    }
+    
+    .profile-avatar-section {
+        flex: 0 0 100%;
+        margin-bottom: 30px;
+    }
+    
+    .profile-content {
+        padding: 20px;
+    }
+
+    .otp-input-group {
+        gap: 5px;
+    }
+
+    .otp-input {
+        width: 40px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .profile-section-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .btn-group {
+        flex-wrap: wrap;
+    }
+} 
