@@ -46,17 +46,17 @@
     }
 
     function verifyOTP(otp) {
-        otpError.textContent = "";
+        // otpError.textContent = "";
 
-        fetch("/Admin/VerifyOTPCheck", {
+        fetch("/User/VerifyPasswordOTP", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ OTPCode: otp })
+            body: JSON.stringify({ OTPPassCode: otp })
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    toastr.success("Đã tạo tài khoản thành công!", "", {
+                    toastr.success("Xác thực tài khoản thành công!", "", {
                         timeOut: 4000,
                         extendedTimeOut: 1000,
                         closeButton: true,
@@ -68,7 +68,7 @@
                         window.location.href = data.redirectUrl;
                     }, 3000);
                 } else {
-                    otpError.textContent = data.message;
+                    // otpError.textContent = data.message;
                     toastr.error(data.message);
                     inputs.forEach(input => {
                         input.value = "";
@@ -79,7 +79,7 @@
             })
             .catch(error => {
                 console.error("Lỗi khi gửi OTP:", error);
-                otpError.textContent = "⚠ Có lỗi xảy ra, vui lòng thử lại!";
+                // otpError.textContent = "⚠ Có lỗi xảy ra, vui lòng thử lại!";
                 toastr.error("⚠ Có lỗi xảy ra, vui lòng thử lại!");
             });
     }
@@ -104,7 +104,7 @@ document.getElementById("resendOTP").addEventListener("click", function () {
     }, 1000);
 
     // Gửi yêu cầu Resend OTP
-    fetch('/Admin/ResendOTP', {
+    fetch('/User/ResendPasswordOTP', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -148,5 +148,3 @@ document.getElementById("resendOTP").addEventListener("click", function () {
             resendBtn.disabled = false;
         });
 });
-
-

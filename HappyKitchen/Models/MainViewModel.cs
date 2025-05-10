@@ -323,4 +323,65 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; }
     }
 
+<<<<<<< Updated upstream:HappyKitchen/Models/MainViewModel.cs
+=======
+    public class CommentRequestModel
+    {
+        public int MenuItemId { get; set; }
+        public int Rating { get; set; }
+        public string Comment { get; set; }
+    }
+
+    public class QRCode
+    {
+        [Key]
+        public int QRCodeID { get; set; }
+
+        [Required]
+        [ForeignKey(nameof(Table))] 
+        public int TableID { get; set; }
+
+        [Required]
+        [MaxLength(255)]
+        public string QRCodeImage { get; set; } = string.Empty; 
+
+        [Required]
+        [MaxLength(500)]
+        public string MenuUrl { get; set; } = string.Empty;
+
+        public int AccessCount { get; set; } = 0;
+
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
+
+        [Required]
+        [Range(0, 1, ErrorMessage = "Status must be 0 (Inactive) or 1 (Active)")]
+        public byte Status { get; set; } = 1;
+
+        public virtual Table Table { get; set; }
+    }
+
+    // Thêm class mới vào MainViewModel.cs
+    public class UserProfileViewModel
+    {
+        public User User { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public bool IsPhoneVerified { get; set; }
+    }
+
+    public class UserUpdateModel
+    {
+        public User User { get; set; }
+        public bool UpdatePassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+
+    public class ChangePasswordModel
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
+
+>>>>>>> Stashed changes:HappyKitchen/Data/MainViewModel.cs
 }

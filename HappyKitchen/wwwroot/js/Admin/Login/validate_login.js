@@ -51,7 +51,11 @@
                 } else {
                     toastr.success(data.message);
                     setTimeout(() => {
+<<<<<<< Updated upstream
                         window.location.href = "/Home/Menu"; // Trang Menu hoặc trang chủ
+=======
+                        window.location.href = "/dashboard"; // Trang Menu hoặc trang chủ
+>>>>>>> Stashed changes
                     }, 1500);
                 }
             } else {

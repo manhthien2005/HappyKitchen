@@ -48,7 +48,7 @@
     function verifyOTP(otp) {
         otpError.textContent = "";
 
-        fetch("/Admin/VerifyOTPCheck", {
+        fetch("/User/VerifyOTPCheck", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ OTPCode: otp })
@@ -56,7 +56,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    toastr.success("Đã tạo tài khoản thành công!", "", {
+                    toastr.success("🎉 Đã tạo tài khoản thành công!", "", {
                         timeOut: 4000,
                         extendedTimeOut: 1000,
                         closeButton: true,
@@ -104,7 +104,7 @@ document.getElementById("resendOTP").addEventListener("click", function () {
     }, 1000);
 
     // Gửi yêu cầu Resend OTP
-    fetch('/Admin/ResendOTP', {
+    fetch('/User/ResendOTP', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

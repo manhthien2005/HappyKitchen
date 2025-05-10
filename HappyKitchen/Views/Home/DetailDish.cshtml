@@ -24,6 +24,10 @@
     -->
     <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
 
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+
     <!--
       - google font link
     -->
@@ -272,9 +276,9 @@
 
                         <!-- Pagination Controls -->
                         <div class="pagination">
-                            <button id="prev-page" class="pagination-button" disabled>Previous</button>
-                            <div class="pagination-info">Page <span id="current-page">1</span> of <span id="total-pages">1</span></div>
-                            <button id="next-page" class="pagination-button" disabled>Next</button>
+                            <button id="prev-page" class="pagination-button" disabled>Trước</button>
+                            <div class="pagination-info">Trang&nbsp;<span id="current-page"> 1 </span> / <span id="total-pages"> 1 </span></div>
+                            <button id="next-page" class="pagination-button" disabled>Sau</button>
                         </div>
 
                         <!-- Comment Form -->
@@ -401,6 +405,42 @@
                         generateStarForElement(element);
                     });
                 });
+<<<<<<< Updated upstream
+=======
+
+            </script>
+            <script>
+                function toggleUserDropdown(event) {
+                    event.stopPropagation(); // Ngăn sự kiện click lan tỏa đến window
+                    const userDropdown = document.getElementById('userDropdown');
+                    userDropdown.classList.toggle('show');
+                }
+
+                document.getElementById('userAvatar').addEventListener('click', toggleUserDropdown);
+
+                window.addEventListener('click', function (event) {
+                    const userAvatar = document.getElementById('userAvatar');
+                    const userDropdown = document.getElementById('userDropdown');
+                    if (!userAvatar.contains(event.target) && !userDropdown.contains(event.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            </script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+            <script>
+                toastr.options = {
+                    "progressBar": true,
+                    "positionClass": "toast-bottom-right",
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "3000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+>>>>>>> Stashed changes
             </script>
 </body>
 

@@ -2472,3 +2472,132 @@ h1 {
     }
 }
 
+<<<<<<< Updated upstream
+=======
+
+
+/*
+    AVATAR USER
+*/
+/*
+    AVATAR USER
+*/
+/* Container styling */
+.login-container {
+    position: relative;
+    margin: 15px;
+
+}
+
+/* Định dạng avatar */
+.user-avatar {
+    position: relative;
+}
+
+    .user-avatar img.avatar-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        border: 2px solid transparent;
+        object-fit: cover;
+    }
+
+        /* Hiệu ứng hover nhẹ nhàng */
+        .user-avatar img.avatar-img:hover {
+            transform: scale(1.05);
+            border-color: #007bff;
+        }
+
+/* Định dạng dropdown */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transform-origin: top right;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+/* Arrow pointer for dropdown */
+.dropdown-arrow {
+    position: absolute;
+    top: -7px;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    background: white;
+    transform: rotate(45deg);
+    border-left: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    z-index: -1;
+}
+
+/* Dropdown hiển thị khi mở */
+.dropdown-menu.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Item trong dropdown */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #333;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+}
+
+    .dropdown-item i {
+        font-size: 16px;
+    }
+
+    /* Hover item */
+    .dropdown-item:hover {
+        background: hsl(38, 61%, 73%);
+        color: black;
+    }
+
+    /* Text danger styling */
+    .dropdown-item.text-danger {
+        color: #dc3545;
+    }
+
+        .dropdown-item.text-danger:hover {
+            background: #fff5f5;
+            color: #dc3545;
+        }
+
+/* Divider thẩm mỹ */
+.dropdown-divider {
+    margin: 6px 0;
+    border-top: 1px solid #eee;
+}
+
+/* Login button styling */
+.login-btn a.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+    .login-btn a.btn:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+>>>>>>> Stashed changes

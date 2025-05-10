@@ -33,7 +33,7 @@
     <!--
       - custom css link
     -->
-    <link rel="stylesheet" href="~/css/event.css">
+    <link rel="stylesheet" href="~/css/Home/about_us.css">
 
     <!--
       - preload images
@@ -118,7 +118,7 @@
     <header class="header" data-header>
         <div class="container">
 
-            <a href="#" class="logo">
+            <a href="@Url.Action("Index", "Home")" class="logo">
                 <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
             </a>
 
@@ -128,14 +128,14 @@
                     <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
                 </button>
 
-                <a href="#" class="logo">
+                <a href="@Url.Action("Index", "Home")" class="logo">
                     <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
                 </a>
 
                 <ul class="navbar-list">
 
                     <li class="navbar-item">
-                        <a href="#home" class="navbar-link hover-underline active">
+                        <a href="@Url.Action("Index", "Home")" class="navbar-link hover-underline active">
                             <div class="separator"></div>
 
                             <span class="span">Trang Chủ</span>
@@ -143,7 +143,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#about" class="navbar-link hover-underline">
+                        <a href="@Url.Action("AboutUs", "Home")" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Giới Thiệu</span>
@@ -151,7 +151,7 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#menu" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Menu", "Home")" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Thực Đơn</span>
@@ -159,15 +159,15 @@
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#event" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Event", "Home")" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
-                            <span class="span">Sự Kiện</span>
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#booking" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
                             <div class="separator"></div>
 
                             <span class="span">Kết Nối</span>
@@ -211,7 +211,55 @@
                 <span class="line line-3"></span>
             </button>
 
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                @if (Context.Session.GetString("Email") != null)
+                {
+                    <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
+            </div>
+
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <i class="bi bi-list"></i>
+            </button>
+
             <div class="overlay" data-nav-toggler data-overlay></div>
+
 
         </div>
     </header>
@@ -222,89 +270,53 @@
 
     <main>
         <article>
+
             <!--
-              - #EVENT
+              - #ABOUT
             -->
 
-            <section class="section event bg-black-10" aria-label="event" id="event">
+            <section class="section about text-center" aria-labelledby="about-label" id="about">
                 <div class="container">
 
-                    <p class="section-subtitle label-2 text-center">Cập Nhật Mới</p>
+                    <div class="about-content">
 
-                    <h2 class="section-title headline-1 text-center">Sự Kiện Sắp Tới</h2>
+                        <p class="label-2 section-subtitle" id="about-label">Về Chúng Tôi</p>
 
-                    <ul class="grid-list">
 
-                        <li>
-                            <div class="event-card has-before hover:shine">
+                        <h2 class="headline-2 section-title">
+                            Khởi Nguồn: Ba Con Người, Ba Đam Mê Khác Biệt
+                        </h2>
 
-                                <div class="card-banner img-holder" style="--width: 350; --height: 450;">
-                                    <img src="~/images/event-1.jpg" width="350" height="450" loading="lazy"
-                                         alt="Flavour so good you'll try to eat with your eyes." class="img-cover">
+                        <p class="section-text">
+                            Từ những ngày còn ngồi trên ghế giảng đường Đại học Quốc tế Sài Gòn (SIU), Khoa, Thiên và Tuấn đã là những người bạn thân thiết với những đam mê riêng biệt. Thiên - người luôn mày mò và đam mê phát triển phần mềm, thích nghiên cứu những ý tưởng mới. Khoa - con người kiên trì, chuyên cần, say mê quản lý và phục vụ. Tuấn - chàng trai thông minh, cần cù với niềm đam mê nấu ăn.
+                            Khi tốt nghiệp, cả ba đều phải đối mặt với những thử thách của thị trường lao động. Thiên bắt đầu làm freelance phát triển phần mềm, Khoa xin vào một xưởng sản xuất nhỏ, còn Tuấn thì lang thang qua các nhà hàng, mong được thể hiện tài năng nấu nướng.
+                        </p>
 
-                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
-                                </div>
+                        <h2 class="headline-2 section-title">
+                            Điểm Gặp Gỡ: Khi Đam Mê Hội Tụ
+                        </h2>
 
-                                <div class="card-content">
-                                    <p class="card-subtitle label-2 text-center">Đồ Ăn, Hương Vị</p>
+                        <p class="section-text">
+                            Một buổi chiều mưa, tại một quán cà phê quen thuộc, ba người bạn cũ chợt gặp nhau. Thiên bắt đầu chia sẻ về ý tưởng xây dựng một ứng dụng quản lý nhà hàng thông minh. Khoa - với khả năng quản lý và tinh thần phục vụ - nhận thấy tiềm năng của ý tưởng này. Tuấn, với kiến thức và đam mê ẩm thực, bỗng thấy cánh cửa mới mở ra.
+                            Từ những chia sẻ ban đầu, họ dần hình dung ra một dự án chung: Một nhà hàng không chỉ là nơi phục vụ thức ăn, mà còn là không gian kết nối con người.
+                        </p>
 
-                                    <h3 class="card-title title-2 text-center">
-                                        Hương vị tuyệt hảo, nhìn thôi cũng muốn thưởng thức!
-                                    </h3>
-                                </div>
+                        <h2 class="headline-2 section-title">
+                            Hành Trình Xây Dựng: Sức Mạnh Từ Sự Khác Biệt
+                        </h2>
 
-                            </div>
-                        </li>
+                        <p class="section-text">
+                            Thiên đảm nhiệm phần công nghệ, xây dựng hệ thống đặt bàn trực tuyến và quản lý nhà hàng thông minh. Những dòng mã của cô được viết với sự tỉ mỉ và sáng tạo, mang đến trải nghiệm hoàn toàn mới cho thực khách.
+                            Khoa, với sự kiên trì và tinh thần phục vụ, lo liệu mọi khâu vận hành. Anh thiết kế không gian ấm áp, chăm chút từng chi tiết để mang đến trải nghiệm tốt nhất cho khách hàng.
+                            Tuấn - người nắm giữ bếp núc - biến mỗi món ăn thành một tác phẩm nghệ thuật. Anh kết hợp các nguyên liệu theo cách riêng, mang đến những hương vị độc đáo và gần gũi.
+                            Happy Kitchen ra đời không chỉ là một nhà hàng, mà là kết tinh của ba đam mê khác biệt. Nơi đây không chỉ phục vụ thức ăn, mà còn là minh chứng cho sức mạnh của tình bạn và khát vọng chung.
+                            Ngày khai trương, không gian nhỏ chật kín khách. Mọi người không chỉ đến để thưởng thức ẩm thực, mà còn để trải nghiệm một không gian được xây dựng bằng tình yêu và đam mê.
+                        </p>
 
-                        <li>
-                            <div class="event-card has-before hover:shine">
 
-                                <div class="card-banner img-holder" style="--width: 350; --height: 450;">
-                                    <img src="~/images/event-2.jpg" width="350" height="450" loading="lazy"
-                                         alt="Flavour so good you'll try to eat with your eyes." class="img-cover">
+                    </div>
 
-                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
-                                </div>
-
-                                <div class="card-content">
-                                    <p class="card-subtitle label-2 text-center">Thực Phẩm Sạch</p>
-
-                                    <h3 class="card-title title-2 text-center">
-                                        Thực phẩm lành mạnh mang đến sức khỏe tốt và năng lượng tràn đầy mỗi ngày.
-                                    </h3>
-                                </div>
-
-                            </div>
-                        </li>
-
-                        <li>
-                            <div class="event-card has-before hover:shine">
-
-                                <div class="card-banner img-holder" style="--width: 350; --height: 450;">
-                                    <img src="~/images/event-3.jpg" width="350" height="450" loading="lazy"
-                                         alt="Flavour so good you'll try to eat with your eyes." class="img-cover">
-
-                                    <time class="publish-date label-2" datetime="2025-03-03">03/03/2025</time>
-                                </div>
-
-                                <div class="card-content">
-                                    <p class="card-subtitle label-2 text-center">Công Thức</p>
-
-                                    <h3 class="card-title title-2 text-center">
-                                        Công thức hoàn hảo tạo nên hương vị độc đáo và hấp dẫn.
-                                    </h3>
-                                </div>
-
-                            </div>
-                        </li>
-
-                    </ul>
-
-                    <a href="#" class="btn btn-primary">
-                        <span class="text text-1">Xem Blog Của Chúng Tôi</span>
-
-                        <span class="text text-2" aria-hidden="true">Xem Blog Của Chúng Tôi</span>
-                    </a>
+                    <img src="~/images/shape-3.png" width="197" height="194" loading="lazy" alt="" class="shape">
 
                 </div>
             </section>
@@ -320,7 +332,7 @@
       - #FOOTER
     -->
 
-    <footer class="footer section has-bg-image text-center"
+    <footer class="footer section has-bg-image text-center" id="connect"
             style="background-image: url('~/images/footer-bg.jpg')">
         <div class="container">
 
@@ -460,7 +472,53 @@
     -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="assets/js/section.js"></script>
+    <script src="~/js/section.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatar = document.getElementById('avatarDropdown');
+            const dropdownMenu = document.getElementById('userDropdown');
+
+            if (avatar && dropdownMenu) {
+                // Toggle dropdown khi click avatar
+                avatar.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Ngăn click lan ra ngoài
+                    dropdownMenu.classList.toggle('show');
+
+                    // Add aria attributes for accessibility
+                    const isExpanded = dropdownMenu.classList.contains('show');
+                    avatar.setAttribute('aria-expanded', isExpanded.toString());
+                });
+
+                // Ẩn dropdown khi click ra ngoài
+                document.addEventListener('click', (e) => {
+                    if (dropdownMenu.classList.contains('show') &&
+                        !avatar.contains(e.target) &&
+                        !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.remove('show');
+                        avatar.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Ẩn dropdown khi nhấn ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && dropdownMenu.classList.contains('show')) {
+                        dropdownMenu.classList.remove('show');
+                        avatar.setAttribute('aria-expanded', 'false');
+                        avatar.focus(); // Return focus to avatar
+                    }
+                });
+
+                // Prevent clicks inside dropdown from closing it
+                dropdownMenu.addEventListener('click', (e) => {
+                    // Only stop propagation if not clicking on a link
+                    if (!e.target.closest('a')) {
+                        e.stopPropagation();
+                    }
+                });
+            }
+        });
+
+    </script>
 
     <script>
     toastr.options = {

@@ -1,0 +1,478 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Happy Kitchen - Thông Tin Tài Khoản</title>
+    <meta name="title" content="Happy Kitchen - Thông Tin Tài Khoản">
+    <meta name="description" content="Quản lý thông tin tài khoản tại Happy Kitchen">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/User/Profile/profile.css">
+    <link rel="stylesheet" href="~/css/User/Profile/header.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+
+<body>
+    <!--
+      - #PRELOADER
+    -->
+
+    <div class="preload" data-preaload>
+        <div class="circle"></div>
+        <p class="text">HAPPY KITCHEN</p>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="container">
+            <address class="topbar-item">
+                <div class="icon">
+                    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">
+                    Happy Kitchen, 01 Thảo Điền, Hồ Chí Minh, VN
+                </span>
+            </address>
+
+            <div class="separator"></div>
+
+            <div class="topbar-item item-2">
+                <div class="icon">
+                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">Mở cửa : 8.00 AM - 10.00 PM</span>
+            </div>
+
+            <a href="tel:+11234567890" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">+84 977139203</span>
+            </a>
+
+            <div class="separator"></div>
+
+            <a href="mailto:booking@restaurant.com" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">happykitchenvn2025@gmail.com</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" data-header>
+        <div class="container">
+            <a href="@Url.Action("Index", "Home")" class="logo">
+                <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+
+            <nav class="navbar" data-navbar>
+
+                <button class="close-btn" aria-label="close menu" data-nav-toggler>
+                    <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+                </button>
+
+                <a href="@Url.Action("Index", "Home")" class="logo">
+                    <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
+                </a>
+
+                <ul class="navbar-list">
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#home" class="navbar-link hover-underline active">
+                            <div class="separator"></div>
+
+                            <span class="span">Trang Chủ</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#about" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Giới Thiệu</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#menu" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Thực Đơn</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#event" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Kết Nối</span>
+                        </a>
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <a href="#booking" class="btn btn-secondary">
+                <span class="text text-1">Đặt Bàn</span>
+                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+            </a>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <span class="line line-1"></span>
+                <span class="line line-2"></span>
+                <span class="line line-3"></span>
+            </button>
+
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                @if (Context.Session.GetString("Email") != null)
+                {
+                     <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="overlay" data-nav-toggler data-overlay></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Profile Section -->
+        <section class="section">
+            <div class="container">
+                <div class="profile-container">
+                    <!-- Profile Header -->
+                    <div class="profile-header">
+                        <h1 class="headline-1">Thông Tin Tài Khoản</h1>
+                    </div>
+
+                    <!-- Profile Content -->
+                    <div class="profile-content">
+                        <form method="post" action="#" enctype="multipart/form-data" id="profileForm">
+                            <div class="profile-flex">
+                                <!-- Avatar Section -->
+                                <div class="profile-avatar-section">
+                                    <div>
+                                        <div class="avatar-container">
+                                            @{
+                                                string avatarUrl1;
+                                                {
+                                                    // Lấy chữ cái đầu của tên
+                                                    string[] nameParts = Model.User.FullName.Split(' ');
+                                                    string initials = "";
+                                                    if (nameParts.Length > 0)
+                                                    {
+                                                        // Lấy chữ cái đầu của họ
+                                                        initials += nameParts[0][0];
+                                                        // Lấy chữ cái đầu của tên
+                                                        if (nameParts.Length > 1)
+                                                        {
+                                                            initials += nameParts[nameParts.Length - 1][0];
+                                                        }
+                                                    }
+                                                    // Tạo URL với chữ cái đầu
+                                                    avatarUrl1 = $"https://ui-avatars.com/api/?name={initials}&background=random&color=fff&size=150";
+                                                }
+                                            }
+                                            <img src="@avatarUrl1" 
+                                                 alt="User Avatar" 
+                                                 class="avatar-image" 
+                                                 id="avatarPreview">
+                                            
+                                            <label for="avatarUpload" class="avatar-upload-btn disabled" id="avatarUploadBtn">
+                                                <i class="bi bi-camera"></i>
+                                            </label>
+                                            <input type="file" id="avatarUpload" name="AvatarFile" style="display: none;" accept="image/*" disabled>
+                                        </div>
+                                        
+                                        <h2 class="title-2">@Model.User.FullName</h2>
+                                        <p class="body-4">@Model.User.Email</p>
+                                        
+                                        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
+                                            <span class="profile-status-badge @(Model.User.Status == 0 ? "profile-status-active" : "profile-status-inactive")">
+                                                @(Model.User.Status == 0 ? "Hoạt động" : "Không hoạt động")
+                                            </span>
+                                            <span class="profile-type-badge">
+                                                @(Model.User.UserType == 0 ? "Khách hàng" : "Nhân viên")
+                                            </span>
+                                        </div>
+                                        
+                                        <p class="body-4">
+                                            <i class="bi bi-calendar3"></i> Ngày tạo: @Model.User.CreatedAt.ToString("dd/MM/yyyy")
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- User Details Form -->
+                                <div class="profile-details-section">
+                                    <div class="profile-section-title">
+                                        <h3 class="title-3">Thông Tin Cá Nhân</h3>
+                                        <button type="button" class="btn btn-secondary edit-button" id="editProfileBtn">
+                                            <span class="text text-1">Chỉnh Sửa</span>
+                                            <span class="text text-2" aria-hidden="true">Chỉnh Sửa</span>
+                                        </button>
+                                        <div class="btn-group edit-buttons">
+                                            <button type="button" class="btn btn-secondary" id="saveProfileBtn">
+                                                <span class="text text-1">Lưu</span>
+                                                <span class="text text-2" aria-hidden="true">Lưu</span>
+                                            </button>
+                                            <button type="button" class="btn" id="cancelProfileBtn">
+                                                <span class="text text-1">Hủy</span>
+                                                <span class="text text-2" aria-hidden="true">Hủy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="profile-form-grid">
+                                        <!-- Form Fields -->
+                                        <div>
+                                            <label class="profile-form-label">
+                                                <i class="bi bi-person"></i> Họ và Tên
+                                            </label>
+                                            <input type="text" name="FullName" id="fullName" value="@Model.User.FullName" required maxlength="100"
+                                                   class="input-field" data-original="@Model.User.FullName" disabled>
+                                        </div>
+
+                                        <div>
+                                            <label class="profile-form-label">
+                                                <i class="bi bi-telephone"></i> Số Điện Thoại
+                                            </label>
+                                            <div class="field-with-verify">
+                                                <input type="tel" name="PhoneNumber" id="phoneNumber" value="@Model.User.PhoneNumber" required maxlength="15"
+                                                       class="input-field" data-original="@Model.User.PhoneNumber" disabled>
+                                                <button type="button" class="verify-btn" id="verifyPhone">Xác thực</button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="profile-form-label">
+                                                <i class="bi bi-envelope"></i> Email
+                                            </label>
+                                            <div class="field-with-verify">
+                                                <input type="email" name="Email" id="email" value="@Model.User.Email" maxlength="100"
+                                                       class="input-field" data-original="@Model.User.Email" disabled>
+                                                <button type="button" class="verify-btn" id="verifyEmail">Xác thực</button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="profile-form-label">
+                                                <i class="bi bi-geo-alt"></i> Địa Chỉ
+                                            </label>
+                                            <input type="text" name="Address" id="address" value="@Model.User.Address" maxlength="255"
+                                                   class="input-field" data-original="@Model.User.Address" disabled>
+                                        </div>
+                                    </div>
+
+                                    <!-- OTP Verification Section (Hidden by default) -->
+                                    <div id="otpContainer" class="otp-container">
+                                        <h3 class="otp-title">Xác Thực OTP</h3>
+                                        <p class="otp-description" id="otpDescription">
+                                            Chúng tôi đã gửi mã xác thực đến <span id="otpDestination"></span>. Vui lòng nhập mã để xác thực.
+                                        </p>
+                                        
+                                        <div class="otp-input-group">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="1">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="2">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="3">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="4">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="5">
+                                            <input type="text" class="otp-input" maxlength="1" data-index="6">
+                                        </div>
+                                        
+                                        <div class="otp-actions">
+                                            <span class="otp-timer">Mã xác thực hết hạn sau: <span id="otpTimer">02:00</span></span>
+                                            <button type="button" class="otp-resend" id="resendOtp" disabled>Gửi lại mã</button>
+                                        </div>
+                                        
+                                        <div style="text-align: center; margin-top: 20px;">
+                                            <button type="button" class="btn btn-secondary otp-verify-btn" id="verifyOtp">
+                                                <span class="text text-1">Xác Nhận</span>
+                                                <span class="text text-2" aria-hidden="true">Xác Nhận</span>
+                                            </button>
+                                            <button type="button" class="btn otp-verify-btn" id="cancelOtp" style="margin-left: 10px;">
+                                                <span class="text text-1">Hủy</span>
+                                                <span class="text text-2" aria-hidden="true">Hủy</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Password Change Section -->
+                                    <div class="password-section">
+                                        <div class="profile-section-title">
+                                            <h3 class="title-3">Đổi Mật Khẩu</h3>
+                                            <button type="button" class="btn btn-secondary edit-button" id="editPasswordBtn">
+                                                <span class="text text-1">Đổi Mật Khẩu</span>
+                                                <span class="text text-2" aria-hidden="true">Đổi Mật Khẩu</span>
+                                            </button>
+                                            <div class="btn-group edit-buttons" id="passwordButtons" style="display: none;">
+                                                <button type="button" class="btn btn-secondary" id="savePasswordBtn">
+                                                    <span class="text text-1">Lưu</span>
+                                                    <span class="text text-2" aria-hidden="true">Lưu</span>
+                                                </button>
+                                                <button type="button" class="btn" id="cancelPasswordBtn">
+                                                    <span class="text text-1">Hủy</span>
+                                                    <span class="text text-2" aria-hidden="true">Hủy</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="password-fields" id="passwordFields">
+                                            <div class="profile-form-grid">
+                                                <div>
+                                                    <label class="profile-form-label">
+                                                        <i class="bi bi-lock"></i> Mật Khẩu Hiện Tại
+                                                    </label>
+                                                    <input type="password" name="CurrentPassword" id="currentPassword"
+                                                           class="input-field">
+                                                </div>
+                                                
+                                                <div>
+                                                    <label class="profile-form-label">
+                                                        <i class="bi bi-lock"></i> Mật Khẩu Mới
+                                                    </label>
+                                                    <input type="password" name="NewPassword" id="newPassword"
+                                                           class="input-field">
+                                                </div>
+                                                
+                                                <div>
+                                                    <label class="profile-form-label">
+                                                        <i class="bi bi-lock-fill"></i> Xác Nhận Mật Khẩu Mới
+                                                    </label>
+                                                    <input type="password" name="ConfirmPassword" id="confirmPassword"
+                                                           class="input-field">
+                                                </div>
+                                            </div>
+                                            
+                                            <div style="margin-top: 20px;">
+                                                <p class="body-4">
+                                                    <i class="bi bi-info-circle"></i> Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" ></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "3000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+        });
+    </script>
+
+    <!-- Custom JS -->
+    <script src="~/js/User/Profile/profile.js"></script>
+    <script src="~/js/User/Profile/header.js"></script>
+
+    <script>
+        function toggleUserDropdown(event) {
+            event.stopPropagation(); // Ngăn sự kiện click lan tỏa đến window
+            const userDropdown = document.getElementById('userDropdown');
+            userDropdown.classList.toggle('show');
+        }
+
+        document.getElementById('userAvatar').addEventListener('click', toggleUserDropdown);
+
+        window.addEventListener('click', function (event) {
+            const userAvatar = document.getElementById('userAvatar');
+            const userDropdown = document.getElementById('userDropdown');
+            if (!userAvatar.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+    </script>
+
+
+    <!-- Ionicon -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>
