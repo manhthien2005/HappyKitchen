@@ -282,7 +282,7 @@
         <article>
 
             <!--
-              - #HERO
+              --#HERO
             -->
 
             <section class="hero text-center" aria-label="home" id="home">
@@ -798,7 +798,7 @@
             -->
 
             <section class="section testi text-center has-bg-image"
-                     style="background-image: url('~/images/testimonial-bg.jpg')" aria-label="testimonials">
+                     style="background-image: url('@Url.Content("~/images/testimonial-bg.jpg")')" aria-label="testimonials">
                 <div class="container">
 
                     <div class="quote">”</div>
@@ -998,7 +998,7 @@
                                 </a>
                             }
                         </div>
-                        <div class="form-right text-center" style="background-image: url('~/images/form-pattern.png')">
+                        <div class="form-right text-center" style="background-image:url('@Url.Content("~/images/form-pattern.png")')">
 
                             <h2 class="headline-1 text-center">Liên Hệ</h2>
 
@@ -1453,7 +1453,7 @@
     -->
 
     <footer class="footer section has-bg-image text-center" id="connect"
-            style="background-image: url('~/images/footer-bg.jpg')">
+            style="background-image: url('@Url.Content("~/images/footer-bg.jpg")')">
         <div class="container">
 
             <div class="footer-top grid-list">
@@ -1969,7 +1969,7 @@
     -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="assets/js/section.js"></script>
+    <script src="~/js/section.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const avatar = document.getElementById('avatarDropdown');
