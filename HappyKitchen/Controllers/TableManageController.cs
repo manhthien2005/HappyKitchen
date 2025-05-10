@@ -133,7 +133,10 @@ namespace HappyKitchen.Controllers
                     return Json(new { success = false, message = "Vui lòng nhập tên khu vực" });
                 }
 
-                if ((await _areaTableService.GetAllAreasAsync(model.AreaName)).Any(a => a.AreaName.ToLower() == model.AreaName.ToLower()))
+                
+                var existingAreas = await _areaTableService.GetAllAreasAsync(model.AreaName);
+                if (existingAreas.Any(a => 
+                    a.AreaName.ToLower() == model.AreaName.ToLower() && a.AreaID != model.AreaID))
                 {
                     return Json(new { success = false, message = "Tên khu vực đã tồn tại, hãy thử tên khác đi bé." });
                 }

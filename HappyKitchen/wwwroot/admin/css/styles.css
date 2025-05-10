@@ -6,7 +6,9 @@ body {
     transition: all 0.3s;
     min-height: 100vh;
 }
-
+.user-profile {
+    cursor: pointer;
+}
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
