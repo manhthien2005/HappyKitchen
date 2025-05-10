@@ -164,7 +164,7 @@ namespace HappyKitchen.Controllers
                 }
 
                 var employee = await _context.Users
-                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 1)
+                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 0)
                     .FirstOrDefaultAsync();
                 if (employee == null)
                 {

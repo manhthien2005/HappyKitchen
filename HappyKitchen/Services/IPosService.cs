@@ -30,12 +30,12 @@ namespace HappyKitchen.Services
 
             foreach (var table in tables)
             {
-                // Kiểm tra đặt bàn đang hoạt động
+                // Kiểm tra đặt bàn còn hiệu lực trong khoảng thời gian hợp lệ
                 bool hasActiveReservation = await _context.Reservations
                     .AnyAsync(r => r.TableID == table.TableID
-                        && r.Status == 1 // Xác nhận
+                        && r.Status == 1 // Đã xác nhận
                         && DateTime.Now >= r.ReservationTime
-                        && DateTime.Now < r.ReservationTime.AddMinutes(r.Duration));
+                        && DateTime.Now < r.ReservationTime.AddHours(r.Duration)); // Sửa từ AddMinutes thành AddHours
 
                 // Kiểm tra đơn hàng đang hoạt động
                 bool hasActiveOrder = await _context.Orders
@@ -43,6 +43,7 @@ namespace HappyKitchen.Services
                         && o.Status >= 1 && o.Status <= 2 // Chờ xác nhận hoặc đang chuẩn bị
                         && o.OrderTime >= DateTime.Now.AddHours(-4)); // Hoạt động trong 4 giờ gần nhất
 
+                // Gán trạng thái bàn
                 table.Status = hasActiveReservation ? (byte)1 // Đã đặt trước
                     : hasActiveOrder ? (byte)2 // Đang sử dụng
                     : (byte)0; // Trống
@@ -59,20 +60,23 @@ namespace HappyKitchen.Services
 
             if (table != null)
             {
+                // Kiểm tra đặt bàn còn hiệu lực trong khoảng thời gian hợp lệ
                 bool hasActiveReservation = await _context.Reservations
                     .AnyAsync(r => r.TableID == table.TableID
-                        && r.Status == 1
+                        && r.Status == 1 // Đã xác nhận
                         && DateTime.Now >= r.ReservationTime
-                        && DateTime.Now < r.ReservationTime.AddMinutes(r.Duration));
+                        && DateTime.Now < r.ReservationTime.AddHours(r.Duration)); // Sửa từ AddMinutes thành AddHours
 
+                // Kiểm tra đơn hàng đang hoạt động
                 bool hasActiveOrder = await _context.Orders
                     .AnyAsync(o => o.TableID == table.TableID
-                        && o.Status >= 1 && o.Status <= 2
-                        && o.OrderTime >= DateTime.Now.AddHours(-4));
+                        && o.Status >= 1 && o.Status <= 2 // Chờ xác nhận hoặc đang chuẩn bị
+                        && o.OrderTime >= DateTime.Now.AddHours(-4)); // Hoạt động trong 4 giờ gần nhất
 
-                table.Status = hasActiveReservation ? (byte)1
-                    : hasActiveOrder ? (byte)2
-                    : (byte)0;
+                // Gán trạng thái bàn
+                table.Status = hasActiveReservation ? (byte)1 // Đã đặt trước
+                    : hasActiveOrder ? (byte)2 // Đang sử dụng
+                    : (byte)0; // Trống
             }
 
             return table;
@@ -81,7 +85,7 @@ namespace HappyKitchen.Services
         public async Task<List<User>> GetCustomersAsync(string searchTerm)
         {
             var query = _context.Users
-                .Where(u => u.UserType == 0 && u.Status == 0); // Customers only, active
+                .Where(u => u.UserType == 0 && u.Status == 0); // Chỉ khách hàng, đang hoạt động
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 searchTerm = searchTerm.ToLower();
