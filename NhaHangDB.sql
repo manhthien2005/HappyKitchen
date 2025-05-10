@@ -107,7 +107,7 @@ CREATE TABLE MenuItems (
     Name NVARCHAR(100) NOT NULL,
     MenuItemImage VARCHAR(255) NULL,
     CategoryID INT NOT NULL,
-    Price DECIMAL(10,2) NOT NULL,
+    Price DECIMAL(18,2) NOT NULL,
     Description NVARCHAR(255) NULL,
     Status TINYINT NOT NULL CHECK (Status IN (0,1)), -- 0 = Hết hàng, 1 = Còn hàng
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE CASCADE ON UPDATE CASCADE
