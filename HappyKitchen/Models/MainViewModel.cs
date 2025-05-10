@@ -211,7 +211,7 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
-        public class Order
+               public class Order
         {
             [Key]
             public int OrderID { get; set; }
@@ -419,7 +419,16 @@ namespace HappyKitchen.Models
         public decimal TotalPrice => MenuItem != null ? MenuItem.Price * Quantity : 0;
     }
 
-    
+
+
+    public class VNPayRequest
+    {
+        public string OrderId { get; set; }
+        public int Amount { get; set; }
+        public string OrderDescription { get; set; }
+        public string CreatedDate { get; set; } 
+        public string ClientIp { get; set; }
+    }
 
 
 }

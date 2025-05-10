@@ -1,0 +1,392 @@
+﻿:root {
+    --dark: #121212;
+    --gold: #D6B981;
+    --gold-light: #E5D3A8;
+    --gold-dark: #B39B69;
+    --white: #FFFFFF;
+    --error: #FF5252;
+    --info: #64B5F6;
+    --text-light: #E0E0E0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.payment-result-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    z-index: 1;
+}
+
+.slider-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.img-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.3);
+}
+
+.payment-card {
+    background-color: rgba(18, 18, 18, 0.95);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 0;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    color: var(--text-light);
+    animation: cardAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+@keyframes cardAppear {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.celebration-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 10;
+}
+
+
+.card-header {
+    background-color: var(--dark);
+    padding: 20px;
+    border-bottom: 1px solid var(--gold);
+    animation: fadeInDown 0.8s ease-out 0.3s both;
+}
+
+.header-title {
+    color: var(--gold);
+    font-size: 24px;
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.status-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 30px auto 20px;
+    border: 2px solid var(--gold);
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s both;
+}
+
+    .status-icon i {
+        font-size: 40px;
+        color: var(--gold);
+    }
+
+    .status-icon.success {
+        background-color: white;
+    }
+
+    .status-icon.error {
+        background-color: transparent;
+        border-color: var(--error);
+    }
+
+        .status-icon.error i {
+            color: var(--error);
+        }
+
+    .status-icon.info {
+        background-color: transparent;
+        border-color: var(--info);
+    }
+
+        .status-icon.info i {
+            color: var(--info);
+        }
+
+.result-title {
+    color: var(--gold);
+    font-size: 22px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    padding: 0 20px;
+    animation: fadeInUp 0.8s ease-out 0.7s both;
+}
+
+.transaction-details {
+    background-color: rgba(214, 185, 129, 0.1);
+    border-radius: 4px;
+    padding: 16px;
+    margin: 0 20px 30px;
+    border-left: 3px solid var(--gold);
+    animation: fadeInUp 0.8s ease-out 0.9s both;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(214, 185, 129, 0.2);
+}
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+.detail-label {
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+.detail-value {
+    color: var(--gold);
+    font-weight: 500;
+}
+
+    .detail-value.amount {
+        color: var(--gold);
+        font-weight: 600;
+    }
+
+.countdown-container {
+    margin: 30px 20px;
+    animation: fadeInUp 0.8s ease-out 1.1s both;
+}
+
+    .countdown-container p {
+        color: var(--text-light);
+        margin-bottom: 12px;
+    }
+
+#countdown {
+    font-weight: bold;
+    color: var(--dark);
+    background-color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.progress-bar {
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 12px;
+}
+
+.progress {
+    height: 100%;
+    background-color: var(--gold);
+    width: 100%;
+    transition: width 1s linear;
+}
+
+.action-buttons {
+    margin: 30px 0;
+    animation: fadeInUp 0.8s ease-out 1.1s both;
+}
+
+.home-button {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--gold);
+    padding: 12px 30px;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+    .home-button:hover {
+        background-color: var(--gold);
+        color: var(--dark);
+    }
+
+.card-footer {
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(214, 185, 129, 0.3);
+    animation: fadeInUp 0.8s ease-out 1.3s both;
+}
+
+.divider {
+    position: relative;
+    text-align: center;
+    margin: 0 0 15px;
+}
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: rgba(214, 185, 129, 0.3);
+        z-index: 1;
+    }
+
+.divider-icon {
+    position: relative;
+    z-index: 2;
+    background-color: rgba(18, 18, 18, 0.95);
+    padding: 0 15px;
+    color: var(--gold);
+    font-size: 12px;
+}
+
+.thank-you {
+    color: var(--text-light);
+    font-size: 14px;
+    margin: 10px 0 0;
+    font-style: italic;
+}
+
+.success-gif {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 30px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -30px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 576px) {
+    .payment-card {
+        max-width: 100%;
+    }
+
+    .header-title {
+        font-size: 20px;
+    }
+
+    .result-title {
+        font-size: 18px;
+    }
+}
+
+
+.celebration-star {
+    position: absolute;
+    pointer-events: none;
+    z-index: 20;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+    opacity: 0; /* Tàng hình ban đầu */
+}
+
+.celebration-sparkle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+}
+
+@keyframes starMoveAndRotate {
+    0% {
+        opacity: 0; /* Tàng hình */
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    1% {
+        opacity: 1; /* Hiện ngay khi bắt đầu bắn */
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(var(--translateX), var(--translateY)) rotate(var(--rotations));
+    }
+}
+
+@keyframes sparkle {
+    0% {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0);
+    }
+}

@@ -1,0 +1,105 @@
+﻿@{
+    ViewData["Title"] = "Kết quả thanh toán";
+    Layout = null;
+}
+
+<div class="payment-result-container">
+    <ul class="hero-slider" data-hero-slider>
+        <li class="slider-item active" data-hero-slider-item>
+            <div class="slider-bg">
+                <img src="~/images/hero-slider-1.jpg" width="1880" height="950" alt="" class="img-cover">
+            </div>
+        </li>
+        <li class="slider-item" data-hero-slider-item>
+            <div class="slider-bg">
+                <img src="~/images/hero-slider-2.jpg" width="1880" height="950" alt="" class="img-cover">
+            </div>
+        </li>
+        <li class="slider-item" data-hero-slider-item>
+            <div class="slider-bg">
+                <img src="~/images/hero-slider-3.jpg" width="1880" height="950" alt="" class="img-cover">
+            </div>
+        </li>
+    </ul>
+
+    <div class="payment-card" id="payment-card">
+        <div class="celebration-container" id="celebration-container"></div>
+        <div class="card-header">
+            <h1 class="header-title">Kết quả thanh toán</h1>
+        </div>
+
+        @if (ViewBag.Message.Contains("thành công") || ViewBag.Message.Contains("Thành công"))
+        {
+            <div class="status-icon success">
+                <img src="~/images/Payment/credit-card.gif" alt="Thanh toán thành công" class="success-gif" />
+            </div>
+        }
+        else if (ViewBag.Message.Contains("thất bại") || ViewBag.Message.Contains("Thất bại") || ViewBag.Message.Contains("lỗi"))
+        {
+            <div class="status-icon error">
+                <i class="fas fa-times-circle"></i>
+            </div>
+        }
+        else
+        {
+            <div class="status-icon info">
+                <i class="fas fa-info-circle"></i>
+            </div>
+        }
+
+        <h2 class="result-title">@ViewBag.Message</h2>
+
+        @if (ViewBag.TransactionId != null || ViewBag.Amount != null)
+        {
+            <div class="transaction-details">
+                @if (ViewBag.TransactionId != null)
+                {
+                    <div class="detail-item">
+                        <span class="detail-label">Mã giao dịch:</span>
+                        <span class="detail-value">@ViewBag.TransactionId</span>
+                    </div>
+                }
+                @if (ViewBag.Amount != null)
+                {
+                    <div class="detail-item">
+                        <span class="detail-label">Số tiền:</span>
+                        <span class="detail-value amount">@String.Format("{0:N0}", ViewBag.Amount) VND</span>
+                    </div>
+                }
+                <div class="detail-item">
+                    <span class="detail-label">Phương thức thanh toán:</span>
+                    <span class="detail-value amount">Thẻ</span>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.ShowCountdown == true)
+        {
+            <div class="countdown-container">
+                <p>Quay về trang chủ sau <span id="countdown">10</span> giây</p>
+                <div class="progress-bar">
+                    <div class="progress" id="progress-bar"></div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="action-buttons">
+                <a href="@Url.Action("Index", "Home")" class="home-button">
+                    <i class="fas fa-home"></i> Về trang chủ
+                </a>
+            </div>
+        }
+
+        <div class="card-footer">
+            <div class="divider">
+                <span class="divider-icon">✦</span>
+            </div>
+            <p class="thank-you">Cảm ơn quý khách đã sử dụng dịch vụ</p>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="~/css/Reservation/Paid.css">
+<script src="~/js/Reservation/Paid.js"></script>

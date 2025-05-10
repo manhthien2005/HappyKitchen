@@ -58,7 +58,7 @@
                 <button class="apply-button">ÁP DỤNG</button>
             </div>
             <p class="no-discount">Không có mã giảm giá hiện tại.</p>
-
+            
             <div class="price-breakdown">
                 <div class="price-row"> 
                     <span>Tạm tính:</span>
@@ -69,39 +69,32 @@
                     <span>0 đ</span>
                 </div>
                 <div class="price-row">
-                    <span>Thuế:</span>
-                    <span>@Model.TotalPrice đ</span>
+                    <span>Thuế (20%):</span>
+                    <span>@((Model.TotalPrice*0.2m).ToString("N0")) đ</span>
                 </div>
                 <div class="total-row">
                     <span>Tổng thanh toán:</span>
-                    <span>@Model.TotalPrice đ</span>
+                    <span>@(((Model.TotalPrice * 0.2m) + Model.TotalPrice).ToString("N0"))đ</span>
                 </div>
             </div>
-
-            <div class="payment-methods">
-                <h3 class="payment-title">Phương thức thanh toán</h3>
-                <div class="payment-option">
-                    <input type="radio" id="momo" name="payment" checked>
-                    <label for="momo">Thanh toán bằng MOMO</label>
+            <form asp-controller="Reservation" asp-action="CreateOrder" method="post">
+                <div class="payment-methods">
+                    <h3 class="payment-title">Phương thức thanh toán</h3>
+                    <div class="payment-option">
+                        <input type="radio" id="cash" name="payment" value="CASH">
+                        <label for="cash">Thanh toán bằng Tiền mặt</label>
+                        <input type="radio" id="card" name="payment" value="CARD">
+                        <label for="card">Thanh toán bằng Thẻ</label>
+                        <input type="radio" id="vnpay" name="payment" value="VNPAY">
+                        <label for="vnpay">Thanh toán bằng VNPay</label>
+                    </div>
                 </div>
-                <div class="payment-option">
-                    <input type="radio" id="vnpay" name="payment">
-                    <label for="vnpay">Thanh toán bằng VNPay</label>
+                <div class="button-group">
+                    <button type="button" class="back-button">TRỞ LẠI</button>
+                    <button type="submit" class="confirm-button">XÁC NHẬN THANH TOÁN</button>
                 </div>
-                <div class="price-row">
-                    <span>Cọc (30%) hóa đơn:</span>
-                    <span>@((Model.TotalPrice * 0.3m).ToString("N0")) đ</span>
-                </div>
-                <div class="price-row">
-                    <span>Còn lại (70%):</span>
-                    <span>@((Model.TotalPrice * 0.7m).ToString("N0")) đ</span>
-                </div>
-            </div>
-
-            <div class="button-group">
-                <button class="back-button">TRỞ LẠI</button>
-                <button class="confirm-button">XÁC NHẬN THANH TOÁN</button>
-            </div>
+            </form>
+            
         </div>
     </main>
 
