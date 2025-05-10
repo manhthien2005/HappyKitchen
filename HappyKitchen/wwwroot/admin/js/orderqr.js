@@ -9,7 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         searchTerm: "",
         categoryFilter: 0,
         currentPage: 1,
-        totalPages: 1
+        totalPages: 1,
+        userInfo: null
     };
 
     // API Endpoints
@@ -20,7 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
             (searchTerm ? `&searchTerm=${encodeURIComponent(searchTerm)}` : '') +
             (categoryId > 0 ? `&categoryId=${categoryId}` : ''),
         categories: '/OrderQR/GetCategories',
-        createOrder: '/OrderQR/CreateOrder'
+        createOrder: '/OrderQR/CreateOrder',
+        checkUserLogin: '/User/CheckLoginStatus'
     };
 
     // DOM Elements
@@ -41,7 +43,13 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollTopButton: document.getElementById("scroll-top-button"),
         menuForm: document.getElementById("menu-form"),
         loadingOverlay: document.getElementById("loading-overlay"),
-        toastContainer: document.getElementById("toast-container")
+        toastContainer: document.getElementById("toast-container"),
+        userIcon: document.getElementById("user-icon"),
+        accountPopup: document.getElementById("account-popup"),
+        loginSection: document.getElementById("login-section"),
+        userSection: document.getElementById("user-section"),
+        userName: document.getElementById("user-name"),
+        sidebarAccountInfo: document.getElementById("sidebar-account-info")
     };
 
     // Skeleton Loaders
@@ -101,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
             state.categoryFilter = categoryId;
             state.currentPage = page;
 
-            const url = API.menuItems(page, 8, searchTerm, categoryId);
+            const url = API.menuItems(page, 4, searchTerm, categoryId);
             const result = await utils.fetchData(url);
 
             if (result.success) {
@@ -304,6 +312,55 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // User Authentication
+    async function checkUserLoginStatus() {
+        try {
+            const response = await fetch(API.checkUserLogin, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            
+            const result = await response.json();
+            if (result.success && result.data) {
+                state.userInfo = result.data;
+                updateUserInterface();
+            }
+        } catch (error) {
+            console.error('Check login status error:', error);
+        }
+    }
+
+    function updateUserInterface() {
+        if (state.userInfo) {
+            // Cập nhật thông tin người dùng đã đăng nhập
+            if (DOM.loginSection) DOM.loginSection.style.display = 'none';
+            if (DOM.userSection) {
+                DOM.userSection.style.display = 'block';
+                DOM.userName.textContent = state.userInfo.fullName || state.userInfo.email;
+            }
+            
+            // Cập nhật thông tin sidebar
+            if (DOM.sidebarAccountInfo) {
+                DOM.sidebarAccountInfo.innerHTML = `
+                    <p>Đã đăng nhập với tài khoản:</p>
+                    <p class="fw-bold">${state.userInfo.email}</p>
+                    <div class="d-grid">
+                        <a href="/User/Profile" class="btn btn-sm btn-outline-primary">Xem tài khoản</a>
+                    </div>
+                `;
+            }
+            
+            // Cập nhật thông tin khách hàng nếu chưa có
+            if (DOM.customerName.textContent === "Khách QR" && state.userInfo.fullName) {
+                DOM.customerName.textContent = state.userInfo.fullName;
+            }
+            
+            if (DOM.customerPhone.textContent === "-" && state.userInfo.phone) {
+                DOM.customerPhone.textContent = state.userInfo.phone;
+            }
+        }
+    }
+
     // Event Listeners
     function setupEventListeners() {
         let menuItemSearchTimeout;
@@ -404,7 +461,8 @@ document.addEventListener("DOMContentLoaded", () => {
             await Promise.all([
                 validateTable(),
                 loadCategories(),
-                loadMenuItems()
+                loadMenuItems(),
+                checkUserLoginStatus()
             ]);
 
             setupEventListeners();

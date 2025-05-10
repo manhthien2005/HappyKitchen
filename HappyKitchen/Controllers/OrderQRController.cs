@@ -70,9 +70,10 @@ namespace HappyKitchen.Controllers
                 await TrackQRCodeAccessByTableId(tableId);
 
                 ViewBag.TableId = tableId;
-                ViewBag.TableName = table.TableName; // Add TableName to ViewBag
-                ViewBag.FullName = HttpContext.Session.GetString("FullName") ?? "Khách QR"; // Default to "Khách QR" if not set
-                ViewBag.Phone = HttpContext.Session.GetString("Phone") ?? "-"; // Default to "-" if not set
+                ViewBag.TableName = table.TableName;
+                ViewBag.FullName = HttpContext.Session.GetString("FullName") ?? "-";
+                ViewBag.Phone = HttpContext.Session.GetString("Phone") ?? "-"; 
+                ViewBag.IsLoggedIn = HttpContext.Session.GetInt32("UserID").HasValue;
                 stopwatch.Stop();
                 _logger.LogDebug("Index completed in {ElapsedMs}ms", stopwatch.ElapsedMilliseconds);
                 return View("Index");

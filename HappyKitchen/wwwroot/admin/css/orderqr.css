@@ -139,7 +139,7 @@ header {
 .cart-container {
     width: 400px;
     background-color: var(--selected-items-bg);
-    padding: 1.5rem;
+    padding: 1.5rem 1.5rem 5rem 1.5rem;
     position: sticky;
     top: 80px;
     height: calc(100vh - 80px);
@@ -733,4 +733,51 @@ header {
         padding: 0.5rem 0.75rem;
         font-size: 0.9rem;
     }
+}
+
+/* User Account Styles */
+.user-account-container {
+    position: relative;
+}
+
+.user-icon {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.user-icon:hover {
+    color: var(--primary-color);
+}
+
+.account-popup {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 220px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    z-index: 1000;
+    display: none;
+    margin-top: 10px;
+}
+
+.account-popup.show {
+    display: block;
+}
+
+.account-popup-content p {
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.account-info {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.account-info p {
+    margin-bottom: 10px;
+    font-size: 14px;
 }
