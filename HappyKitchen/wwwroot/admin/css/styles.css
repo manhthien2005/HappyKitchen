@@ -31,7 +31,10 @@ body {
 .sidebar {
     background-color: var(--sidebar-bg);
     color: white;
-    height: 100vh;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
     position: fixed;
     width: 250px;
     transition: all 0.3s;

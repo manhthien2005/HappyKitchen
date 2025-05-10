@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="food-item">
                 <div class="food-rank">${food.rank}</div>
                 <div class="food-image">
-                    <img src="${food.image}" alt="${food.name}">
+                    <img src="/images/MenuItem/${food.image}" alt="${food.name}">
                 </div>
                 <div class="food-content">
                     <h6 class="food-title">${food.name}</h6>
