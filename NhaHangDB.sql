@@ -175,102 +175,79 @@ CREATE TABLE QRCodes (
 );
 
 GO
--- Thêm dữ liệu vào bảng Roles
+-- Vai trò
 INSERT INTO Roles (RoleKey, RoleName, Description) VALUES
 (N'MANAGER', N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
 (N'WAITER', N'Nhân viên phục vụ', N'Phục vụ khách hàng và xử lý đơn hàng'),
 (N'CHEF', N'Đầu bếp', N'Chuẩn bị món ăn theo đơn hàng'),
-(N'ADMIN', N'Quản trị viên', N'Quản trị viên hệ thống'),
-(N'CASHIER', N'Thu ngân', N'Xử lý thanh toán và hóa đơn');
+(N'ADMIN', N'Quản trị viên', N'Quản trị hệ thống'),
+(N'CASHIER', N'Thu ngân', N'Xử lý đơn hàng và hóa đơn thanh toán');
 
--- Thêm dữ liệu vào bảng Permissions
+-- Bảng quyền
 INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
-(N'MENU_MANAGE', N'Quản lý thực đơn', N'Quyền quản lý toàn bộ món ăn trong thực đơn'), --product
-(N'MENU_CATEGORY_MANAGE', N'Quản lý danh mục món ăn', N'Quản lý các nhóm danh mục trong thực đơn'), --category
-(N'MENU_TAG_MANAGE', N'Quản lý thẻ thực đơn', N'Quản lý thẻ nhóm món ăn'), --attribute
-(N'TABLE_BOOKING_MANAGE', N'Quản lý đặt bàn', N'Xem và xử lý thông tin đặt bàn'), --res
-(N'TABLE_QR_MANAGE', N'Quản lý mã QR bàn', N'Tạo và quản lý mã QR cho bàn'), --qrtable
-(N'CUSTOMER_ACCOUNT_MANAGE', N'Quản lý tài khoản khách hàng', N'Xem và chỉnh sửa thông tin khách hàng'), --user:0
-(N'STAFF_ACCOUNT_MANAGE', N'Quản lý tài khoản nhân viên', N'Quản lý hồ sơ nhân viên'), --user:1
-(N'ROLE_PERMISSION_MANAGE', N'Quản lý vai trò và phân quyền', N'Tạo, phân quyền, chỉnh sửa vai trò'), --role
-(N'VIEW_REPORT', N'Xem báo cáo', N'Xem các báo cáo thống kê và doanh thu'),  --page dashboard
-(N'ORDER_PREPARE', N'Chuẩn bị món ăn', N'Đánh dấu món ăn đã sẵn sàng'), --page pos
-(N'PAYMENT_MANAGE', N'Thu ngân', N'Xử lý hóa đơn và thanh toán');
+(N'MENU_MANAGE', N'Quản lý thực đơn', N'Quản lý toàn bộ món ăn trong thực đơn'),
+(N'MENU_CATEGORY_MANAGE', N'Quản lý danh mục món ăn', N'Quản lý các nhóm danh mục trong thực đơn'),
+(N'MENU_TAG_MANAGE', N'Quản lý thẻ thực đơn', N'Quản lý thẻ nhóm món ăn'),
+(N'TABLE_BOOKING_MANAGE', N'Quản lý đặt bàn', N'Xem và xử lý thông tin đặt bàn'),
+(N'TABLE_QR_MANAGE', N'Quản lý mã QR bàn', N'Tạo và quản lý mã QR cho bàn'),
+(N'CUSTOMER_ACCOUNT_MANAGE', N'Quản lý tài khoản khách hàng', N'Xem và chỉnh sửa thông tin khách hàng'),
+(N'STAFF_ACCOUNT_MANAGE', N'Quản lý tài khoản nhân viên', N'Quản lý hồ sơ nhân viên'),
+(N'ROLE_PERMISSION_MANAGE', N'Quản lý vai trò và phân quyền', N'Tạo, phân quyền, chỉnh sửa vai trò'),
+(N'VIEW_REPORT', N'Xem báo cáo', N'Xem các báo cáo thống kê và doanh thu'),
+(N'TABLE_MANAGE', N'Quản lý bàn', N'Quản lý danh sách bàn, chỉnh sửa, xóa, thêm mới'),
+(N'ORDER_MANAGE', N'Quản lý đơn hàng', N'Tạo, chỉnh sửa, xóa và xem thông tin đơn hàng (gồm thanh toán)');
 
-INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
-(N'TABLE_MANAGE', N'Quản lý bàn', N'Quản lý danh sách bàn, chỉnh sửa, xóa, thêm mới');
-INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
-(N'ORDER_MANAGE', N'Quản lý đơn hàng', N'Tạo, chỉnh sửa, xóa và xem thông tin đơn hàng');
-
-
-
+-- MANAGER: đầy đủ quyền (trừ ROLE_PERMISSION_MANAGE view-only, QR có thể giữ lại tùy ý)
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
--- MANAGER (Quản lý): Quyền mạnh, trừ TABLE_QR_MANAGE và ROLE_PERMISSION_MANAGE
-(1, 1, 1, 1, 1, 1), -- MENU_MANAGE
-(1, 2, 1, 1, 1, 1), -- MENU_CATEGORY_MANAGE
-(1, 3, 1, 1, 1, 1), -- MENU_TAG_MANAGE
-(1, 4, 1, 1, 1, 1), -- TABLE_BOOKING_MANAGE
-(1, 5, 0, 0, 0, 0), -- TABLE_QR_MANAGE (không cần)
-(1, 6, 1, 1, 1, 1), -- CUSTOMER_ACCOUNT_MANAGE
-(1, 7, 1, 1, 1, 1), -- STAFF_ACCOUNT_MANAGE
-(1, 8, 0, 0, 0, 0), -- ROLE_PERMISSION_MANAGE (chỉ admin)
-(1, 9, 1, 0, 0, 0), -- VIEW_REPORT (chỉ xem)
-(1, 10, 1, 1, 1, 0), -- ORDER_PREPARE
-(1, 11, 1, 1, 1, 1), -- PAYMENT_MANAGE
+(1, 1, 1,1,1,1), 
+(1, 2, 1,1,1,1), 
+(1, 3, 1,1,1,1),
+(1, 4, 1,1,1,1), 
+(1, 5, 1,1,1,1),
+(1, 6, 1,1,1,1), 
+(1, 7, 1,1,1,1),
+(1, 8, 0,0,0,0), -- ROLE_PERMISSION_MANAGE
+(1, 9, 1,0,0,0), -- chỉ xem báo cáo
+(1,10, 1,1,1,1), -- TABLE_MANAGE
+(1,11, 1,1,1,1); -- ORDER_MANAGE
 
--- WAITER (Nhân viên phục vụ): Quyền liên quan đến phục vụ
-(2, 1, 1, 0, 0, 0), -- MENU_MANAGE (chỉ xem)
-(2, 2, 1, 0, 0, 0), -- MENU_CATEGORY_MANAGE (chỉ xem)
-(2, 3, 1, 0, 0, 0), -- MENU_TAG_MANAGE (chỉ xem)
-(2, 4, 1, 1, 1, 0), -- TABLE_BOOKING_MANAGE
-(2, 5, 0, 0, 0, 0), -- TABLE_QR_MANAGE
-(2, 6, 1, 0, 0, 0), -- CUSTOMER_ACCOUNT_MANAGE (chỉ xem)
-(2, 7, 0, 0, 0, 0), -- STAFF_ACCOUNT_MANAGE
-(2, 8, 0, 0, 0, 0), -- ROLE_PERMISSION_MANAGE
-(2, 9, 0, 0, 0, 0), -- VIEW_REPORT
-(2, 10, 1, 0, 0, 0), -- ORDER_PREPARE (chỉ xem)
-(2, 11, 0, 0, 0, 0), -- PAYMENT_MANAGE
+-- WAITER: xem menu, tạo/sửa đơn hàng, xử lý đặt bàn
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(2, 1, 1,0,0,0), 
+(2, 2, 1,0,0,0), 
+(2, 3, 1,0,0,0),
+(2, 4, 1,1,1,0), 
+(2, 5, 1,0,0,0),
+(2, 6, 1,0,0,0), 
+(2, 7, 0,0,0,0),
+(2, 8, 0,0,0,0), 
+(2, 9, 0,0,0,0),
+(2,10, 1,0,0,0),
+(2,11, 1,1,1,0); -- đơn hàng: tạo, sửa nhưng không xóa
 
--- CHEF (Đầu bếp): Chỉ liên quan đến chuẩn bị món
-(3, 1, 1, 0, 0, 0), -- MENU_MANAGE (chỉ xem)
-(3, 2, 1, 0, 0, 0), -- MENU_CATEGORY_MANAGE (chỉ xem)
-(3, 3, 1, 0, 0, 0), -- MENU_TAG_MANAGE (chỉ xem)
-(3, 4, 0, 0, 0, 0), -- TABLE_BOOKING_MANAGE
-(3, 5, 0, 0, 0, 0), -- TABLE_QR_MANAGE
-(3, 6, 0, 0, 0, 0), -- CUSTOMER_ACCOUNT_MANAGE
-(3, 7, 0, 0, 0, 0), -- STAFF_ACCOUNT_MANAGE
-(3, 8, 0, 0, 0, 0), -- ROLE_PERMISSION_MANAGE
-(3, 9, 0, 0, 0, 0), -- VIEW_REPORT
-(3, 10, 1, 1, 1, 0), -- ORDER_PREPARE
-(3, 11, 0, 0, 0, 0), -- PAYMENT_MANAGE
+-- CHEF: chỉ xem menu và đơn hàng
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(3, 1, 1,0,0,0), (3, 2, 1,0,0,0), (3, 3, 1,0,0,0),
+(3, 4, 0,0,0,0), (3, 5, 0,0,0,0),
+(3, 6, 0,0,0,0), (3, 7, 0,0,0,0),
+(3, 8, 0,0,0,0), (3, 9, 0,0,0,0),
+(3,10, 0,0,0,0), (3,11, 1,0,0,0); -- chỉ xem đơn hàng
 
--- ADMIN (Quản trị viên): Toàn quyền
-(4, 1, 1, 1, 1, 1), -- MENU_MANAGE
-(4, 2, 1, 1, 1, 1), -- MENU_CATEGORY_MANAGE
-(4, 3, 1, 1, 1, 1), -- MENU_TAG_MANAGE
-(4, 4, 1, 1, 1, 1), -- TABLE_BOOKING_MANAGE
-(4, 5, 1, 1, 1, 1), -- TABLE_QR_MANAGE
-(4, 6, 1, 1, 1, 1), -- CUSTOMER_ACCOUNT_MANAGE
-(4, 7, 1, 1, 1, 1), -- STAFF_ACCOUNT_MANAGE
-(4, 8, 1, 1, 1, 1), -- ROLE_PERMISSION_MANAGE
-(4, 9, 1, 1, 1, 1), -- VIEW_REPORT
-(4, 10, 1, 1, 1, 1), -- ORDER_PREPARE
-(4, 11, 1, 1, 1, 1), -- PAYMENT_MANAGE
+-- ADMIN: toàn quyền mọi thứ
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(4, 1, 1,1,1,1), (4, 2, 1,1,1,1), (4, 3, 1,1,1,1),
+(4, 4, 1,1,1,1), (4, 5, 1,1,1,1),
+(4, 6, 1,1,1,1), (4, 7, 1,1,1,1),
+(4, 8, 1,1,1,1), (4, 9, 1,1,1,1),
+(4,10, 1,1,1,1), (4,11, 1,1,1,1);
 
--- CASHIER (Thu ngân): Chỉ xử lý thanh toán
-(5, 1, 1, 0, 0, 0), -- MENU_MANAGE (chỉ xem)
-(5, 2, 1, 0, 0, 0), -- MENU_CATEGORY_MANAGE (chỉ xem)
-(5, 3, 1, 0, 0, 0), -- MENU_TAG_MANAGE (chỉ xem)
-(5, 4, 1, 0, 0, 0), -- TABLE_BOOKING_MANAGE (chỉ xem)
-(5, 5, 0, 0, 0, 0), -- TABLE_QR_MANAGE
-(5, 6, 1, 0, 0, 0), -- CUSTOMER_ACCOUNT_MANAGE (chỉ xem)
-(5, 7, 0, 0, 0, 0), -- STAFF_ACCOUNT_MANAGE
-(5, 8, 0, 0, 0, 0), -- ROLE_PERMISSION_MANAGE
-(5, 9, 1, 0, 0, 0), -- VIEW_REPORT (chỉ xem)
-(5, 10, 1, 0, 0, 0), -- ORDER_PREPARE (chỉ xem)
-(5, 11, 1, 1, 1, 1); -- PAYMENT_MANAGE
-
-
+-- CASHIER: chủ yếu xem, toàn quyền với đơn hàng
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(5, 1, 1,0,0,0), (5, 2, 1,0,0,0), (5, 3, 1,0,0,0),
+(5, 4, 1,0,0,0), (5, 5, 0,0,0,0),
+(5, 6, 1,0,0,0), (5, 7, 0,0,0,0),
+(5, 8, 0,0,0,0), (5, 9, 1,0,0,0),
+(5,10, 1,0,0,0), (5,11, 1,1,1,1);
 -- MANAGER: toàn quyền với danh sách bàn
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
 VALUES (1, 12, 1, 1, 1, 1);
