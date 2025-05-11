@@ -3,9 +3,7 @@ using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 namespace HappyKitchen.Controllers
 {
@@ -29,6 +27,13 @@ namespace HappyKitchen.Controllers
 
         public IActionResult Login()
         {
+            // Check if user is already logged in
+            if (HttpContext.Session.GetString("StaffID") != null)
+            {
+                _logger.LogInformation("User already logged in, redirecting to Dashboard");
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             _logger.LogInformation("Login page accessed");
             var email = Request.Cookies["RememberMe_Email"];
             _logger.LogInformation($"RememberMe cookie found: {!string.IsNullOrEmpty(email)}");
@@ -38,7 +43,7 @@ namespace HappyKitchen.Controllers
                 _logger.LogInformation($"Attempting auto-login with email: {email}");
                 var user = _context.Users
                     .Include(u => u.Role)
-                    .FirstOrDefault(u => u.Email == email && u.UserType == 1 && u.Status == 1);
+                    .FirstOrDefault(u => u.Email == email && u.UserType == 1 && u.Status == 0);
                 
                 if (user != null)
                 {
@@ -50,11 +55,13 @@ namespace HappyKitchen.Controllers
                     HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
                     HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
-                    return RedirectToAction("index", "Dashboard");
+                    return RedirectToAction("Index", "Dashboard");
                 }
                 else
                 {
                     _logger.LogWarning($"Auto-login failed: User not found or inactive for email: {email}");
+                    // Clear the invalid RememberMe cookie to prevent login loops
+                    Response.Cookies.Delete("RememberMe_Email");
                 }
             }
 
@@ -87,8 +94,9 @@ namespace HappyKitchen.Controllers
             var user = await _context.Users
                 .Include(u => u.Role)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == model.Email && u.UserType == 1 && u.Status == 1);
+                .FirstOrDefaultAsync(u => u.Email == model.Email && u.UserType == 1 && u.Status == 0);
 
+            
             if (user == null)
             {
                 _logger.LogWarning($"Login failed: User not found for email: {model.Email}");
@@ -103,6 +111,7 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
 
+            
             // Kiểm tra cookie trusted device
             _logger.LogInformation("Checking for trusted device");
             if (Request.Cookies.ContainsKey("TrustedDevice"))
@@ -249,7 +258,9 @@ namespace HappyKitchen.Controllers
 
             var user = await _context.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 1);
+                .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 0);
+            
+            
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy người dùng." });
@@ -657,8 +668,8 @@ namespace HappyKitchen.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            // Response.Cookies.Delete("RememberMe_Email");
-            // Response.Cookies.Delete("TrustedDevice");
+            Response.Cookies.Delete("RememberMe_Email");
+            Response.Cookies.Delete("TrustedDevice");
             return RedirectToAction("Login");
         }
 
@@ -674,6 +685,168 @@ namespace HappyKitchen.Controllers
 
             var permissions = await _permissionService.GetUserPermissionsAsync(userId);
             return Json(new { success = true, data = permissions });
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUserProfile()
+        {
+            _logger.LogDebug("[API] GetUserProfile");
+
+            try
+            {
+                var userIdString = HttpContext.Session.GetString("StaffID");
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+                {
+                    _logger.LogWarning("GetUserProfile failed: Invalid or missing StaffID in session");
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." });
+                }
+
+                var user = await _context.Users
+                    .Where(u => u.UserID == userId && u.UserType == 1 && u.Status == 0)
+                    .Select(u => new
+                    {
+                        u.UserID,
+                        u.FullName,
+                        u.Email,
+                        u.Address
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    _logger.LogWarning("GetUserProfile failed: User with UserID {UserID} not found or inactive", userId);
+                    return Json(new { success = false, message = "Người dùng không hợp lệ hoặc không hoạt động." });
+                }
+
+                return Json(new { success = true, data = user });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi lấy thông tin cá nhân" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateUserProfile([FromBody] UserProfileUpdateModel model)
+        {
+            _logger.LogDebug("[API] UpdateUserProfile: UserID={UserID}, FullName={FullName}, Email={Email}", model.UserID, model.FullName, model.Email);
+
+            try
+            {
+                // Validate model
+                if (model == null)
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: Model is null");
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
+
+                // Validate session
+                var userIdString = HttpContext.Session.GetString("StaffID");
+                if (string.IsNullOrEmpty(userIdString))
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: StaffID is missing in session");
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." });
+                }
+
+                if (!int.TryParse(userIdString, out int sessionUserId) || sessionUserId != model.UserID)
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: Invalid StaffID format or mismatched UserID, StaffID={StaffID}, ModelUserID={ModelUserID}", userIdString, model.UserID);
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." });
+                }
+
+                // Find user
+                var user = await _context.Users
+                    .Where(u => u.UserID == model.UserID && u.UserType == 1 && u.Status == 0)
+                    .FirstOrDefaultAsync();
+
+                if (user == null)
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: User with UserID {UserID} not found or inactive", model.UserID);
+                    return Json(new { success = false, message = "Người dùng không hợp lệ hoặc không hoạt động." });
+                }
+
+                // Validation
+                if (string.IsNullOrWhiteSpace(model.FullName))
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: FullName is required");
+                    return Json(new { success = false, message = "Họ và tên là bắt buộc" });
+                }
+                if (string.IsNullOrWhiteSpace(model.Email))
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: Email is required");
+                    return Json(new { success = false, message = "Email là bắt buộc" });
+                }
+                if (model.Password != null && model.Password != model.ConfirmPassword)
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: Password and ConfirmPassword do not match");
+                    return Json(new { success = false, message = "Mật khẩu xác nhận không khớp" });
+                }
+
+                // Check for duplicate email
+                var emailExists = await _context.Users
+                    .AnyAsync(u => u.Email.ToLower() == model.Email.ToLower() && u.UserID != model.UserID);
+                if (emailExists)
+                {
+                    _logger.LogWarning("UpdateUserProfile failed: Email {Email} already exists", model.Email);
+                    return Json(new { success = false, message = "Email đã được sử dụng" });
+                }
+
+                // Update user
+                user.FullName = model.FullName.Trim();
+                user.Email = model.Email.Trim();
+                user.Address = model.Address?.Trim();
+                if (!string.IsNullOrEmpty(model.Password))
+                {
+                    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                }
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                // Update session
+                HttpContext.Session.SetString("StaffFullName", user.FullName);
+                HttpContext.Session.SetString("Email", user.Email);
+
+                return Json(new { success = true, message = "Cập nhật thông tin thành công" });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return Json(new { success = false, message = "Lỗi cơ sở dữ liệu khi cập nhật thông tin" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi cập nhật thông tin: " + ex.Message });
+            }
+        }
+
+        public class UserProfileUpdateModel
+        {
+            public int UserID { get; set; }
+            public string FullName { get; set; }
+            public string Email { get; set; }
+            public string Address { get; set; }
+            public string Password { get; set; }
+            public string ConfirmPassword { get; set; }
+        }
+        [HttpGet]
+        public IActionResult UserProfile()
+        {
+            _logger.LogDebug("[View] UserProfile");
+
+            try
+            {
+                var userIdString = HttpContext.Session.GetString("StaffID");
+                if (string.IsNullOrEmpty(userIdString))
+                {
+                    _logger.LogWarning("UserProfile failed: StaffID is missing in session");
+                    return RedirectToAction("Login");
+                }
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return RedirectToAction("Login");
+            }
         }
     }
 }

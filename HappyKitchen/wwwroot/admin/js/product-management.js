@@ -483,13 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm sản phẩm", "error");
             }
         } catch (error) {
-            console.error("Create product error:", error);
-            console.error("Error details:", { 
-                name: error.name, 
-                message: error.message, 
-                stack: error.stack 
-            });
-            utils.showToast("Đã xảy ra lỗi khi thêm sản phẩm", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             console.log("Hiding loading overlay");
             utils.showLoadingOverlay(false);
@@ -616,13 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật sản phẩm", "error");
             }
         } catch (error) {
-            console.error("Update product error:", error);
-            console.error("Update error details:", { 
-                name: error.name, 
-                message: error.message, 
-                stack: error.stack 
-            });
-            utils.showToast("Đã xảy ra lỗi khi cập nhật sản phẩm", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -689,8 +677,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm danh mục", "error");
             }
         } catch (error) {
-            console.error("Create category error", error);
-            utils.showToast("Đã xảy ra lỗi khi thêm danh mục", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }

@@ -7,7 +7,9 @@ class RestaurantManager {
             mobileOverlay: document.querySelector('.mobile-overlay'),
             tableItems: document.querySelectorAll('.table-item'),
             dropdownToggles: document.querySelectorAll('.dropdown-toggle'),
-            passwordToggles: document.querySelectorAll('.password-toggle')
+            passwordToggles: document.querySelectorAll('.password-toggle'),
+            userAvatar: document.querySelector('.user-avatar'),
+            userInfo: document.querySelector('.user-info')
         };
 
         this.isMobile = () => window.innerWidth < 992;
@@ -34,6 +36,15 @@ class RestaurantManager {
 
         this.elements.passwordToggles.forEach(toggle => {
             toggle.addEventListener('click', () => this.togglePassword(toggle));
+        });
+        
+        this.elements.userAvatar?.addEventListener('click', (e) => {
+            console.log('User profile clicked');
+            window.location.href = '/admin/userProfile';
+        });
+        this.elements.userInfo?.addEventListener('click', (e) => {
+            console.log('User profile clicked');
+            window.location.href = '/admin/userProfile';
         });
     }
 

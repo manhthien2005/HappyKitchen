@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch (error) {
             console.error('Load orders error:', error);
-            utils.showToast("Không thể tải danh sách đơn hàng", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         }
     }
 
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <td>${order.customerName}</td>
                     <td>${order.employeeName || 'Chưa phân công'}</td>
                     <td>${new Date(order.orderTime).toLocaleString()}</td>
-                    <td>${order.paymentMethod}</td>
+                    <td>${getPaymentMethodText(order.paymentMethod)}</td>
                     <td>${utils.formatMoney(order.total)}</td>
                     <td>
                         <span class="order-status-badge ${getStatusBadgeClass(order.status)}">
@@ -131,9 +131,28 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button class="btn btn-sm btn-outline-danger delete-order-btn" data-order-id="${order.orderID}" title="Xóa đơn hàng">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <button class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}" title="Xóa đơn hàng">
+                            <i class="fas fa-print me-1"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
+            
+            document.querySelectorAll(".print-order-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const orderId = btn.getAttribute("data-order-id");
+                    window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
+                });
+            });
+    }
+
+    function getPaymentMethodText(paymentMethod) {
+        switch (parseInt(paymentMethod)) {
+            case 0: return 'Tiền mặt';
+            case 1: return 'Thẻ';
+            case 2: return 'Thanh toán online';
+            default: return 'Không xác định';
+        }
     }
 
     function getStatusText(status) {
@@ -458,7 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (error) {
                 console.error("Delete order error", error);
-                utils.showToast("Đã xảy ra lỗi khi xóa đơn hàng", "error");
+                utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
             } finally {
                 utils.showLoadingOverlay(false);
                 confirmBtn.removeEventListener("click", deleteHandler);
@@ -469,84 +488,75 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function openEditOrderModal(orderId) {
-        const order = state.orders.find(o => o.orderID === orderId);
-        if (!order) {
-            console.error("Order not found for edit", { orderId });
-            utils.showToast("Không tìm thấy đơn hàng", "error");
-            return;
-        }
+        try {
+            const order = state.orders.find(o => o.orderID === orderId);
+            if (!order) {
+                utils.showToast("Không tìm thấy đơn hàng", "error");
+                return;
+            }
 
-        console.log("Opening edit modal for order", { orderId, orderDetails: order.orderDetails });
-
-        document.getElementById("editOrderId").value = order.orderID;
-        document.getElementById("editOrderStatus").value = order.status;
-        document.getElementById("editPaymentMethod").value = order.paymentMethod;
-
-        const detailsContainer = DOM.editOrderDetails;
-        detailsContainer.innerHTML = "";
-        
-        // Thêm tiêu đề cột nếu có chi tiết đơn hàng
-        if (order.orderDetails && order.orderDetails.length > 0) {
-            const headerRow = document.createElement("div");
-            headerRow.className = "row g-2 align-items-center mb-2 fw-bold";
-            headerRow.innerHTML = `
-                <div class="col-5">Tên món</div>
-                <div class="col-3">Số lượng</div>
-                <div class="col-3">Ghi chú</div>
-                <div class="col-1"></div>
-            `;
-            detailsContainer.appendChild(headerRow);
+            document.getElementById("editOrderId").value = order.orderID;
+            document.getElementById("editOrderStatus").value = order.status;
+            document.getElementById("editPaymentMethod").value = order.paymentMethod;
             
-            order.orderDetails.forEach((detail, index) => {
-                console.log("Rendering order detail", {
-                    index: index + 1,
-                    menuItemID: detail.menuItemID,
-                    menuItemName: detail.menuItemName,
-                    quantity: detail.quantity,
-                    note: detail.note,
-                    unitPrice: detail.unitPrice
-                });
-
-                const detailId = Date.now() + Math.random();
-                const detailItem = document.createElement("div");
-                detailItem.className = "order-detail-item mb-2";
-                detailItem.setAttribute("data-detail-id", detailId);
-                detailItem.innerHTML = `
-                    <small class="text-muted mt-1 d-block">Món #${index + 1}</small>
-                    <div class="row g-2 align-items-center">
-                        <div class="col-5">
-                            <select class="form-select form-select-sm menu-item-select" required>
-                                <option value="" selected disabled>Chọn món</option>
-                            </select>
-                        </div>
-                        <div class="col-3">
-                            <input type="number" class="form-control form-control-sm quantity" placeholder="Số lượng" min="1" value="${detail.quantity}" required>
-                        </div>
-                        <div class="col-3">
-                            <input type="text" class="form-control form-control-sm note" placeholder="Ghi chú" value="${detail.note || ''}">
-                        </div>
-                        <div class="col-1 d-flex align-items-center">
-                            <i class="fas fa-trash text-danger detail-remove" style="cursor: pointer;" data-detail-id="${detailId}"></i>
-                        </div>
-                    </div>
+            // Xóa chi tiết đơn hàng cũ
+            DOM.editOrderDetails.innerHTML = "";
+            
+            // Thêm tiêu đề cột nếu có chi tiết đơn hàng
+            if (order.orderDetails && order.orderDetails.length > 0) {
+                const headerRow = document.createElement("div");
+                headerRow.className = "row g-2 align-items-center mb-2 fw-bold";
+                headerRow.innerHTML = `
+                    <div class="col-5">Tên món</div>
+                    <div class="col-3">Số lượng</div>
+                    <div class="col-3">Ghi chú</div>
+                    <div class="col-1"></div>
                 `;
-                detailsContainer.appendChild(detailItem);
-
-                const menuItemSelect = detailItem.querySelector(".menu-item-select");
-                loadMenuItemsForSelect(menuItemSelect, detail.menuItemID);
-
-                detailItem.querySelector(".detail-remove").addEventListener("click", () => {
-                    detailItem.remove();
-                    console.log(`Order detail removed`, { detailId });
-                    updateOrderDetailNumbers();
+                DOM.editOrderDetails.appendChild(headerRow);
+                
+                // Thêm từng chi tiết đơn hàng
+                order.orderDetails.forEach((detail, index) => {
+                    const detailId = Date.now() + index;
+                    const detailItem = document.createElement("div");
+                    detailItem.className = "order-detail-item mb-2";
+                    detailItem.setAttribute("data-detail-id", detailId);
+                    
+                    detailItem.innerHTML = `
+                        <small class="text-muted mt-1 d-block">Món #${index + 1}</small>
+                        <div class="row g-2 align-items-center">
+                            <div class="col-5">
+                                <select class="form-select form-select-sm menu-item-select" required>
+                                    <option value="" selected disabled>Chọn món</option>
+                                </select>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" class="form-control form-control-sm quantity" placeholder="Số lượng" min="1" value="${detail.quantity}" required>
+                            </div>
+                            <div class="col-3">
+                                <input type="text" class="form-control form-control-sm note" placeholder="Ghi chú" value="${detail.note || ''}">
+                            </div>
+                            <div class="col-1 d-flex align-items-center">
+                                <i class="fas fa-trash text-danger detail-remove" style="cursor: pointer;" data-detail-id="${detailId}"></i>
+                            </div>
+                        </div>
+                    `;
+                    DOM.editOrderDetails.appendChild(detailItem);
+                    
+                    const selectElement = detailItem.querySelector(".menu-item-select");
+                    loadMenuItemsForSelect(selectElement, detail.menuItemID);
+                    
+                    detailItem.querySelector(".detail-remove").addEventListener("click", () => {
+                        detailItem.remove();
+                        updateOrderDetailNumbers();
+                    });
                 });
-            });
+            }
+            
+            console.log("Edit order modal opened for order:", order);
+        } catch (error) {
+            console.error("Open edit modal error:", error);
+            utils.showToast("Lỗi khi mở form chỉnh sửa", "error");
         }
-
-        console.log("Edit modal populated with", {
-            orderId,
-            detailCount: detailsContainer.children.length
-        });
     }
 
     // Initialize

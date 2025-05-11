@@ -1,6 +1,5 @@
-﻿using BCrypt.Net;
-
-namespace HappyKitchen.Services // Đổi thành namespace của bạn
+﻿
+namespace HappyKitchen.Services 
 {
     public static class PasswordService
     {

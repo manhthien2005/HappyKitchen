@@ -143,8 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Không thể tải danh sách bàn", "error");
             }
         } catch (error) {
-            console.error('Load tables error:', error);
-            utils.showToast("Không thể tải danh sách bàn", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         }
     }
 
@@ -289,8 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi lưu khu vực", "error");
             }
         } catch (error) {
-            console.error('Save area error:', error);
-            utils.showToast("Đã xảy ra lỗi khi lưu khu vực", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -331,8 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi lưu bàn", "error");
             }
         } catch (error) {
-            console.error('Save table error:', error);
-            utils.showToast("Đã xảy ra lỗi khi lưu bàn", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -352,8 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi xóa khu vực", "error");
             }
         } catch (error) {
-            console.error('Delete area error:', error);
-            utils.showToast("Đã xảy ra lỗi khi xóa khu vực", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -373,8 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi xóa bàn", "error");
             }
         } catch (error) {
-            console.error('Delete table error:', error);
-            utils.showToast("Đã xảy ra lỗi khi xóa bàn", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }

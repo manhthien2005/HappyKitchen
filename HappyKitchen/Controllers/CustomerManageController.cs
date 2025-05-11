@@ -2,10 +2,7 @@ using HappyKitchen.Attributes;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace HappyKitchen.Controllers
 {
@@ -21,6 +18,8 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [AuthorizeAccess("CUSTOMER_ACCOUNT_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
@@ -200,7 +199,6 @@ namespace HappyKitchen.Controllers
                     user.PasswordHash = existingUser.PasswordHash;
                 }
 
-                user.UserType = user.UserType == 0 ? existingUser.UserType : user.UserType;
                 await _userService.UpdateUserAsync(user);
                 _logger.LogInformation("Người dùng được cập nhật thành công: {UserId}", user.UserID);
                 return Json(new { success = true });
@@ -347,6 +345,40 @@ namespace HappyKitchen.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi lấy chi tiết đơn hàng {OrderId}", orderId);
                 return Json(new { success = false, message = "Lỗi khi lấy chi tiết đơn hàng" });
+            }
+        }
+        
+        [HttpGet]
+        [Route("he-thong/in-hoa-don/{orderId}")]
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
+        public async Task<IActionResult> PrintInvoice(int orderId)
+        {
+            _logger.LogDebug("[View] PrintInvoice: OrderID={OrderID}", orderId);
+            
+            try
+            {
+                if (orderId <= 0)
+                {
+                    _logger.LogWarning("PrintInvoice: Invalid OrderID={OrderID}", orderId);
+                    return BadRequest("Mã đơn hàng không hợp lệ");
+                }
+
+                var order = await _userService.GetOrderByIdAsync(orderId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning("PrintInvoice: OrderID={OrderID} does not exist", orderId);
+                    return NotFound("Đơn hàng không tồn tại");
+                }
+
+                _logger.LogInformation("PrintInvoice loaded: OrderID={OrderID}", orderId);
+                
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in PrintInvoice: {Message}", ex.Message);
+                return StatusCode(500, "Lỗi khi tải thông tin hóa đơn");
             }
         }
     }

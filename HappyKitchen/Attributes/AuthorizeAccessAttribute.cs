@@ -26,6 +26,12 @@ namespace HappyKitchen.Attributes
 
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
+            // Check if we're already on the Login page to prevent redirect loops
+            if (context.HttpContext.Request.Path.StartsWithSegments("/Admin/Login"))
+            {
+                return; // Skip authorization for the Login page itself
+            }
+            
             var permissionService = context.HttpContext.RequestServices.GetRequiredService<IPermissionService>();
             var userIdString = context.HttpContext.Session.GetString("StaffID");
 

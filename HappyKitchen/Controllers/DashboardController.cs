@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using HappyKitchen.Models;
 using HappyKitchen.Services;
 using HappyKitchen.Attributes;
 
@@ -45,11 +38,11 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetRevenueData(string timeRange = "month")
+        public async Task<IActionResult> GetRevenueData(string timeRange = "month", DateTime? startDate = null, DateTime? endDate = null)
         {
             try
             {
-                var revenueData = await _dashboardService.GetRevenueDataAsync(timeRange);
+                var revenueData = await _dashboardService.GetRevenueDataAsync(timeRange, startDate, endDate);
                 return Json(revenueData);
             }
             catch (Exception ex)
@@ -60,11 +53,11 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTopSellingFoods(string timeRange = "day")
+        public async Task<IActionResult> GetTopSellingFoods(string timeRange = "day", DateTime? startDate = null, DateTime? endDate = null)
         {
             try
             {
-                var topFoods = await _dashboardService.GetTopSellingFoodsAsync(timeRange);
+                var topFoods = await _dashboardService.GetTopSellingFoodsAsync(timeRange, startDate, endDate);
                 return Json(topFoods);
             }
             catch (Exception ex)

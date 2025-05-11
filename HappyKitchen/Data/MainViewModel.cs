@@ -103,6 +103,7 @@ namespace HappyKitchen.Models
 
         [Required]
         public DateTime ReservationTime { get; set; }
+        public int Duration { get; set; }
 
         [Required]
         [Range(0, 2, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending), or 2 (Confirmed)")]
@@ -237,9 +238,7 @@ namespace HappyKitchen.Models
         [Range(0, 3, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending Confirmation), 2 (Preparing), or 3 (Completed)")]
         public byte Status { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string PaymentMethod { get; set; }
+        public byte PaymentMethod { get; set; }
 
         // Navigation properties
         [ForeignKey("CustomerID")]

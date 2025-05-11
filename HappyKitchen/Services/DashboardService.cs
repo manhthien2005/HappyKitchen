@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 using HappyKitchen.Data;
-using HappyKitchen.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HappyKitchen.Services
@@ -91,67 +87,153 @@ namespace HappyKitchen.Services
             };
         }
 
-        public async Task<RevenueData> GetRevenueDataAsync(string timeRange)
+        public async Task<RevenueData> GetRevenueDataAsync(string timeRange, DateTime? startDate = null, DateTime? endDate = null)
         {
             var currentDate = DateTime.Now;
             var labels = new List<string>();
             var data = new List<decimal>();
 
-            switch (timeRange)
+            // Xử lý khoảng thời gian tùy chỉnh
+            if (timeRange == "custom" && startDate.HasValue && endDate.HasValue)
             {
-                case "month":
-                    // Lấy dữ liệu 15 ngày gần nhất
-                    for (int i = 14; i >= 0; i--)
+                // Đảm bảo ngày bắt đầu không lớn hơn ngày kết thúc
+                if (startDate.Value > endDate.Value)
+                {
+                    var temp = startDate;
+                    startDate = endDate;
+                    endDate = temp;
+                }
+
+                // Tính số ngày giữa startDate và endDate
+                var daysDifference = (endDate.Value - startDate.Value).Days;
+
+                // Nếu khoảng thời gian lớn hơn 30 ngày, hiển thị theo tháng
+                if (daysDifference > 30)
+                {
+                    // Lấy tháng đầu tiên
+                    var currentMonth = new DateTime(startDate.Value.Year, startDate.Value.Month, 1);
+                    
+                    // Lặp qua từng tháng cho đến tháng cuối cùng
+                    while (currentMonth <= endDate.Value)
                     {
-                        var date = currentDate.AddDays(-i);
+                        var nextMonth = currentMonth.AddMonths(1);
+                        var lastDayOfMonth = nextMonth.AddDays(-1);
+                        
+                        // Nếu lastDayOfMonth vượt quá endDate, sử dụng endDate
+                        var endOfPeriod = lastDayOfMonth > endDate.Value ? endDate.Value : lastDayOfMonth;
+                        
+                        labels.Add($"T{currentMonth.Month}/{currentMonth.Year}");
+
+                        var monthlyRevenue = await _context.Orders
+                            .Where(o => o.OrderTime >= currentMonth && o.OrderTime <= endOfPeriod && o.Status >= 3)
+                            .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
+                            .SumAsync();
+
+                        data.Add(monthlyRevenue);
+                        
+                        currentMonth = nextMonth;
+                    }
+                }
+                // Nếu khoảng thời gian từ 7-30 ngày, hiển thị theo tuần
+                else if (daysDifference > 7)
+                {
+                    // Chia khoảng thời gian thành các đoạn 7 ngày
+                    var currentDay = startDate.Value.Date;
+                    
+                    while (currentDay <= endDate.Value)
+                    {
+                        var endOfWeek = currentDay.AddDays(6);
+                        
+                        // Nếu endOfWeek vượt quá endDate, sử dụng endDate
+                        var endOfPeriod = endOfWeek > endDate.Value ? endDate.Value : endOfWeek;
+                        
+                        labels.Add($"{currentDay.ToString("dd/MM")} - {endOfPeriod.ToString("dd/MM")}");
+
+                        var weeklyRevenue = await _context.Orders
+                            .Where(o => o.OrderTime.Date >= currentDay && o.OrderTime.Date <= endOfPeriod && o.Status >= 3)
+                            .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
+                            .SumAsync();
+
+                        data.Add(weeklyRevenue);
+                        
+                        currentDay = endOfWeek.AddDays(1);
+                    }
+                }
+                // Nếu khoảng thời gian nhỏ hơn hoặc bằng 7 ngày, hiển thị theo ngày
+                else
+                {
+                    for (var date = startDate.Value.Date; date <= endDate.Value.Date; date = date.AddDays(1))
+                    {
                         labels.Add(date.ToString("dd/MM"));
 
                         var dailyRevenue = await _context.Orders
-                            .Where(o => o.OrderTime.Date == date.Date && o.Status >= 3)
+                            .Where(o => o.OrderTime.Date == date && o.Status >= 3)
                             .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
                             .SumAsync();
 
-                        data.Add(dailyRevenue); 
+                        data.Add(dailyRevenue);
                     }
-                    break;
+                }
+            }
+            else
+            {
+                // Xử lý các khoảng thời gian cố định
+                switch (timeRange)
+                {
+                    case "month":
+                        // Lấy dữ liệu 15 ngày gần nhất
+                        for (int i = 14; i >= 0; i--)
+                        {
+                            var date = currentDate.AddDays(-i);
+                            labels.Add(date.ToString("dd/MM"));
 
-                case "quarter":
-                    // Lấy dữ liệu 3 tháng gần nhất
-                    for (int i = 2; i >= 0; i--)
-                    {
-                        var month = currentDate.AddMonths(-i);
-                        var firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
-                        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                            var dailyRevenue = await _context.Orders
+                                .Where(o => o.OrderTime.Date == date.Date && o.Status >= 3)
+                                .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
+                                .SumAsync();
 
-                        labels.Add($"Tháng {month.Month}");
+                            data.Add(dailyRevenue); 
+                        }
+                        break;
 
-                        var monthlyRevenue = await _context.Orders
-                            .Where(o => o.OrderTime >= firstDayOfMonth && o.OrderTime <= lastDayOfMonth && o.Status >= 3)
-                            .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
-                            .SumAsync();
+                    case "quarter":
+                        // Lấy dữ liệu 3 tháng gần nhất
+                        for (int i = 2; i >= 0; i--)
+                        {
+                            var month = currentDate.AddMonths(-i);
+                            var firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
+                            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-                        data.Add(monthlyRevenue); // Chuyển đổi sang đơn vị nghìn
-                    }
-                    break;
+                            labels.Add($"Tháng {month.Month}");
 
-                case "year":
-                    // Lấy dữ liệu 12 tháng gần nhất
-                    for (int i = 11; i >= 0; i--)
-                    {
-                        var month = currentDate.AddMonths(-i);
-                        var firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
-                        var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+                            var monthlyRevenue = await _context.Orders
+                                .Where(o => o.OrderTime >= firstDayOfMonth && o.OrderTime <= lastDayOfMonth && o.Status >= 3)
+                                .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
+                                .SumAsync();
 
-                        labels.Add($"T{month.Month}");
+                            data.Add(monthlyRevenue);
+                        }
+                        break;
 
-                        var monthlyRevenue = await _context.Orders
-                            .Where(o => o.OrderTime >= firstDayOfMonth && o.OrderTime <= lastDayOfMonth && o.Status >= 3)
-                            .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
-                            .SumAsync();
+                    case "year":
+                        // Lấy dữ liệu 12 tháng gần nhất
+                        for (int i = 11; i >= 0; i--)
+                        {
+                            var month = currentDate.AddMonths(-i);
+                            var firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
+                            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
 
-                        data.Add(monthlyRevenue); // Chuyển đổi sang đơn vị nghìn
-                    }
-                    break;
+                            labels.Add($"T{month.Month}");
+
+                            var monthlyRevenue = await _context.Orders
+                                .Where(o => o.OrderTime >= firstDayOfMonth && o.OrderTime <= lastDayOfMonth && o.Status >= 3)
+                                .Select(o => o.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity))
+                                .SumAsync();
+
+                            data.Add(monthlyRevenue);
+                        }
+                        break;
+                }
             }
 
             return new RevenueData
@@ -161,30 +243,41 @@ namespace HappyKitchen.Services
             };
         }
 
-        public async Task<List<TopSellingFood>> GetTopSellingFoodsAsync(string timeRange)
+        public async Task<List<TopSellingFood>> GetTopSellingFoodsAsync(string timeRange, DateTime? startDate = null, DateTime? endDate = null)
         {
             var currentDate = DateTime.Now;
-            DateTime startDate;
+            DateTime queryStartDate;
+            DateTime queryEndDate = currentDate;
 
-            switch (timeRange)
+            // Xử lý khoảng thời gian tùy chỉnh
+            if (timeRange == "custom" && startDate.HasValue && endDate.HasValue)
             {
-                case "day":
-                    startDate = currentDate.Date;
-                    break;
-                case "week":
-                    startDate = currentDate.AddDays(-(int)currentDate.DayOfWeek).Date;
-                    break;
-                case "month":
-                    startDate = new DateTime(currentDate.Year, currentDate.Month, 1);
-                    break;
-                default:
-                    startDate = currentDate.Date;
-                    break;
+                queryStartDate = startDate.Value.Date;
+                queryEndDate = endDate.Value.Date.AddDays(1).AddSeconds(-1); // Kết thúc của ngày
+            }
+            else
+            {
+                // Xử lý các khoảng thời gian cố định
+                switch (timeRange)
+                {
+                    case "day":
+                        queryStartDate = currentDate.Date;
+                        break;
+                    case "week":
+                        queryStartDate = currentDate.AddDays(-(int)currentDate.DayOfWeek).Date;
+                        break;
+                    case "month":
+                        queryStartDate = new DateTime(currentDate.Year, currentDate.Month, 1);
+                        break;
+                    default:
+                        queryStartDate = currentDate.Date;
+                        break;
+                }
             }
 
             // Lấy top 5 món ăn bán chạy nhất trong khoảng thời gian
             var topFoods = await _context.OrderDetails
-                .Where(oi => oi.Order.OrderTime >= startDate && oi.Order.Status >= 3)
+                .Where(oi => oi.Order.OrderTime >= queryStartDate && oi.Order.OrderTime <= queryEndDate && oi.Order.Status >= 3)
                 .GroupBy(oi => new { oi.MenuItem.MenuItemID, oi.MenuItem.Name, oi.MenuItem.MenuItemImage, oi.MenuItem.Price })
                 .Select(g => new TopSellingFood
                 {

@@ -1,10 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 using HappyKitchen.Models;
 using Microsoft.EntityFrameworkCore;
 using HappyKitchen.Data;
-using HappyKitchen.Models;
-using Microsoft.EntityFrameworkCore;
 namespace HappyKitchen.Services
 {
     public interface IQRCodeService

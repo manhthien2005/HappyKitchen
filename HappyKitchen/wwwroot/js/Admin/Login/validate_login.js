@@ -54,7 +54,7 @@
                 } else {
                     toastr.success(data.message);
                     setTimeout(() => {
-                        window.location.href = "/dashboard"; // Trang Menu hoặc trang chủ
+                        window.location.href = "/dashboard";
                     }, 1500);
                 }
             } else {
