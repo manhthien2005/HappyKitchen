@@ -423,7 +423,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".print-order-btn").forEach(btn => {
           btn.addEventListener("click", () => {
               const orderId = btn.getAttribute("data-order-id");
-              alert(`Đơn hàng ${orderId} sẽ được in`);
+              // Mở trang in hóa đơn trong cửa sổ mới
+              window.open(`/OrderQR/PrintInvoice?orderId=${orderId}`, '_blank', 'width=800,height=600');
           });
       });
   }

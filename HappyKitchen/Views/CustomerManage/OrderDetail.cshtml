@@ -83,4 +83,16 @@
 
 @section Scripts {
     <script src="~/admin/js/order-detail.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý sự kiện khi nhấn nút in hóa đơn
+            document.getElementById('printOrderBtn').addEventListener('click', function() {
+                const orderId = document.getElementById('orderId').textContent.replace('#', '');
+                if (orderId) {
+                    // Mở trang in hóa đơn trong cửa sổ mới
+                    window.open(`/OrderQR/PrintInvoice?orderId=${orderId}`, '_blank', 'width=800,height=600');
+                }
+            });
+        });
+    </script>
 }

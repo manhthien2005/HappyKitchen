@@ -1,160 +1,102 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // State Management
-    const state = {
-        order: null,
-        customer: null
-    };
-
-    // API Endpoints
-    const API = {
-        getOrderDetails: (orderId) => `/CustomerManage/GetOrderDetails?orderId=${orderId}`
-    };
-
-    // DOM Elements
-    const DOM = {
-        orderId: document.getElementById("orderId"),
-        orderDate: document.getElementById("orderDate"),
-        orderStatus: document.getElementById("orderStatus"),
-        customerName: document.getElementById("customerName"),
-        customerPhone: document.getElementById("customerPhone"),
-        customerEmail: document.getElementById("customerEmail"),
-        customerAddress: document.getElementById("customerAddress"),
-        orderProductsBody: document.getElementById("orderProductsBody"),
-        orderTotal: document.getElementById("orderTotal"),
-        printOrderBtn: document.getElementById("printOrderBtn")
-    };
-
-    // Utility Functions
-    const utils = {
-        formatMoney: (amount) => {
-            return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-        },
-        fetchData: async (url, method = 'GET', data = null) => {
-            const options = { method, headers: { 'Content-Type': 'application/json' } };
-            if (data) options.body = JSON.stringify(data);
-            const response = await fetch(url, options);
-            return await response.json();
-        },
-        showToast: (message, type) => {
-            // Placeholder for toast notification
-            console.log(`${type}: ${message}`);
-        },
-        showLoadingOverlay: (show) => {
-            // Placeholder for loading overlay
-            console.log(show ? "Show loading" : "Hide loading");
-        }
-    };
-
-    // Helper Functions
-    function getOrderStatusText(status) {
-        const statusMap = {
-            0: "Chờ xử lý",
-            1: "Đang xử lý",
-            2: "Hoàn thành",
-            3: "Đã hủy"
-        };
-        return statusMap[status] || "Chờ xử lý";
+document.addEventListener('DOMContentLoaded', function() {
+    const orderId = new URLSearchParams(window.location.search).get('orderId');
+    
+    if (!orderId) {
+        showError("Không tìm thấy mã đơn hàng");
+        return;
     }
-
-    function getOrderStatusClass(status) {
-        const statusMap = {
-            0: "status-pending",
-            1: "status-processing",
-            2: "status-completed",
-            3: "status-cancelled"
-        };
-        return statusMap[status] || "status-pending";
+    
+    loadOrderDetails(orderId);
+    
+    function loadOrderDetails(orderId) {
+        fetch(`/CustomerManage/GetOrderDetails?orderId=${orderId}`)
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    renderOrderDetails(result.data);
+                } else {
+                    showError(result.message || "Không thể tải thông tin đơn hàng");
+                }
+            })
+            .catch(error => {
+                console.error('Error loading order details:', error);
+                showError("Lỗi khi tải thông tin đơn hàng");
+            });
     }
-
-    // Rendering Functions
-    function renderOrderDetails() {
-        if (!state.order || !state.customer) {
-            DOM.orderProductsBody.innerHTML = `
-                <div class="empty-orders">
-                    <i class="fas fa-shopping-cart"></i>
-                    <p>Không tìm thấy thông tin đơn hàng</p>
-                </div>`;
-            return;
-        }
-
-        DOM.orderId.textContent = `#${state.order.orderID}`;
-        DOM.orderDate.textContent = new Date(state.order.orderTime).toLocaleString('vi-VN');
-        DOM.orderStatus.textContent = getOrderStatusText(state.order.status);
-        DOM.orderStatus.className = `order-status ${getOrderStatusClass(state.order.status)}`;
-
-        DOM.customerName.textContent = state.customer.fullName || "Không có tên";
-        DOM.customerPhone.textContent = state.customer.phoneNumber || "Chưa cập nhật";
-        DOM.customerEmail.textContent = state.customer.email || "Chưa cập nhật";
-        DOM.customerAddress.textContent = state.customer.address || "Chưa cập nhật";
-
-        DOM.orderProductsBody.innerHTML = state.order.items.map(product => `
-            <div class="product-item">
-                <div class="product-name">${product.name}</div>
-                <div class="product-unit-price">${utils.formatMoney(product.unitPrice || (product.price / product.quantity))}</div>
-                <div class="product-quantity">x${product.quantity}</div>
-                <div class="product-price">${utils.formatMoney(product.price)}</div>
-            </div>
-        `).join('');
-
-        DOM.orderTotal.textContent = utils.formatMoney(state.order.total);
-    }
-
-    // Data Loading
-    async function loadOrderDetails(orderId) {
-        try {
-            utils.showLoadingOverlay(true);
-            const result = await utils.fetchData(API.getOrderDetails(orderId));
-            if (result.success) {
-                state.order = result.data.order;
-                state.customer = result.data.customer;
-                renderOrderDetails();
-            } else {
-                utils.showToast(result.message || "Không thể tải chi tiết đơn hàng", "error");
-                DOM.orderProductsBody.innerHTML = `
-                    <div class="empty-orders">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>${result.message || "Không tìm thấy thông tin đơn hàng"}</p>
-                    </div>`;
-            }
-        } catch (error) {
-            console.error('Load order details error:', error);
-            utils.showToast("Không thể tải chi tiết đơn hàng", "error");
-        } finally {
-            utils.showLoadingOverlay(false);
-        }
-    }
-
-    // Event Listeners
-    function setupEventListeners() {
-        DOM.printOrderBtn.addEventListener("click", () => {
-            if (state.order) {
-                // Placeholder for print functionality
-                alert(`Đơn hàng ${state.order.orderID} sẽ được in`);
-            }
+    
+    function renderOrderDetails(data) {
+        const { order, customer } = data;
+        
+        // Hiển thị thông tin đơn hàng
+        document.getElementById('orderId').textContent = `#${order.orderID}`;
+        document.getElementById('orderDate').textContent = formatDate(order.orderTime);
+        document.getElementById('orderStatus').textContent = getOrderStatusText(order.status);
+        document.getElementById('orderStatus').className = `order-status ${getOrderStatusClass(order.status)}`;
+        
+        // Hiển thị thông tin khách hàng
+        document.getElementById('customerName').textContent = customer.fullName;
+        document.getElementById('customerPhone').textContent = customer.phoneNumber;
+        document.getElementById('customerEmail').textContent = customer.email;
+        document.getElementById('customerAddress').textContent = customer.address;
+        
+        // Hiển thị danh sách sản phẩm
+        const productsContainer = document.getElementById('orderProductsBody');
+        productsContainer.innerHTML = '';
+        
+        order.items.forEach(item => {
+            const productElement = document.createElement('div');
+            productElement.className = 'product-item';
+            productElement.innerHTML = `
+                <div class="product-name">${item.name}</div>
+                <div class="product-unit-price">${formatMoney(item.unitPrice)}</div>
+                <div class="product-quantity">${item.quantity}</div>
+                <div class="product-price">${formatMoney(item.price)}</div>
+            `;
+            productsContainer.appendChild(productElement);
         });
+        
+        // Hiển thị tổng tiền
+        document.getElementById('orderTotal').textContent = formatMoney(order.total);
     }
-
-    // Initialization
-    async function initialize() {
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const orderId = urlParams.get('orderId');
-            if (orderId) {
-                await loadOrderDetails(orderId);
-                setupEventListeners();
-            } else {
-                utils.showToast("Không tìm thấy ID đơn hàng", "error");
-                DOM.orderProductsBody.innerHTML = `
-                    <div class="empty-orders">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Không tìm thấy thông tin đơn hàng</p>
-                    </div>`;
-            }
-        } catch (error) {
-            console.error("Initialization error:", error);
-            utils.showToast("Đã xảy ra lỗi khi tải dữ liệu", "error");
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    }
+    
+    function formatMoney(amount) {
+        return amount.toLocaleString('vi-VN') + ' đ';
+    }
+    
+    function getOrderStatusText(status) {
+        switch (status) {
+            case 0: return "Đã hủy";
+            case 1: return "Đang chờ";
+            case 2: return "Đang chuẩn bị";
+            case 3: return "Đang phục vụ";
+            case 4: return "Hoàn thành";
+            default: return "Không xác định";
         }
     }
-
-    initialize();
+    
+    function getOrderStatusClass(status) {
+        switch (status) {
+            case 0: return "status-cancelled";
+            case 1: return "status-pending";
+            case 2: return "status-preparing";
+            case 3: return "status-serving";
+            case 4: return "status-completed";
+            default: return "status-unknown";
+        }
+    }
+    
+    function showError(message) {
+        const container = document.querySelector('.order-detail-container');
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                ${message}
+            </div>
+        `;
+    }
 });

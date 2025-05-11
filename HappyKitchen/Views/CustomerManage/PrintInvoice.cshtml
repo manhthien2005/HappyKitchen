@@ -1,0 +1,255 @@
+@model Order
+@{
+    Layout = null;
+    var orderDate = Model.OrderTime.ToString("dd/MM/yyyy HH:mm");
+    var total = Model.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity);
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn #@Model.OrderID - Happy Kitchen</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        .restaurant-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #d35400;
+        }
+        .restaurant-info {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .invoice-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .invoice-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .detail-row {
+            margin-bottom: 10px;
+        }
+        .detail-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .products-table th {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+        .products-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .products-table .text-right {
+            text-align: right;
+        }
+        .total-section {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .total-row {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        .grand-total {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            border-top: 2px solid #eee;
+            padding-top: 10px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .print-button {
+            background-color: #d35400;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .print-button:hover {
+            background-color: #e67e22;
+        }
+        .print-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        @@media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            .invoice-container {
+                box-shadow: none;
+                padding: 0;
+            }
+            .print-controls {
+                display: none;
+            }
+            @@page {
+                margin: 0;
+                size: auto;
+            }
+            html {
+                -webkit-print-color-adjust: exact;
+            }
+            head, title {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <div class="restaurant-name">HAPPY KITCHEN</div>
+            <div class="restaurant-info">01 Thảo Điền, Hồ Chí Minh, VN</div>
+            <div class="restaurant-info">Điện thoại: 0977223517</div>
+            <div class="restaurant-info">Email: happykitchenvn2025@gmail.com</div>
+        </div>
+        
+        <div class="invoice-title">HÓA ĐƠN THANH TOÁN</div>
+        
+        <div class="invoice-details">
+            <div class="invoice-details-left">
+                <div class="detail-row">
+                    <span class="detail-label">Mã hóa đơn:</span>
+                    <span>#@Model.OrderID</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Ngày:</span>
+                    <span>@orderDate</span>
+                </div>
+                @if (Model.Table != null)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Bàn:</span>
+                        <span>@Model.Table.TableName</span>
+                    </div>
+                }
+            </div>
+            <div class="invoice-details-right">
+                @if (Model.Customer != null)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Khách hàng:</span>
+                        <span>@Model.Customer.FullName</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Điện thoại:</span>
+                        <span>@Model.Customer.PhoneNumber</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Khách hàng:</span>
+                        <span>Khách vãng lai</span>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%">STT</th>
+                    <th style="width: 45%">Tên món</th>
+                    <th style="width: 15%" class="text-right">Đơn giá</th>
+                    <th style="width: 15%" class="text-right">Số lượng</th>
+                    <th style="width: 20%" class="text-right">Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int index = 1;
+                    foreach (var item in Model.OrderDetails)
+                    {
+                        var itemTotal = item.MenuItem.Price * item.Quantity;
+                        <tr>
+                            <td>@index</td>
+                            <td>@item.MenuItem.Name</td>
+                            <td class="text-right">@item.MenuItem.Price.ToString("N0") đ</td>
+                            <td class="text-right">@item.Quantity</td>
+                            <td class="text-right">@itemTotal.ToString("N0") đ</td>
+                        </tr>
+                        index++;
+                    }
+                }
+            </tbody>
+        </table>
+        
+        <div class="total-section">
+            <div class="total-row grand-total">
+                <span class="detail-label">Tổng cộng:</span>
+                <span>@total.ToString("N0") đ</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Cảm ơn quý khách đã sử dụng dịch vụ của Happy Kitchen!</p>
+            <p>Chúc quý khách ngon miệng!</p>
+        </div>
+        
+        <div class="print-controls">
+            <button class="print-button" onclick="window.print()">In hóa đơn</button>
+            <button class="print-button" style="background-color: #3498db;" onclick="window.close()">Đóng</button>
+        </div>
+    </div>
+    
+    <script>
+        // Tự động mở hộp thoại in khi trang được tải
+        window.onload = function() {
+            // Đợi 1 giây để trang được render hoàn toàn
+            setTimeout(function() {
+                window.print();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

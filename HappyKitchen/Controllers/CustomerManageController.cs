@@ -347,5 +347,38 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Lỗi khi lấy chi tiết đơn hàng" });
             }
         }
+        
+        [HttpGet]
+        [AuthorizeAccess("CUSTOMER_ACCOUNT_MANAGE", "view")]
+        public async Task<IActionResult> PrintInvoice(int orderId)
+        {
+            _logger.LogDebug("[View] PrintInvoice: OrderID={OrderID}", orderId);
+            
+            try
+            {
+                if (orderId <= 0)
+                {
+                    _logger.LogWarning("PrintInvoice: Invalid OrderID={OrderID}", orderId);
+                    return BadRequest("Mã đơn hàng không hợp lệ");
+                }
+
+                var order = await _userService.GetOrderByIdAsync(orderId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning("PrintInvoice: OrderID={OrderID} does not exist", orderId);
+                    return NotFound("Đơn hàng không tồn tại");
+                }
+
+                _logger.LogInformation("PrintInvoice loaded: OrderID={OrderID}", orderId);
+                
+                return View(order);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in PrintInvoice: {Message}", ex.Message);
+                return StatusCode(500, "Lỗi khi tải thông tin hóa đơn");
+            }
+        }
     }
 }
