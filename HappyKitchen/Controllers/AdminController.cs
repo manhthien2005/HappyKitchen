@@ -5,54 +5,56 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace HappyKitchen.Controllers
 {
     public class AdminController : Controller
     {
-
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IPermissionService _permissionService;
+        private readonly EmailService _emailService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ApplicationDbContext context, IConfiguration configuration)
+        public AdminController(ApplicationDbContext context, IConfiguration configuration,
+            IPermissionService permissionService, EmailService emailService, ILogger<AdminController> logger)
         {
             _context = context;
             _configuration = configuration;
-        }
-
-        public IActionResult TEMP()
-        {
-            // Kiểm tra Session tồn tại chưa
-            var userName = HttpContext.Session.GetString("FullName");
-            var userEmail = HttpContext.Session.GetString("Email");
-
-            if (string.IsNullOrEmpty(userName))
-            {
-                return RedirectToAction("Login");
-            }
-
-            ViewBag.UserName = userName;
-            ViewBag.UserEmail = userEmail;
-
-            return View();
+            _permissionService = permissionService;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         public IActionResult Login()
         {
+            _logger.LogInformation("Login page accessed");
             var email = Request.Cookies["RememberMe_Email"];
+            _logger.LogInformation($"RememberMe cookie found: {!string.IsNullOrEmpty(email)}");
 
             if (!string.IsNullOrEmpty(email))
             {
-
-                var user = _context.Users.FirstOrDefault(u => u.Email == email);
+                _logger.LogInformation($"Attempting auto-login with email: {email}");
+                var user = _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefault(u => u.Email == email && u.UserType == 1 && u.Status == 1);
+                
                 if (user != null)
                 {
-
-                    HttpContext.Session.SetString("FullName", user.FullName);
+                    _logger.LogInformation($"Auto-login successful for user: {user.UserID}");
+                    HttpContext.Session.SetString("StaffID", user.UserID.ToString());
+                    HttpContext.Session.SetString("StaffFullName", user.FullName);
                     HttpContext.Session.SetString("Email", user.Email);
                     HttpContext.Session.SetString("Phone", user.PhoneNumber);
+                    HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
+                    HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
-                    return RedirectToAction("TEMP");
+                    return RedirectToAction("index", "Dashboard");
+                }
+                else
+                {
+                    _logger.LogWarning($"Auto-login failed: User not found or inactive for email: {email}");
                 }
             }
 
@@ -62,43 +64,69 @@ namespace HappyKitchen.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] EmployeeLogin model)
         {
-            Console.WriteLine(model);
+            _logger.LogInformation($"Login attempt for email: {model?.Email}");
+            Console.WriteLine($"Login model: {JsonConvert.SerializeObject(model)}");
+            
             if (model == null || string.IsNullOrEmpty(model.Email) ||
                 string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.RecaptchaToken))
             {
+                _logger.LogWarning("Login failed: Invalid data provided");
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
             }
 
             // Kiểm tra reCAPTCHA
+            _logger.LogInformation("Verifying reCAPTCHA");
             bool isRecaptchaValid = await VerifyRecaptcha(model.RecaptchaToken);
             if (!isRecaptchaValid)
             {
+                _logger.LogWarning("Login failed: reCAPTCHA verification failed");
                 return Json(new { success = false, message = "Xác thực reCAPTCHA thất bại." });
             }
 
-            // Kiểm tra tài khoản
-            var user = _context.Users.AsNoTracking().FirstOrDefault(e => e.Email == model.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash) || user.UserType != 1)
+            _logger.LogInformation("Querying user from database");
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == model.Email && u.UserType == 1 && u.Status == 1);
+
+            if (user == null)
             {
+                _logger.LogWarning($"Login failed: User not found for email: {model.Email}");
+                return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
+            }
+
+            _logger.LogInformation("Verifying password");
+            bool passwordValid = BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash);
+            if (!passwordValid || user.UserType != 1)
+            {
+                _logger.LogWarning($"Login failed: Invalid password for user: {user.UserID}");
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
 
             // Kiểm tra cookie trusted device
+            _logger.LogInformation("Checking for trusted device");
             if (Request.Cookies.ContainsKey("TrustedDevice"))
             {
                 string deviceToken = Request.Cookies["TrustedDevice"];
+                _logger.LogInformation($"Found device token: {deviceToken}");
+                
                 var trustedDevice = _context.TrustedDevices
                     .FirstOrDefault(td => td.DeviceToken == deviceToken && td.UserID == user.UserID);
+                
                 if (trustedDevice != null)
                 {
+                    _logger.LogInformation($"Trusted device found for user: {user.UserID}");
                     // Lưu thông tin vào session
-                    HttpContext.Session.SetString("FullName", user.FullName);
+                    HttpContext.Session.SetString("StaffID", user.UserID.ToString());
+                    HttpContext.Session.SetString("StaffFullName", user.FullName);
                     HttpContext.Session.SetString("Email", user.Email);
                     HttpContext.Session.SetString("Phone", user.PhoneNumber);
-
-                    // Kiểm tra "Remember Me"
+                    HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
+                    HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
+                    
                     if (model.RememberMe)
                     {
+                        _logger.LogInformation("Setting RememberMe cookie");
                         CookieOptions options = new CookieOptions
                         {
                             Expires = DateTime.Now.AddDays(7),
@@ -110,20 +138,34 @@ namespace HappyKitchen.Controllers
                     }
 
                     // Thiết bị đã tin cậy, đăng nhập thành công
+                    _logger.LogInformation($"Login successful for user: {user.UserID}");
                     return Json(new { success = true, message = "Đăng nhập thành công!" });
+                }
+                else
+                {
+                    _logger.LogWarning("Device token not valid for this user");
                 }
             }
 
             // Thiết bị chưa tin cậy, cần xác thực OTP
+            _logger.LogInformation("Device not trusted, generating OTP");
             string otpCode = new Random().Next(100000, 999999).ToString();
             HttpContext.Session.SetString("User_OTP_Login", otpCode);
             HttpContext.Session.SetString("User_Login_Email", model.Email);
             HttpContext.Session.SetString("User_OTP_Login_Timestamp", DateTime.Now.ToString());
 
             // (Gọi dịch vụ gửi OTP qua email)
+            _logger.LogInformation($"Sending OTP to email: {model.Email}");
             var emailService = new EmailService(_configuration);
-            emailService.SendLoginOTP(model.Email, otpCode);
+            try {
+                emailService.SendLoginOTP(model.Email, otpCode);
+                _logger.LogInformation("OTP sent successfully");
+            }
+            catch (Exception ex) {
+                _logger.LogError($"Error sending OTP: {ex.Message}");
+            }
 
+            _logger.LogInformation("Redirecting to OTP verification");
             return Json(new
             {
                 success = true,
@@ -136,13 +178,25 @@ namespace HappyKitchen.Controllers
         // Hàm xác minh reCAPTCHA
         private async Task<bool> VerifyRecaptcha(string recaptchaToken)
         {
-            string secretKey = "6Le7Le8qAAAAAFfAqwHWHvPrVToCuSXafwzobYgV";  // 🔹 Thay bằng Secret Key của bạn từ Google reCAPTCHA
-            using (var client = new HttpClient())
-            {
-                var response = await client.PostAsync($"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={recaptchaToken}", null);
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                dynamic result = JsonConvert.DeserializeObject(jsonResponse);
-                return result.success == "true";
+            _logger.LogInformation("Verifying reCAPTCHA token");
+            string secretKey = "6Le7Le8qAAAAAFfAqwHWHvPrVToCuSXafwzobYgV";
+            
+            try {
+                using (var client = new HttpClient())
+                {
+                    var response = await client.PostAsync($"https://www.google.com/recaptcha/api/siteverify?secret={secretKey}&response={recaptchaToken}", null);
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation($"reCAPTCHA response: {jsonResponse}");
+                    
+                    dynamic result = JsonConvert.DeserializeObject(jsonResponse);
+                    bool isValid = result.success == true;
+                    _logger.LogInformation($"reCAPTCHA verification result: {isValid}");
+                    return isValid;
+                }
+            }
+            catch (Exception ex) {
+                _logger.LogError($"reCAPTCHA verification error: {ex.Message}");
+                return false;
             }
         }
 
@@ -160,7 +214,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        public IActionResult Verify_Login([FromBody] OTPModel model)
+        public async Task<IActionResult> Verify_Login([FromBody]  OTPModel model)
         {
             // Kiểm tra dữ liệu đầu vào
             if (model == null || string.IsNullOrEmpty(model.OTPCode))
@@ -193,8 +247,9 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Mã OTP không chính xác." });
             }
 
-            // OTP hợp lệ, tiến hành xác định thiết bị tin cậy
-            var user = _context.Users.FirstOrDefault(e => e.Email == email);
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 1);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy người dùng." });
@@ -232,9 +287,12 @@ namespace HappyKitchen.Controllers
 
 
             // Lưu thông tin vào session
-            HttpContext.Session.SetString("FullName", user.FullName);
+            HttpContext.Session.SetString("StaffID", user.UserID.ToString());
+            HttpContext.Session.SetString("StaffFullName", user.FullName);
             HttpContext.Session.SetString("Email", user.Email);
             HttpContext.Session.SetString("Phone", user.PhoneNumber);
+            HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
+            HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
             // Kiểm tra "Remember Me"
             if (model.RememberMe)
@@ -254,7 +312,7 @@ namespace HappyKitchen.Controllers
             {
                 success = true,
                 message = "Xác thực OTP thành công. Thiết bị của bạn đã được lưu tin cậy.",
-                redirectUrl = Url.Action("TEMP", "Admin")
+                redirectUrl = Url.Action("index", "Dashboard")
             });
         }
 
@@ -308,7 +366,7 @@ namespace HappyKitchen.Controllers
                 }
 
                 // Lưu thông tin vào Session
-                HttpContext.Session.SetString("FullName", model.FullName);
+                HttpContext.Session.SetString("StaffFullName", model.FullName);
                 HttpContext.Session.SetString("Email", model.Email);
                 HttpContext.Session.SetString("Password", model.Password);
                 HttpContext.Session.SetString("PhoneNumber", model.PhoneNumber);
@@ -599,11 +657,23 @@ namespace HappyKitchen.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-
-            Response.Cookies.Delete("RememberMe");
-
+            // Response.Cookies.Delete("RememberMe_Email");
+            // Response.Cookies.Delete("TrustedDevice");
             return RedirectToAction("Login");
         }
 
+        
+        [HttpGet]
+        public async Task<IActionResult> GetCurrentUserPermissions()
+        {
+            var userIdString = HttpContext.Session.GetString("StaffID");
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return Json(new { success = false, message = "Người dùng chưa đăng nhập." });
+            }
+
+            var permissions = await _permissionService.GetUserPermissionsAsync(userId);
+            return Json(new { success = true, data = permissions });
+        }
     }
 }

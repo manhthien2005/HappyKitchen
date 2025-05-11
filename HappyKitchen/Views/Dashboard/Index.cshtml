@@ -1,0 +1,220 @@
+@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen - Dashboard";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/admin/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Trang chủ</h1>
+    <p>Tổng quan về hoạt động kinh doanh của nhà hàng</p>
+</div>
+
+<!-- Dashboard Content -->
+<div class="dashboard-container">
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="row">
+            <!-- Doanh thu tháng -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="stat-card revenue">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-title">0 ₫</h3>
+                        <p class="stat-card-subtitle">Doanh thu tháng</p>
+                        <div class="stat-card-change positive">
+                            <i class="fas fa-arrow-up"></i> 0% so với tháng trước
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Đơn hàng tháng -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="stat-card orders">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-title">0</h3>
+                        <p class="stat-card-subtitle">Đơn hàng tháng</p>
+                        <div class="stat-card-change positive">
+                            <i class="fas fa-arrow-up"></i> 0% so với tháng trước
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Khách hàng mới -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="stat-card customers">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-title">0</h3>
+                        <p class="stat-card-subtitle">Khách hàng mới</p>
+                        <div class="stat-card-change positive">
+                            <i class="fas fa-arrow-up"></i> 0% so với tháng trước
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tỷ lệ sử dụng bàn -->
+            <div class="col-md-6 col-lg-3 mb-4">
+                <div class="stat-card tables">
+                    <div class="stat-card-icon">
+                        <i class="fas fa-chair"></i>
+                    </div>
+                    <div class="stat-card-content">
+                        <h3 class="stat-card-title">0%</h3>
+                        <p class="stat-card-subtitle">Tỷ lệ sử dụng bàn</p>
+                        <div class="stat-card-change negative">
+                            <i class="fas fa-arrow-down"></i> 0% so với tháng trước
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts & Recent Activity -->
+    <div class="row align-items-stretch mb-4">
+        <!-- Revenue Chart -->
+        <div class="a1 col-lg-8 mb-4 ">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Doanh thu theo thời gian</h5>
+                    <div class="dropdown">
+                        <select class="form-select form-select-sm" id="revenueTimeRange">
+                            <option value="month" selected>Tháng này</option>
+                            <option value="quarter">Quý này</option>
+                            <option value="year">Năm nay</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <div class="total-revenue">
+                        <span class="total-revenue-label">Tổng doanh thu:</span>
+                        <span id="totalRevenue" class="total-revenue-value">0 ₫</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="a2 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Top món ăn bán chạy</h5>
+                    <div class="dropdown">
+                        <select class="form-select form-select-sm" id="topFoodTimeRange">
+                            <option value="day" selected>Hôm nay</option>
+                            <option value="week">Tuần này</option>
+                            <option value="month">Tháng này</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="top-foods-list">
+                        <!-- Món ăn 1 -->
+                        <div class="food-item">
+                            <div class="food-rank">1</div>
+                            <div class="food-image">
+                                <img src="/images/foods/pho.jpg" alt="Phở bò">
+                            </div>
+                            <div class="food-content">
+                                <h6 class="food-title">Phở bò tái lăn</h6>
+                                <div class="food-stats">
+                                    <span class="food-price">85,000 đ</span>
+                                    <span class="food-sold">Đã bán: 42</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Món ăn 2 -->
+                        <div class="food-item">
+                            <div class="food-rank">2</div>
+                            <div class="food-image">
+                                <img src="/images/foods/banhmi.jpg" alt="Bánh mì">
+                            </div>
+                            <div class="food-content">
+                                <h6 class="food-title">Bánh mì thịt nướng</h6>
+                                <div class="food-stats">
+                                    <span class="food-price">35,000 đ</span>
+                                    <span class="food-sold">Đã bán: 38</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Món ăn 3 -->
+                        <div class="food-item">
+                            <div class="food-rank">3</div>
+                            <div class="food-image">
+                                <img src="/images/foods/comtam.jpg" alt="Cơm tấm">
+                            </div>
+                            <div class="food-content">
+                                <h6 class="food-title">Cơm tấm sườn bì chả</h6>
+                                <div class="food-stats">
+                                    <span class="food-price">55,000 đ</span>
+                                    <span class="food-sold">Đã bán: 35</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Món ăn 4 -->
+                        <div class="food-item">
+                            <div class="food-rank">4</div>
+                            <div class="food-image">
+                                <img src="/images/foods/buncha.jpg" alt="Bún chả">
+                            </div>
+                            <div class="food-content">
+                                <h6 class="food-title">Bún chả Hà Nội</h6>
+                                <div class="food-stats">
+                                    <span class="food-price">65,000 đ</span>
+                                    <span class="food-sold">Đã bán: 30</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Món ăn 5 -->
+                        <div class="food-item">
+                            <div class="food-rank">5</div>
+                            <div class="food-image">
+                                <img src="/images/foods/hutieu.jpg" alt="Hủ tiếu">
+                            </div>
+                            <div class="food-content">
+                                <h6 class="food-title">Hủ tiếu Nam Vang</h6>
+                                <div class="food-stats">
+                                    <span class="food-price">60,000 đ</span>
+                                    <span class="food-sold">Đã bán: 28</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="@Url.Action("index","product")" class="btn btn-outline-primary btn-sm">Xem tất cả món ăn</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="~/admin/js/dashboard.js"></script>
+}

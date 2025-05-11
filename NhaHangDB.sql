@@ -30,7 +30,6 @@ DROP TABLE IF EXISTS Permissions;
 DROP TABLE IF EXISTS Roles;
 DROP TABLE IF EXISTS MenuItems;
 DROP TABLE IF EXISTS Categories;
-DROP TABLE IF EXISTS Labels;
 -- Tạo bảng Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
@@ -116,13 +115,6 @@ CREATE TABLE Categories (
     CategoryName NVARCHAR(50) NOT NULL
 );
 
--- Tạo bảng Labels
-CREATE TABLE Labels (
-    LabelID INT IDENTITY(1,1) PRIMARY KEY,
-    Name NVARCHAR(50) NOT NULL,
-    Description NVARCHAR(255) NULL
-);
-
 -- Tạo bảng MenuItems (phải tạo sau Categories vì có khóa ngoại CategoryID)
 CREATE TABLE MenuItems (
     MenuItemID INT IDENTITY(1,1) PRIMARY KEY,
@@ -133,15 +125,6 @@ CREATE TABLE MenuItems (
     Description NVARCHAR(255) NULL,
     Status TINYINT NOT NULL CHECK (Status IN (0,1)), -- 0 = Hết hàng, 1 = Còn hàng
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
--- Tạo bảng MenuItemLabels (phải tạo sau MenuItems và Labels vì có khóa ngoại)
-CREATE TABLE MenuItemLabels (
-    MenuItemID INT NOT NULL,
-    LabelID INT NOT NULL,
-    PRIMARY KEY (MenuItemID, LabelID),
-    FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE,
-    FOREIGN KEY (LabelID) REFERENCES Labels(LabelID) ON DELETE CASCADE
 );
 
 -- Tạo bảng MenuItemRatings (phải tạo sau MenuItems và Users vì có khóa ngoại)
@@ -178,6 +161,7 @@ CREATE TABLE OrderDetails (
     OrderID INT NOT NULL,
     MenuItemID INT NOT NULL,
     Quantity INT NOT NULL CHECK (Quantity > 0),
+    Note NVARCHAR(200) NULL;
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -420,18 +404,6 @@ VALUES
     (N'Món hải sản');
 GO
 
--- Thêm dữ liệu vào bảng Labels
-INSERT INTO Labels (Name, Description)
-VALUES 
-    (N'Cay', N'Món ăn cay'),
-    (N'Chay', N'Món ăn chay'),
-    (N'Đặc biệt', N'Món đặc biệt của nhà hàng'),
-    (N'Mới', N'Món mới trong thực đơn'),
-    (N'Bán chạy', N'Món ăn bán chạy nhất'),
-    (N'Healthy', N'Món ăn tốt cho sức khỏe'),
-    (N'Không đường', N'Món không chứa đường');
-GO
-
 -- Thêm dữ liệu vào bảng MenuItems
 INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status)
 VALUES 
@@ -476,30 +448,6 @@ VALUES
     -- Món hải sản
     (N'Mực xào sa tế', '/images/menu/muc-xao.jpg', 8, 120000, N'Mực tươi xào với sa tế cay', 1),
     (N'Tôm sú nướng muối ớt', '/images/menu/tom-nuong.jpg', 8, 150000, N'Tôm sú nướng với muối ớt', 1);
-GO
-
--- Thêm dữ liệu vào bảng MenuItemLabels
-INSERT INTO MenuItemLabels (MenuItemID, LabelID)
-VALUES 
-    (3, 1), -- Salad Thái - Cay
-    (5, 5), -- Cơm chiên hải sản - Bán chạy
-    (6, 3), -- Bò lúc lắc - Đặc biệt
-    (7, 6), -- Cá hồi nướng - Healthy
-    (9, 1), -- Lẩu Thái - Cay
-    (9, 3), -- Lẩu Thái - Đặc biệt
-    (10, 5), -- Bún chả - Bán chạy
-    (13, 6), -- Trái cây - Healthy
-    (15, 6), -- Sinh tố bơ - Healthy
-    (16, 4), -- Trà đào - Mới
-    (19, 5), -- Cà phê sữa - Bán chạy
-    (20, 3), -- Cua rang me - Đặc biệt
-    (21, 3), -- Tôm hùm - Đặc biệt
-    (21, 4), -- Tôm hùm - Mới
-    (22, 2), -- Đậu hũ sốt nấm - Chay
-    (23, 2), -- Canh rau củ - Chay
-    (23, 6), -- Canh rau củ - Healthy
-    (24, 5), -- Sườn nướng - Bán chạy
-    (26, 1); -- Mực xào sa tế - Cay
 GO
 
 -- Thêm dữ liệu vào bảng MenuItemAttributes

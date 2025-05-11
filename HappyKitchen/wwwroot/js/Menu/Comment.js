@@ -7,7 +7,6 @@
     const totalComments = document.getElementById('comment-count');
     const currentPageDisplay = document.getElementById('current-page');
     const totalPagesDisplay = document.getElementById('total-pages');
-    let allComments = [];
     let selectedRating = 0;
 
     document.querySelectorAll('input[name="rating"]').forEach(function (input) {
@@ -62,13 +61,14 @@
     }
 
     function displayComments() {
+        // Làm mới danh sách bình luận trước khi render lại
+        commentList.innerHTML = "";
 
         sortCommentsByDateDesc();
 
         // Render lại các bình luận từ mảng allComments
         allComments.slice((currentPage - 1) * commentsPerPage, currentPage * commentsPerPage)
             .forEach(comment => {
-                // Chuyển đổi rating sang số (nếu cần)
                 const starRating = Number(comment.rating);
                 const commentElement = document.createElement('div');
                 commentElement.className = 'comment';
@@ -84,9 +84,35 @@
             });
     }
 
+
     function updateCommentCount() {
         totalComments.textContent = `${allComments.length} comments`;
     }
+
+    function updateRatingDisplay() {
+        // Tính số lượng đánh giá dựa trên mảng allComments
+        const ratingCount = allComments.length;
+
+        // Tính trung bình rating
+        if (ratingCount === 0) {
+            document.getElementById('average-rating').textContent = "0.0";
+        } else {
+            const totalRating = allComments.reduce((sum, comment) => sum + Number(comment.rating), 0);
+            const avgRating = (totalRating / ratingCount).toFixed(1);
+            document.getElementById('average-rating').textContent = avgRating;
+        }
+
+        // Cập nhật số lượng đánh giá
+        document.getElementById('rating-count').textContent = `(${ratingCount} đánh giá)`;
+    }
+
+    function updateRatingStars() {
+        const avgRatingText = document.getElementById('average-rating').textContent;
+        const avgRating = parseFloat(avgRatingText);
+        const starsHtml = generateStars(avgRating);
+        document.getElementById('rating-stars-display').innerHTML = starsHtml;
+    }
+
 
     function addComment() {
         if (!isLoggedIn) {
@@ -143,6 +169,8 @@
             displayComments();
             updatePagination();
             updateCommentCount();
+            updateRatingDisplay();
+            updateRatingStars();
 
             commentTextElem.value = "";
             document.querySelectorAll('input[name="rating"]').forEach(radio => {

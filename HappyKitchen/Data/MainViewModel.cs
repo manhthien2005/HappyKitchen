@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace HappyKitchen.Models
 {
+
     public class User
     {
         [Key]
@@ -20,7 +21,7 @@ namespace HappyKitchen.Models
 
         [StringLength(100)]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [StringLength(255)]
         public string? Address { get; set; }
@@ -31,37 +32,33 @@ namespace HappyKitchen.Models
         [Range(0, 1, ErrorMessage = "UserType must be 0 (Customer) or 1 (Employee)")]
         public byte UserType { get; set; } // 0 = Khách hàng, 1 = Nhân viên
 
-        public string PasswordHash { get; set; } // Chỉ dùng cho nhân viên
+        public string PasswordHash { get; set; } 
 
-        [Column(TypeName = "decimal(10,2)")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal? Salary { get; set; } // Chỉ áp dụng cho nhân viên
 
         [Required]
         [Range(0, 2, ErrorMessage = "Status must be 0 (Active), 1 (Blocked), or 2 (Resigned)")]
         public byte Status { get; set; } = 0; // 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
-    }
+    
+        public int? RoleID { get; set; }
 
-
-    public class Area
-    {
-        [Key]
-        public int AreaID { get; set; }
-
+        [ForeignKey("RoleID")]
+        public virtual Role? Role { get; set; }
+        [InverseProperty("Customer")]
+        public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+        
         [Required]
-        public string AreaName { get; set; }
-
-        [Required]
-        public string Description { get; set; }
-
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
-
     public class Table
     {
         [Key]
         public int TableID { get; set; }
 
         [Required]
-        public string TableName { get; set; }
+        [MaxLength(50)]
+        public string TableName { get; set; } = string.Empty; 
 
         [Required]
         public int AreaID { get; set; }
@@ -70,12 +67,26 @@ namespace HappyKitchen.Models
         public int Capacity { get; set; }
 
         [Required]
-        public byte Status { get; set; } // 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
+        [Range(0, 2)]
+        public byte Status { get; set; }
 
         [ForeignKey("AreaID")]
-        public virtual Area Place { get; set; }
+        public virtual Area Area { get; set; }
     }
+    public class Area
+    {
+        [Key]
+        public int AreaID { get; set; }
 
+        [Required]
+        [StringLength(50)]
+        public string AreaName { get; set; }
+
+        [StringLength(255)]
+        public string? Description { get; set; }
+
+        public virtual ICollection<Table>? Tables { get; set; }
+    }
     public class Reservation
     {
         [Key]
@@ -140,19 +151,20 @@ namespace HappyKitchen.Models
         public int CategoryID { get; set; }
 
         [ForeignKey("CategoryID")]
-        public Category Category { get; set; }
+        public virtual Category Category { get; set; }
 
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
         public decimal Price { get; set; }
 
         [MaxLength(255)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Required]
         public byte Status { get; set; } // 0 = Hết hàng, 1 = Còn hàng
 
-        // Quan hệ 1-N với MenuItemAttribute
-        public ICollection<MenuItemAttribute> Attributes { get; set; } = new List<MenuItemAttribute>();
+        public virtual ICollection<MenuItemAttribute> Attributes { get; set; } = new List<MenuItemAttribute>();
         public virtual ICollection<MenuItemRating> Ratings { get; set; } = new List<MenuItemRating>();
 
         [NotMapped]
@@ -161,9 +173,8 @@ namespace HappyKitchen.Models
         [NotMapped]
         public int RatingCount => Ratings?.Count ?? 0;
 
-        // Tổng số lượt đánh giá
         [NotMapped]
-        public int TotalComments => Ratings?.Count ?? 0;
+        public int TotalComments => Ratings?.Count(r => !string.IsNullOrEmpty(r.Comment)) ?? 0;
     }
 
     public class MenuItemAttribute
@@ -172,17 +183,18 @@ namespace HappyKitchen.Models
         public int AttributeID { get; set; }
 
         [Required]
-        public int MenuItemID { get; set; } // Liên kết với MenuItem
+        public int MenuItemID { get; set; }
 
         [Required, MaxLength(100)]
-        public string AttributeName { get; set; } // Tên thuộc tính (VD: "Spiciness", "Calories")
+        public string AttributeName { get; set; }
 
         [Required, MaxLength(255)]
-        public string AttributeValue { get; set; } // Giá trị của thuộc tính (VD: "Medium", "350 kcal")
+        public string AttributeValue { get; set; }
 
-        // Quan hệ với MenuItem
-        public MenuItem MenuItem { get; set; }
+        [ForeignKey("MenuItemID")]
+        public virtual MenuItem MenuItem { get; set; }
     }
+
 
     public class MenuItemRating
     {
@@ -234,16 +246,17 @@ namespace HappyKitchen.Models
             [StringLength(50)]
             public string PaymentMethod { get; set; }
 
-            // Navigation properties
-            [ForeignKey("CustomerID")]
-            public virtual User Customer { get; set; }
+        // Navigation properties
+        [ForeignKey("CustomerID")]
+        public virtual User? Customer { get; set; }
 
-            [ForeignKey("EmployeeID")]
-            public virtual User Employee { get; set; }
-
-            [ForeignKey("TableID")]
-            public virtual Table Table { get; set; }
-        }
+        [ForeignKey("EmployeeID")]
+        public virtual User? Employee { get; set; }
+        [ForeignKey("TableID")]
+        public virtual Table Table { get; set; }
+        [InverseProperty("Order")]
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+    }
 
     public class OrderDetail
     {
@@ -251,15 +264,22 @@ namespace HappyKitchen.Models
         public int OrderDetailID { get; set; }
 
         [Required]
+        [ForeignKey("Order")]
         public int OrderID { get; set; }
-        public Order Order { get; set; }
 
         [Required]
+        [ForeignKey("MenuItem")]
         public int MenuItemID { get; set; }
-        public MenuItem MenuItem { get; set; }
 
         [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0.")]
         public int Quantity { get; set; }
+
+        [StringLength(200)]
+        public string Note { get; set; }
+
+        public virtual Order Order { get; set; }
+        public virtual MenuItem MenuItem { get; set; }
     }
 
     public class Review
@@ -383,6 +403,34 @@ namespace HappyKitchen.Models
         public string Comment { get; set; }
     }
 
+    public class QRCode
+    {
+        [Key]
+        public int QRCodeID { get; set; }
+
+        [Required]
+        [ForeignKey(nameof(Table))] 
+        public int TableID { get; set; }
+
+        [Required]
+        [MaxLength(255)]
+        public string QRCodeImage { get; set; } = string.Empty; 
+
+        [Required]
+        [MaxLength(500)]
+        public string MenuUrl { get; set; } = string.Empty;
+
+        public int AccessCount { get; set; } = 0;
+
+        [Required]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
+
+        [Required]
+        [Range(0, 1, ErrorMessage = "Status must be 0 (Inactive) or 1 (Active)")]
+        public byte Status { get; set; } = 1;
+
+        public virtual Table Table { get; set; }
+    }
     public class HomeIndexViewModel
     {
         public List<Table> Tables { get; set; }

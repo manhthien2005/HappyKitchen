@@ -1,7 +1,5 @@
 ﻿using HappyKitchen.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit; // Thay YourNamespace bằng namespace thật của bạn
 
 namespace HappyKitchen.Data
 {
@@ -22,8 +20,35 @@ namespace HappyKitchen.Data
         public DbSet<MenuItemRating> MenuItemRatings { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-
         public DbSet<TrustedDevice> TrustedDevices { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<QRCode> QRCodes { get; set; }
+        public DbSet<Area> Areas { get; set; }
 
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Removed MenuItemLabel configurations
+            // Configure RolePermission composite key and relationships
+            modelBuilder.Entity<RolePermission>()
+                .HasKey(rp => new { rp.RoleID, rp.PermissionID });
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions)
+                .HasForeignKey(rp => rp.RoleID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RolePermission>()
+                .HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions)
+                .HasForeignKey(rp => rp.PermissionID)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }
+
