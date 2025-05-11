@@ -1599,7 +1599,7 @@
     <!--chỉnh sửa hiển thị bảng chọn ngày giờ đặt bàn-->
     <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.2/air-datepicker.min.js"></script>
     <script>
-        new AirDatepicker('#reservationDate', {
+            new AirDatepicker('#reservationDate', {
             timepicker: true,
             locale: {
                 days: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
@@ -1614,6 +1614,27 @@
                 firstDay: 1
             },
             minDate: new Date(),
+            minHours: 9,  // Giới hạn giờ nhỏ nhất là 9 (09:00 AM)
+            maxHours: 22, // Giới hạn giờ lớn nhất là 22 (10:00 PM)
+            onSelect: function ({ date, formattedDate, datepicker }) {
+                if (date) {
+                    const hours = date.getHours();
+                    const minutes = date.getMinutes();
+
+                    // Nếu giờ không nằm trong khoảng 9-22, điều chỉnh lại
+                    if (hours < 9) {
+                        date.setHours(9);
+                        date.setMinutes(0);
+                        datepicker.selectDate(date);
+                        alert("Nhà hàng mở cửa từ 9:00 sáng. Thời gian đã được điều chỉnh.");
+                    } else if (hours > 22 || (hours === 22 && minutes > 0)) {
+                        date.setHours(22);
+                        date.setMinutes(0);
+                        datepicker.selectDate(date);
+                        alert("Nhà hàng đóng cửa lúc 22:00 tối. Thời gian đã được điều chỉnh.");
+                    }
+                }
+            }
         });
         function parseDateStringToDateObject(dateString) {
             console.log("DEBUG: Bắt đầu parseDateStringToDateObject cho chuỗi:", dateString);

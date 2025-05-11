@@ -66,7 +66,7 @@ namespace HappyKitchen.Controllers
             // Nếu chưa tồn tại, thêm mới vào database
             if (existingReservation == null)
             {
-                _context.Reservations.Add(cartInfoJson.ReservationInformation);
+                _context.Reservations.Add(cartInfoJson.ReservationInformation); 
                 await _context.SaveChangesAsync();
             }
             else

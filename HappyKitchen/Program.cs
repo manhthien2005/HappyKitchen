@@ -31,6 +31,9 @@ builder.Services.AddScoped<ITableService, TableService>();
 builder.Services.AddScoped<IAreaTableService, AreaTableService>();
 builder.Services.AddScoped<IPosService, PosService>();
 
+// Đăng ký Background Service
+builder.Services.AddHostedService<ReservationCleanupService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
