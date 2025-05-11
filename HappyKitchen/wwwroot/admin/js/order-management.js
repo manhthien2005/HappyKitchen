@@ -131,9 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         <button class="btn btn-sm btn-outline-danger delete-order-btn" data-order-id="${order.orderID}" title="Xóa đơn hàng">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <button class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}" title="Xóa đơn hàng">
+                            <i class="fas fa-print me-1"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
+            
+            document.querySelectorAll(".print-order-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const orderId = btn.getAttribute("data-order-id");
+                    window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
+                });
+            });
     }
 
     function getPaymentMethodText(paymentMethod) {

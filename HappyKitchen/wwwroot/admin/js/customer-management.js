@@ -410,9 +410,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <a href= "/CustomerManage/OrderDetail?orderId=${order.orderID}" class="btn btn-sm btn-outline-primary view-details-btn">
                 <i class="fas fa-eye me-1"></i> Chi tiết
               </a>
-              <button class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}">
+              <a class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}">
                 <i class="fas fa-print me-1"></i> In hóa đơn
-              </button>
+              </a>
             </div>
           `;
           orderElement.appendChild(orderFooter);
@@ -423,8 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".print-order-btn").forEach(btn => {
           btn.addEventListener("click", () => {
               const orderId = btn.getAttribute("data-order-id");
-              // Mở trang in hóa đơn trong cửa sổ mới
-              window.open(`/OrderQR/PrintInvoice?orderId=${orderId}`, '_blank', 'width=800,height=600');
+              window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
           });
       });
   }

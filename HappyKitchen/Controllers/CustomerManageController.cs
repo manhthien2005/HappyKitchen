@@ -349,7 +349,8 @@ namespace HappyKitchen.Controllers
         }
         
         [HttpGet]
-        [AuthorizeAccess("CUSTOMER_ACCOUNT_MANAGE", "view")]
+        [Route("he-thong/in-hoa-don/{orderId}")]
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public async Task<IActionResult> PrintInvoice(int orderId)
         {
             _logger.LogDebug("[View] PrintInvoice: OrderID={OrderID}", orderId);

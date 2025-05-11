@@ -3,6 +3,29 @@
     Layout = null;
     var orderDate = Model.OrderTime.ToString("dd/MM/yyyy HH:mm");
     var total = Model.OrderDetails.Sum(od => od.MenuItem.Price * od.Quantity);
+    
+    string GetStatusText(int status)
+    {
+        switch (status)
+        {
+            case 0: return "Đã hủy";
+            case 1: return "Chờ xác nhận";
+            case 2: return "Đang chuẩn bị";
+            case 3: return "Hoàn thành";
+            default: return "Không xác định";
+        }
+    }
+    
+    string GetPaymentMethodText(int paymentMethod)
+    {
+        switch (paymentMethod)
+        {
+            case 0: return "Tiền mặt";
+            case 1: return "Thẻ";
+            case 2: return "Thanh toán online";
+            default: return "Không xác định";
+        }
+    }
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -164,6 +187,14 @@
                 <div class="detail-row">
                     <span class="detail-label">Ngày:</span>
                     <span>@orderDate</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Trạng thái:</span>
+                    <span>@GetStatusText(Model.Status)</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Thanh toán:</span>
+                    <span>@GetPaymentMethodText(Model.PaymentMethod)</span>
                 </div>
                 @if (Model.Table != null)
                 {
