@@ -21,36 +21,46 @@ namespace HappyKitchen.Services
             _smtpPort = 587; // Cổng SMTP của Gmail
         }
 
-        private Task SendEmailAsync(string toEmail, string subject, string body)
+        private async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            return Task.Run(async () =>
+            try
             {
-                try
-                {
-                    using var smtpClient = new SmtpClient(_smtpServer)
-                    {
-                        Port = _smtpPort,
-                        Credentials = new NetworkCredential(_fromEmail, _password),
-                        EnableSsl = true,
-                        Timeout = 10000 // 10 giây
-                    };
+                Console.WriteLine($"Attempting to send email to: {toEmail}");
+                Console.WriteLine($"Using SMTP server: {_smtpServer}:{_smtpPort}");
+                Console.WriteLine($"From email: {_fromEmail}");
 
-                    using var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress(_fromEmail),
-                        Subject = subject,
-                        Body = body,
-                        IsBodyHtml = true
-                    };
-
-                    mailMessage.To.Add(toEmail);
-                    await smtpClient.SendMailAsync(mailMessage);
-                }
-                catch (Exception ex)
+                using var smtpClient = new SmtpClient(_smtpServer)
                 {
-                    Console.WriteLine($"Lỗi gửi email: {ex.Message}");
-                }
-            });
+                    Port = _smtpPort,
+                    Credentials = new NetworkCredential(_fromEmail, _password),
+                    EnableSsl = true,
+                    Timeout = 10000 // 10 giây
+                };
+
+                using var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(_fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                mailMessage.To.Add(toEmail);
+                await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"Email sent successfully to: {toEmail}");
+            }
+            catch (SmtpException ex)
+            {
+                Console.WriteLine($"SMTP Error: {ex.Message}");
+                Console.WriteLine($"Status Code: {ex.StatusCode}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public void SendOTP(string toEmail, string otpCode)
@@ -90,6 +100,19 @@ namespace HappyKitchen.Services
                 "<p>Nếu đây không phải là bạn, vui lòng bảo mật tài khoản của bạn ngay lập tức.<br><strong>Thân ái, Happy Kitchen.</strong></p>"
             );
             SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendEmailVerificationOTP(string toEmail, string otpCode)
+        {
+            string subject = "📧 Xác thực email của bạn";
+            string body = GetEmailTemplate(
+                "📧 Xác thực địa chỉ email",
+                $"<p>Chúng tôi đã nhận được yêu cầu xác thực email của bạn. Vui lòng sử dụng mã OTP bên dưới để xác thực địa chỉ email của bạn:</p>" +
+                $"<div style='background: #e8f5e9; padding: 10px; border-radius: 5px; text-align: center; font-size: 20px; font-weight: bold; color: #2e7d32;'>{otpCode}</div>" +
+                "<p>Mã OTP này có hiệu lực trong <strong>5 phút</strong>.</p>" +
+                "<p>Nếu bạn không yêu cầu xác thực email này, vui lòng bỏ qua email này.<br><strong>Thân ái, Happy Kitchen.</strong></p>"
+            );
+            await SendEmailAsync(toEmail, subject, body);
         }
 
         private string GetEmailTemplate(string title, string content)

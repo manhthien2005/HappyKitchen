@@ -4,6 +4,7 @@ using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace HappyKitchen.Controllers
 {
@@ -12,16 +13,40 @@ namespace HappyKitchen.Controllers
 
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly EmailService _emailService;
+        private readonly IUserService _userService;
 
-        public UserController(ApplicationDbContext context, IConfiguration configuration)
+        public UserController(ApplicationDbContext context, IConfiguration configuration, EmailService emailService, IUserService userService)
         {
             _context = context;
             _configuration = configuration;
+            _emailService = emailService;
+            _userService = userService;
         }
 
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
-            return View();
+            var userId = HttpContext.Session.GetInt32("UserID");
+            if (userId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId.Value);
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Tạo ViewModel để truyền dữ liệu
+            var viewModel = new UserProfileViewModel
+            {
+                User = user,
+                IsEmailVerified = !string.IsNullOrEmpty(user.Email),
+                IsPhoneVerified = !string.IsNullOrEmpty(user.PhoneNumber)
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Login()
@@ -96,8 +121,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetString("User_OTP_Login_Timestamp", DateTime.Now.ToString());
 
             // (Gọi dịch vụ gửi OTP qua email)
-            var emailService = new EmailService(_configuration);
-            emailService.SendLoginOTP(model.Email, otpCode);
+            _emailService.SendLoginOTP(model.Email, otpCode);
 
             return Json(new
             {
@@ -247,8 +271,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetString("User_OTP_Login", newOtp);
             HttpContext.Session.SetString("User_OTP_Login_Timestamp", DateTime.Now.ToString());
 
-            var emailService = new EmailService(_configuration);
-            emailService.SendLoginOTP(sessionEmail, newOtp);
+            _emailService.SendLoginOTP(sessionEmail, newOtp);
 
             return Json(new { success = true, message = "OTP mới đã được gửi!" });
         }
@@ -293,8 +316,7 @@ namespace HappyKitchen.Controllers
                 HttpContext.Session.SetString("User_OTP_SignUp_Timestamp", DateTime.Now.ToString());
 
                 // Gửi email OTP
-                var emailService = new EmailService(_configuration);
-                emailService.SendOTP(model.Email, otpCode);
+                _emailService.SendOTP(model.Email, otpCode);
 
                 return RedirectToAction("VerifyOTP", new { email = model.Email });
             }
@@ -399,8 +421,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetInt32("User_FailedOTP_SignUp_Attempts", 0);
 
             // Gửi OTP qua email
-            var emailService = new EmailService(_configuration);
-            emailService.SendOTP(email, newOtp);
+            _emailService.SendOTP(email, newOtp);
 
             return Json(new { success = true, message = "OTP mới đã được gửi!" });
         }
@@ -425,8 +446,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetString("User_OTP_ResetPass_Timestamp", DateTime.Now.ToString());
 
             // Gửi email OTP
-            var emailService = new EmailService(_configuration);
-            emailService.SendResetPasswordOTP(email, otpCode);
+            _emailService.SendResetPasswordOTP(email, otpCode);
 
             HttpContext.Session.SetString("User_ForgotPass_Email", email);
 
@@ -555,8 +575,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetInt32("User_FailedOTP_ResetPass_Attempts", 0);
 
             // Gửi OTP qua email
-            var emailService = new EmailService(_configuration);
-            emailService.SendOTP(email, newOtp);
+            _emailService.SendResetPasswordOTP(email, newOtp);
 
             return Json(new { success = true, message = "OTP mới đã được gửi!" });
         }
@@ -568,6 +587,279 @@ namespace HappyKitchen.Controllers
             email = email?.Trim().ToLower(); // Chuẩn hóa email để tránh lỗi
             bool exists = _context.Users.Any(u => u.Email.ToLower() == email);
             return Json(exists);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendProfileOTP([FromBody] string email)
+        {
+            try
+            {
+                // Generate OTP
+                string otp = new Random().Next(100000, 999999).ToString();
+                
+                // Store OTP in session
+                HttpContext.Session.SetString("Profile_OTP", otp);
+                HttpContext.Session.SetString("Profile_OTP_Timestamp", DateTime.Now.ToString());
+                HttpContext.Session.SetString("Profile_OTP_Email", email);
+
+                // Send OTP via email
+                _emailService.SendOTP(email, otp);
+
+                return Json(new { success = true, message = "OTP đã được gửi đến email của bạn" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi gửi OTP: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyProfileOTP([FromBody] string otp)
+        {
+            try
+            {
+                var storedOtp = HttpContext.Session.GetString("Profile_OTP");
+                var otpTimestamp = HttpContext.Session.GetString("Profile_OTP_Timestamp");
+                var email = HttpContext.Session.GetString("Profile_OTP_Email");
+
+                if (string.IsNullOrEmpty(storedOtp) || string.IsNullOrEmpty(otpTimestamp) || string.IsNullOrEmpty(email))
+                {
+                    return Json(new { success = false, message = "Phiên xác thực đã hết hạn" });
+                }
+
+                // Check if OTP is expired (5 minutes)
+                if (DateTime.Now - DateTime.Parse(otpTimestamp) > TimeSpan.FromMinutes(5))
+                {
+                    return Json(new { success = false, message = "Mã OTP đã hết hạn" });
+                }
+
+                if (otp != storedOtp)
+                {
+                    return Json(new { success = false, message = "Mã OTP không chính xác" });
+                }
+
+                // Clear OTP session data
+                HttpContext.Session.Remove("Profile_OTP");
+                HttpContext.Session.Remove("Profile_OTP_Timestamp");
+                HttpContext.Session.Remove("Profile_OTP_Email");
+
+                return Json(new { success = true, message = "Xác thực OTP thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi xác thực OTP: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserUpdateModel model)
+        {
+            try
+            {
+                if (model?.User == null)
+                {
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+                }
+
+                var userId = HttpContext.Session.GetInt32("UserID");
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn" });
+                }
+
+                var user = model.User;
+                user.UserID = userId.Value;
+
+                // Validate data
+                if (string.IsNullOrWhiteSpace(user.FullName) || user.FullName.Length > 100)
+                    return Json(new { success = false, message = "Họ tên không hợp lệ" });
+
+                if (string.IsNullOrWhiteSpace(user.PhoneNumber) ||
+                    !new Regex(@"^[0-9]{10,15}$").IsMatch(user.PhoneNumber))
+                    return Json(new { success = false, message = "Số điện thoại không hợp lệ" });
+
+                if (string.IsNullOrWhiteSpace(user.Email) ||
+                    !new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$").IsMatch(user.Email))
+                    return Json(new { success = false, message = "Email không hợp lệ" });
+
+                // Check if email/phone is already used by another user
+                var existingUserWithEmail = await _userService.GetUserByEmailAsync(user.Email);
+                if (existingUserWithEmail != null && existingUserWithEmail.UserID != user.UserID)
+                    return Json(new { success = false, message = "Email đã được sử dụng" });
+
+                var existingUserWithPhone = await _userService.GetUserByPhoneAsync(user.PhoneNumber);
+                if (existingUserWithPhone != null && existingUserWithPhone.UserID != user.UserID)
+                    return Json(new { success = false, message = "Số điện thoại đã được sử dụng" });
+
+                // Update user
+                await _userService.UpdateUserAsync(user);
+
+                // Update session data
+                HttpContext.Session.SetString("FullName", user.FullName);
+                HttpContext.Session.SetString("Email", user.Email);
+                HttpContext.Session.SetString("Phone", user.PhoneNumber);
+
+                return Json(new { success = true, message = "Cập nhật thông tin thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi cập nhật thông tin: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendEmailVerificationOTP([FromBody] string email)
+        {
+            try
+            {
+                // Validate email
+                if (string.IsNullOrEmpty(email) || !new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$").IsMatch(email))
+                {
+                    return Json(new { success = false, message = "Email không hợp lệ" });
+                }
+
+                // Check if email exists
+                var existingUser = _context.Users.FirstOrDefault(u => u.Email == email);
+                if (existingUser != null)
+                {
+                    return Json(new { success = false, message = "Email đã được sử dụng bởi tài khoản khác" });
+                }
+
+                // Generate OTP
+                string otp = new Random().Next(100000, 999999).ToString();
+                Console.WriteLine($"Generated OTP for {email}: {otp}"); // Debug log
+
+                // Store OTP in session
+                HttpContext.Session.SetString("Email_Verification_OTP", otp);
+                HttpContext.Session.SetString("Email_Verification_Timestamp", DateTime.Now.ToString());
+                HttpContext.Session.SetString("Email_Verification_Email", email);
+
+                // Send OTP via email
+                try
+                {
+                    await _emailService.SendEmailVerificationOTP(email, otp);
+                    Console.WriteLine($"OTP sent to {email}"); // Debug log
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending email: {ex.Message}"); // Debug log
+                    return Json(new { success = false, message = "Không thể gửi email. Vui lòng thử lại sau." });
+                }
+
+                return Json(new { success = true, message = "OTP đã được gửi đến email của bạn" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in SendEmailVerificationOTP: {ex.Message}"); // Debug log
+                return Json(new { success = false, message = "Lỗi khi gửi OTP: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyEmailOTP([FromBody] string otp)
+        {
+            try
+            {
+                var storedOtp = HttpContext.Session.GetString("Email_Verification_OTP");
+                var otpTimestamp = HttpContext.Session.GetString("Email_Verification_Timestamp");
+                var email = HttpContext.Session.GetString("Email_Verification_Email");
+
+                if (string.IsNullOrEmpty(storedOtp) || string.IsNullOrEmpty(otpTimestamp) || string.IsNullOrEmpty(email))
+                {
+                    return Json(new { success = false, message = "Phiên xác thực đã hết hạn" });
+                }
+
+                // Check if OTP is expired (5 minutes)
+                if (DateTime.Now - DateTime.Parse(otpTimestamp) > TimeSpan.FromMinutes(5))
+                {
+                    return Json(new { success = false, message = "Mã OTP đã hết hạn" });
+                }
+
+                if (otp != storedOtp)
+                {
+                    return Json(new { success = false, message = "Mã OTP không chính xác" });
+                }
+
+                // Clear OTP session data
+                HttpContext.Session.Remove("Email_Verification_OTP");
+                HttpContext.Session.Remove("Email_Verification_Timestamp");
+                HttpContext.Session.Remove("Email_Verification_Email");
+
+                return Json(new { success = true, message = "Xác thực email thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi xác thực OTP: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetInt32("UserID");
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn" });
+                }
+
+                var user = await _userService.GetUserByIdAsync(userId.Value);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // Kiểm tra mật khẩu hiện tại
+                if (!BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash))
+                {
+                    return Json(new { success = false, message = "Mật khẩu hiện tại không đúng" });
+                }
+
+                // Kiểm tra mật khẩu mới
+                if (string.IsNullOrEmpty(model.NewPassword) || model.NewPassword.Length < 8)
+                {
+                    return Json(new { success = false, message = "Mật khẩu mới phải có ít nhất 8 ký tự" });
+                }
+
+                // Kiểm tra mật khẩu mới có đủ yêu cầu không
+                var passwordRegex = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\@\\$\\!\\%\\*\\?\\&])[A-Za-z\\d\\@\\$\\!\\%\\*\\?\\&]{8,}$");
+                if (!passwordRegex.IsMatch(model.NewPassword))
+                {
+                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt" });
+                }
+
+                // Cập nhật mật khẩu mới (hash trước khi lưu)
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                await _userService.UpdateUserAsync(user);
+
+                return Json(new { success = true, message = "Đổi mật khẩu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi đổi mật khẩu: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Xóa tất cả session
+            HttpContext.Session.Clear();
+
+            // Xóa cookie RememberMe nếu có
+            if (Request.Cookies.ContainsKey("RememberMe_Email"))
+            {
+                Response.Cookies.Delete("RememberMe_Email");
+            }
+
+            // Xóa cookie TrustedDevice nếu có
+            if (Request.Cookies.ContainsKey("TrustedDevice"))
+            {
+                Response.Cookies.Delete("TrustedDevice");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

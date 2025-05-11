@@ -640,7 +640,7 @@ namespace HappyKitchen.Controllers
 
             // Gửi OTP qua email
             var emailService = new EmailService(_configuration);
-            emailService.SendOTP(email, newOtp);
+            emailService.SendResetPasswordOTP(email, newOtp);
 
             return Json(new { success = true, message = "OTP mới đã được gửi!" });
         }
