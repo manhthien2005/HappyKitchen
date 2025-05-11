@@ -980,23 +980,33 @@
                                 }
                                 <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                             </div>
-
-                            @if (Model?.Cart?.ReservationInformation == null)
+                            @if (Context.Session.GetString("Email") != null)
                             {
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <textarea id="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
+                                    <button onclick="submitCartToMenuing()" class="btn btn-secondary">
+                                        <span class="text text-1">Đặt Bàn</span>
+                                        <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <textarea id="message" class="input-field" readonly>@Model.Cart.ReservationInformation.Notes</textarea>
+                                    <a href="#cart" class="btn btn-secondary">
+                                        <span class="text text-1" style="text-align: center;">Trở lại giỏ hàng</span>
+                                        <span class="text text-2" aria-hidden="true">Trở lại giỏ hàng</span>
+                                    </a>
+                                }
+							}
+							else
+							{
                                 <textarea id="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
-                                <button onclick="submitCartToMenuing()" class="btn btn-secondary">
-                                    <span class="text text-1">Đặt Bàn</span>
-                                    <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
-                                </button>
-                            }
-                            else
-                            {
-                                <textarea id="message" class="input-field" readonly>@Model.Cart.ReservationInformation.Notes</textarea>
-                                <a href="#cart" class="btn btn-secondary">
-                                    <span class="text text-1" style="text-align: center;">Trở lại giỏ hàng</span>
-                                    <span class="text text-2" aria-hidden="true">Trở lại giỏ hàng</span>
-                                </a>
-                            }
+								<a href="@Url.Action("Login", "Account")" class="btn btn-secondary">
+                                    <span class="text text-1" style="text-align: center;">Đăng Nhập Để Đặt Bàn</span>
+									<span class="text text-2" aria-hidden="true">Đăng Nhập Để Đặt Bàn</span>
+								</a>
+							}
                         </div>
                         <div class="form-right text-center" style="background-image:url('@Url.Content("~/images/form-pattern.png")')">
 
