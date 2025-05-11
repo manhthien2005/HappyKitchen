@@ -14,6 +14,7 @@
 
 
 </head>
+
 <body>
     <!-- Header -->
     <header>
@@ -44,41 +45,49 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="content">
-            <!-- Menu Tabs -->
-            <div class="menu-tabs">
-                <button class="tab-button active" data-tab="all">Tất cả</button>
-                @if (Model?.Categories != null)
-                {
-                    @foreach (var cate in Model.Categories)
+        <div class="content-wrapper">
+            <!-- Main Content -->
+            <div class="content">
+                <!-- Menu Tabs -->
+                <div class="menu-tabs">
+                    <button class="tab-button active" data-tab="all">Tất cả</button>
+                    @if (Model?.Categories != null)
                     {
-                        <button class="tab-button" data-tab="@cate.CategoryID">@cate.CategoryName</button>
+                        @foreach (var cate in Model.Categories)
+                        {
+                            <button class="tab-button" data-tab="@cate.CategoryID">@cate.CategoryName</button>
+                        }
                     }
-                }
-            </div>
-            <!-- Menu Items -->
-            <div class="menu-items" id="menu-items-container">
-                <!-- Menu items will be dynamically added here -->
-            </div>
-
-            <!-- Selected Items -->
-            <div class="selected-items-container">
-                <h2>Danh sách món đã chọn</h2>
-                <div class="selected-items" id="selected-items-container">
-                    <p class="empty-selection">Chưa có món nào được chọn.</p>
                 </div>
-                <div class="total-price">
-                    <p>Tổng tiền: <span id="total-price">0 đ</span></p>
+                <!-- Menu Items -->
+                <div class="menu-items" id="menu-items-container">
+                    <!-- Menu items will be dynamically added here -->
+                </div>
+                <!-- Pagination -->
+                <div class="pagination" id="pagination-container">
+                    <!-- Pagination buttons will be added here -->
                 </div>
             </div>
+                <!-- Selected Items Sidebar -->
+            <div class="selected-items-sidebar">
+                <!-- Selected Items -->
+                <div class="selected-items-container">
+                    <h2>Danh sách món đã chọn</h2>
+                    <div class="selected-items" id="selected-items-container">
+                        <p class="empty-selection">Chưa có món nào được chọn.</p>
+                    </div>
+                    <div class="total-price">
+                        <p>Tổng tiền: <span id="total-price">0 đ</span></p>
+                    </div>
+                </div>
 
-            <!-- Navigation Buttons -->
-            <div class="navigation-buttons">
-                <form id="menu-form" onsubmit="event.preventDefault(); submitCartToDishChecking();">
-                    <button class="back-button" type="button" onclick="goBack()">TRỞ LẠI</button>
-                    <button class="next-button" type="submit">TIẾP THEO</button>
-                </form>
+                <!-- Navigation Buttons -->
+                <div class="navigation-buttons">
+                    <form id="menu-form" onsubmit="event.preventDefault(); submitCartToDishChecking();">
+                        <button class="back-button" type="button" onclick="goBack()">TRỞ LẠI</button>
+                        <button class="next-button" type="submit">TIẾP THEO</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -97,7 +106,8 @@
         let selectedItems = [];
         let totalPrice = 0;
         let activeTab = "all";
-
+        let currentPage = 1;
+        const itemsPerPage = 4;
         
 
         // Menu items data
@@ -362,7 +372,28 @@
 
             selectedItemsContainer.innerHTML = html;
         }
+        // Get paginated items
+        function getPaginatedItems() {
+            const filteredItems = activeTab === 'all'
+                ? menuItems
+                : menuItems.filter(item => item.category === activeTab);
 
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+            // Adjust current page if it's out of bounds after filtering
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredItems.length);
+
+            return {
+                items: filteredItems.slice(startIndex, endIndex),
+                totalPages: totalPages,
+                currentPage: currentPage
+            };
+        }
         // Update total price
         function updateTotalPrice() {
             totalPrice = selectedItems.reduce((total, item) => {
@@ -373,16 +404,63 @@
             totalPriceElement.textContent = `${formatPrice(totalPrice)} đ`;
         }
 
-        // Render menu items
+        // Render pagination
+        function renderPagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination-container');
+            paginationContainer.innerHTML = '';
+
+            if (totalPages <= 1) {
+                return;
+            }
+
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.className = 'pagination-button';
+            prevButton.innerHTML = '&laquo;';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderMenuItems();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            // Page buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderMenuItems();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.className = 'pagination-button';
+            nextButton.innerHTML = '&raquo;';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderMenuItems();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+                // Render menu items
         function renderMenuItems() {
             const menuItemsContainer = document.getElementById('menu-items-container');
             menuItemsContainer.innerHTML = '';
 
-            const filteredItems = activeTab === 'all'
-                ? menuItems
-                : menuItems.filter(item => item.category === activeTab);
+            // Use the pagination function to get the correct items for the current page
+            const { items, totalPages } = getPaginatedItems();
 
-            filteredItems.forEach(item => {
+            items.forEach(item => {
                 const menuItemElement = document.createElement('div');
                 menuItemElement.className = 'menu-item';
                 menuItemElement.innerHTML = `
@@ -402,6 +480,9 @@
                 menuItemsContainer.appendChild(menuItemElement);
             });
 
+            // Render pagination with the correct totalPages
+            renderPagination(totalPages);
+
             // Add event listeners to quantity buttons
             document.querySelectorAll('.increase-button').forEach(button => {
                 button.addEventListener('click', () => {
@@ -418,7 +499,6 @@
             });
         }
 
-        // Initialize tabs
         function initTabs() {
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', () => {
@@ -427,6 +507,7 @@
                     });
                     button.classList.add('active');
                     activeTab = button.getAttribute('data-tab');
+                    currentPage = 1; // Reset to first page when changing tabs
                     renderMenuItems();
                 });
             });
@@ -451,6 +532,7 @@
                 }
             });
         }
+        
 
         // Initialize the application with model data
         function init() {
