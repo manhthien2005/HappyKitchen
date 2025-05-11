@@ -224,7 +224,14 @@ namespace HappyKitchen.Controllers
                     await _context.SaveChangesAsync();
                     ViewBag.Message = $"Đơn hàng đã được tạo thành công với phương thức {payment}.";
                     if (payment == "CARD") return RedirectToAction("CardReturn", new { id = order.OrderID, price = (int)cartItems.TotalPrice + (cartItems.TotalPrice * 0.2m) });
-                    else return RedirectToAction("CashReturn",new {id = order.OrderID, price =(int) cartItems.TotalPrice + (cartItems.TotalPrice * 0.2m)});
+                    else
+                    {
+                        order.Status = 3; // Giả định trạng thái đã thanh toán
+                        _context.Orders.Update(order);
+                        await _context.SaveChangesAsync(); 
+                        return RedirectToAction("CashReturn", new { id = order.OrderID, price = (int)cartItems.TotalPrice + (cartItems.TotalPrice * 0.2m) });
+                    }
+                    
 
 
 
