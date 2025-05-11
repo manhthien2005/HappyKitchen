@@ -1,17 +1,4 @@
 
-CREATE TABLE Users (
-    UserID INT IDENTITY(1,1) PRIMARY KEY,
-    FullName NVARCHAR(100) NOT NULL,
-    PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
-    Email NVARCHAR(100) UNIQUE NULL,
-    Address NVARCHAR(255) NULL,
-    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)) DEFAULT 0, -- 0 = Khách hàng, 1 = Nhân viên
-    PasswordHash VARCHAR(255) NULL, -- Chỉ dùng cho nhân viên
-    Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
-    
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0 -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
-);
-
 
 USE RestaurantDB
 GO
@@ -144,8 +131,6 @@ CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL,
     EmployeeID INT NULL,
-	ReservationID INT NULL,
-    TableID INT NOT NULL UNIQUE,
     TableID INT NOT NULL,
     OrderTime DATETIME DEFAULT GETDATE(),
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
@@ -161,7 +146,7 @@ CREATE TABLE OrderDetails (
     OrderID INT NOT NULL,
     MenuItemID INT NOT NULL,
     Quantity INT NOT NULL CHECK (Quantity > 0),
-    Note NVARCHAR(200) NULL;
+    Note NVARCHAR(200) NULL,
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -408,46 +393,46 @@ GO
 INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status)
 VALUES 
     -- Món khai vị
-    (N'Gỏi cuốn tôm thịt', '/images/menu/goi-cuon.jpg', 1, 45000, N'Gỏi cuốn tươi với tôm, thịt heo và rau thơm', 1),
-    (N'Chả giò hải sản', '/images/menu/cha-gio.jpg', 1, 55000, N'Chả giò giòn với nhân hải sản thơm ngon', 1),
-    (N'Salad trộn kiểu Thái', '/images/menu/salad-thai.jpg', 1, 65000, N'Salad rau củ trộn chua cay kiểu Thái', 1),
-    (N'Súp hải sản', '/images/menu/sup-hai-san.jpg', 1, 75000, N'Súp hải sản đậm đà với tôm, mực và các loại hải sản', 1),
+    (N'Gỏi cuốn tôm thịt', 'goi-cuon.jpg', 1, 45000, N'Gỏi cuốn tươi với tôm, thịt heo và rau thơm', 1),
+    (N'Chả giò hải sản', 'cha-gio.jpg', 1, 55000, N'Chả giò giòn với nhân hải sản thơm ngon', 1),
+    (N'Salad trộn kiểu Thái', 'salad-thai.jpg', 1, 65000, N'Salad rau củ trộn chua cay kiểu Thái', 1),
+    (N'Súp hải sản', 'sup-hai-san.jpg', 1, 75000, N'Súp hải sản đậm đà với tôm, mực và các loại hải sản', 1),
     
     -- Món chính
-    (N'Cơm chiên hải sản', '/images/menu/com-chien-hai-san.jpg', 2, 85000, N'Cơm chiên với hải sản tươi ngon', 1),
-    (N'Bò lúc lắc', '/images/menu/bo-luc-lac.jpg', 2, 120000, N'Thịt bò xào với ớt chuông và hành tây', 1),
-    (N'Cá hồi nướng', '/images/menu/ca-hoi-nuong.jpg', 2, 150000, N'Cá hồi Na Uy nướng với sốt chanh dây', 1),
-    (N'Gà nướng sả', '/images/menu/ga-nuong-sa.jpg', 2, 110000, N'Gà nướng với sả và gia vị đặc biệt', 1),
-    (N'Lẩu Thái hải sản', '/images/menu/lau-thai.jpg', 2, 250000, N'Lẩu Thái chua cay với hải sản tươi sống', 1),
-    (N'Bún chả Hà Nội', '/images/menu/bun-cha.jpg', 2, 95000, N'Bún chả truyền thống kiểu Hà Nội', 1),
+    (N'Cơm chiên hải sản', 'com-chien-hai-san.jpg', 2, 85000, N'Cơm chiên với hải sản tươi ngon', 1),
+    (N'Bò lúc lắc', 'bo-luc-lac.jpg', 2, 120000, N'Thịt bò xào với ớt chuông và hành tây', 1),
+    (N'Cá hồi nướng', 'ca-hoi-nuong.jpg', 2, 150000, N'Cá hồi Na Uy nướng với sốt chanh dây', 1),
+    (N'Gà nướng sả', 'ga-nuong-sa.jpg', 2, 110000, N'Gà nướng với sả và gia vị đặc biệt', 1),
+    (N'Lẩu Thái hải sản', 'lau-thai.jpg', 2, 250000, N'Lẩu Thái chua cay với hải sản tươi sống', 1),
+    (N'Bún chả Hà Nội', 'bun-cha.jpg', 2, 95000, N'Bún chả truyền thống kiểu Hà Nội', 1),
     
     -- Món tráng miệng
-    (N'Chè hạt sen', '/images/menu/che-hat-sen.jpg', 3, 35000, N'Chè hạt sen với nước cốt dừa', 1),
-    (N'Bánh flan', '/images/menu/banh-flan.jpg', 3, 30000, N'Bánh flan mềm mịn với caramel', 1),
-    (N'Trái cây thập cẩm', '/images/menu/trai-cay.jpg', 3, 5000, N'Đĩa trái cây tươi theo mùa', 1),
+    (N'Chè hạt sen', 'che-hat-sen.jpg', 3, 35000, N'Chè hạt sen với nước cốt dừa', 1),
+    (N'Bánh flan', 'banh-flan.jpg', 3, 30000, N'Bánh flan mềm mịn với caramel', 1),
+    (N'Trái cây thập cẩm', 'trai-cay.jpg', 3, 5000, N'Đĩa trái cây tươi theo mùa', 1),
     
     -- Đồ uống
-    (N'Nước ép cam', '/images/menu/nuoc-cam.jpg', 4, 35000, N'Nước ép cam tươi', 1),
-    (N'Sinh tố bơ', '/images/menu/sinh-to-bo.jpg', 4, 40000, N'Sinh tố bơ đặc creamy', 1),
-    (N'Trà đào', '/images/menu/tra-dao.jpg', 4, 35000, N'Trà đào với đào tươi', 1),
-    (N'Cà phê đen', '/images/menu/ca-phe-den.jpg', 4, 30000, N'Cà phê đen đậm đà', 1),
-    (N'Cà phê sữa', '/images/menu/ca-phe-sua.jpg', 4, 35000, N'Cà phê sữa đặc', 1),
+    (N'Nước ép cam', 'nuoc-cam.jpg', 4, 35000, N'Nước ép cam tươi', 1),
+    (N'Sinh tố bơ', 'sinh-to-bo.jpg', 4, 40000, N'Sinh tố bơ đặc creamy', 1),
+    (N'Trà đào', 'tra-dao.jpg', 4, 35000, N'Trà đào với đào tươi', 1),
+    (N'Cà phê đen', 'ca-phe-den.jpg', 4, 30000, N'Cà phê đen đậm đà', 1),
+    (N'Cà phê sữa', 'ca-phe-sua.jpg', 4, 35000, N'Cà phê sữa đặc', 1),
     
     -- Món đặc biệt
-    (N'Cua rang me', '/images/menu/cua-rang-me.jpg', 5, 250000, N'Cua biển rang với sốt me chua ngọt', 1),
-    (N'Tôm hùm nướng phô mai', '/images/menu/tom-hum-nuong.jpg', 5, 450000, N'Tôm hùm nướng với phô mai béo ngậy', 1),
+    (N'Cua rang me', 'cua-rang-me.jpg', 5, 250000, N'Cua biển rang với sốt me chua ngọt', 1),
+    (N'Tôm hùm nướng phô mai', 'tom-hum-nuong.jpg', 5, 450000, N'Tôm hùm nướng với phô mai béo ngậy', 1),
     
     -- Món chay
-    (N'Đậu hũ sốt nấm', '/images/menu/dau-hu-nam.jpg', 6, 75000, N'Đậu hũ non sốt nấm thơm ngon', 1),
-    (N'Canh rau củ', '/images/menu/canh-rau-cu.jpg', 6, 65000, N'Canh rau củ thanh đạm', 1),
+    (N'Đậu hũ sốt nấm', 'dau-hu-nam.jpg', 6, 75000, N'Đậu hũ non sốt nấm thơm ngon', 1),
+    (N'Canh rau củ', 'canh-rau-cu.jpg', 6, 65000, N'Canh rau củ thanh đạm', 1),
     
     -- Món nướng
-    (N'Sườn nướng BBQ', '/images/menu/suon-nuong.jpg', 7, 135000, N'Sườn heo nướng với sốt BBQ', 1),
-    (N'Thịt xiên nướng', '/images/menu/thit-xien-nuong.jpg', 7, 95000, N'Thịt bò và heo xiên nướng', 1),
+    (N'Sườn nướng BBQ', 'suon-nuong.jpg', 7, 135000, N'Sườn heo nướng với sốt BBQ', 1),
+    (N'Thịt xiên nướng', 'thit-xien-nuong.jpg', 7, 95000, N'Thịt bò và heo xiên nướng', 1),
     
     -- Món hải sản
-    (N'Mực xào sa tế', '/images/menu/muc-xao.jpg', 8, 120000, N'Mực tươi xào với sa tế cay', 1),
-    (N'Tôm sú nướng muối ớt', '/images/menu/tom-nuong.jpg', 8, 150000, N'Tôm sú nướng với muối ớt', 1);
+    (N'Mực xào sa tế', 'muc-xao.jpg', 8, 120000, N'Mực tươi xào với sa tế cay', 1),
+    (N'Tôm sú nướng muối ớt', 'tom-nuong.jpg', 8, 150000, N'Tôm sú nướng với muối ớt', 1);
 GO
 
 -- Thêm dữ liệu vào bảng MenuItemAttributes
@@ -476,72 +461,6 @@ GO
 DECLARE @i INT = 1;
 DECLARE @RatingCount INT = 200;
 
--- Thuộc tính của Chè khúc bạch
-(8, N'Thành phần', N'Sữa tươi, gelatin, hạnh nhân, vải thiều, nhãn, đường phèn'),
-(8, N'Khẩu phần', N'1 chén (1 người)'),
-(8, N'Mô tả món', N'Món chè thanh mát với những viên khúc bạch mềm mịn, béo nhẹ, kết hợp cùng nước chè ngọt thanh và hạnh nhân rang giòn.');
-
-INSERT INTO Users ( FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Salary, Status) 
-VALUES 
-(N'Nguyễn Văn A', '0987654321', 'nguyenvana@example.com', N'123 Đường ABC, TP.HCM', 1, 'hashed_password', 10000000, 0);
-
-
-INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt)
-VALUES 
-(4, 1, 5, N'Rất ngon, sẽ quay lại lần nữa!','2025-03-13'),
-(4, 1, 4, N'Hương vị tuyệt vời nhưng hơi mặn một chút.','2025-03-13'),
-(4, 1, 3, N'Bình thường, không có gì đặc biệt.','2025-03-13'),
-(4, 1, 5, N'Món này xuất sắc, rất đáng thử!','2025-03-13'),
-(4, 1, 2, N'Không hợp khẩu vị của mình lắm.','2025-03-13');
-
--- Thêm dữ liệu mẫu cho bảng Areas
-INSERT INTO Areas (AreaName, Description)
-VALUES
-(N'Khu VIP', N'Khu vực dành cho khách VIP, yên tĩnh và riêng tư.'),
-(N'Khu Gia Đình', N'Khu vực phù hợp cho nhóm gia đình, không gian ấm cúng.'),
-(N'Khu Ngoài Trời', N'Khu vực thoáng mát ngoài trời, gần gũi thiên nhiên.'),
-(N'Khu Sảnh Chính', N'Khu vực trung tâm, dễ dàng phục vụ nhanh chóng.');
-
--- Thêm dữ liệu mẫu cho bảng Tables
-INSERT INTO Tables (TableName, AreaID, Capacity, Status)
-VALUES
--- Bàn thuộc Khu VIP
-(N'Bàn VIP 1', 1, 4, 0),
-(N'Bàn VIP 2', 1, 6, 1),
-(N'Bàn VIP 3', 1, 8, 2),
-
--- Bàn thuộc Khu Gia Đình
-(N'Bàn Gia Đình 1', 2, 6, 0),
-(N'Bàn Gia Đình 2', 2, 8, 1),
-(N'Bàn Gia Đình 3', 2, 10, 2),
-
--- Bàn thuộc Khu Ngoài Trời
-(N'Bàn Ngoài Trời 1', 3, 4, 0),
-(N'Bàn Ngoài Trời 2', 3, 6, 1),
-(N'Bàn Ngoài Trời 3', 3, 8, 2),
-
--- Bàn thuộc Khu Sảnh Chính
-(N'Bàn Sảnh 1', 4, 2, 0),
-(N'Bàn Sảnh 2', 4, 4, 1),
-(N'Bàn Sảnh 3', 4, 6, 2);
-
-
-DROP TABLE IF EXISTS Reviews;
-DROP TABLE IF EXISTS OrderDetails;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS MenuItemAttributes;
-DROP TABLE IF EXISTS MenuItemRatings;
-DROP TABLE IF EXISTS MenuItems;
-DROP TABLE IF EXISTS Categories;
-DROP TABLE IF EXISTS Reservations;
-DROP TABLE IF EXISTS Tables;
-DROP TABLE IF EXISTS TrustedDevices;
-DROP TABLE IF EXISTS Areas;
-DROP TABLE IF EXISTS RolePermissions;
-DROP TABLE IF EXISTS Permissions;
-DROP TABLE IF EXISTS UserRoles;
-DROP TABLE IF EXISTS Roles;
-DROP TABLE IF EXISTS Users;
 WHILE @i <= @RatingCount
 BEGIN
     DECLARE @UserID INT = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
@@ -648,23 +567,6 @@ BEGIN
 END;
 GO
 
--- Cập nhật TotalAmount cho bảng Orders
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Orders') AND name = 'TotalAmount')
-BEGIN
-    ALTER TABLE Orders ADD TotalAmount DECIMAL(10,2) DEFAULT 0;
-END
-GO
-
--- Cập nhật giá trị TotalAmount dựa trên OrderDetails
-UPDATE o
-SET o.TotalAmount = (
-    SELECT SUM(od.Quantity * mi.Price)
-    FROM OrderDetails od
-    JOIN MenuItems mi ON od.MenuItemID = mi.MenuItemID
-    WHERE od.OrderID = o.OrderID
-)
-FROM Orders o;
-GO
 
 PRINT N'Đã tạo dữ liệu mẫu thành công!';
 
