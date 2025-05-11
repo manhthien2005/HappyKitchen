@@ -200,8 +200,18 @@
 
 /* Chỉnh riêng cho thông báo success */
 #toast-container > .toast-success {
-    background-color: #28a745 !important; /* Màu nền xanh lá */
-    color: white !important;
+    background-color: #28a745 !important;
+    color: #fff !important;
+    padding-left: 50px !important;
+    background-position: 15px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 24px 24px !important;
+    min-height: 50px !important;
+    text-align: left !important;
+}
+
+#toast-container > .toast-success:before {
+    display: inline-block !important;
 }
 
 .btn.btn-secondary {
@@ -221,3 +231,17 @@
         background-color: #7A655E;
         color: black;
     }
+
+#toast-container > .toast-error {
+    background-color: #bd362f !important;
+    color: #fff !important;
+    padding-left: 50px !important;
+    background-position: 15px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 24px 24px !important;
+    min-height: 50px !important;
+    text-align: left !important;
+}
+#toast-container > .toast-error:before {
+    display: inline-block !important;
+}

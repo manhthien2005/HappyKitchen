@@ -82,11 +82,5 @@ namespace HappyKitchen.Models
         public bool CanEdit { get; set; }
         public bool CanDelete { get; set; }
     }
-    public class UserUpdateModel
-    {
-        public User User { get; set; }
-        public bool UpdatePassword { get; set; }
-        public string? NewPassword { get; set; }
-    }
 
 }

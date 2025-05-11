@@ -575,7 +575,7 @@ namespace HappyKitchen.Controllers
             HttpContext.Session.SetInt32("User_FailedOTP_ResetPass_Attempts", 0);
 
             // Gửi OTP qua email
-            _emailService.SendOTP(email, newOtp);
+            _emailService.SendResetPasswordOTP(email, newOtp);
 
             return Json(new { success = true, message = "OTP mới đã được gửi!" });
         }
@@ -674,11 +674,11 @@ namespace HappyKitchen.Controllers
                 if (string.IsNullOrWhiteSpace(user.FullName) || user.FullName.Length > 100)
                     return Json(new { success = false, message = "Họ tên không hợp lệ" });
 
-                if (string.IsNullOrWhiteSpace(user.PhoneNumber) || 
+                if (string.IsNullOrWhiteSpace(user.PhoneNumber) ||
                     !new Regex(@"^[0-9]{10,15}$").IsMatch(user.PhoneNumber))
                     return Json(new { success = false, message = "Số điện thoại không hợp lệ" });
 
-                if (string.IsNullOrWhiteSpace(user.Email) || 
+                if (string.IsNullOrWhiteSpace(user.Email) ||
                     !new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$").IsMatch(user.Email))
                     return Json(new { success = false, message = "Email không hợp lệ" });
 
@@ -690,14 +690,6 @@ namespace HappyKitchen.Controllers
                 var existingUserWithPhone = await _userService.GetUserByPhoneAsync(user.PhoneNumber);
                 if (existingUserWithPhone != null && existingUserWithPhone.UserID != user.UserID)
                     return Json(new { success = false, message = "Số điện thoại đã được sử dụng" });
-
-                // Update password if provided
-                if (model.UpdatePassword)
-                {
-                    if (string.IsNullOrEmpty(model.NewPassword) || model.NewPassword.Length < 6)
-                        return Json(new { success = false, message = "Mật khẩu mới phải có ít nhất 6 ký tự" });
-                    user.PasswordHash = PasswordService.HashPassword(model.NewPassword);
-                }
 
                 // Update user
                 await _userService.UpdateUserAsync(user);
@@ -720,21 +712,45 @@ namespace HappyKitchen.Controllers
         {
             try
             {
+                // Validate email
+                if (string.IsNullOrEmpty(email) || !new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$").IsMatch(email))
+                {
+                    return Json(new { success = false, message = "Email không hợp lệ" });
+                }
+
+                // Check if email exists
+                var existingUser = _context.Users.FirstOrDefault(u => u.Email == email);
+                if (existingUser != null)
+                {
+                    return Json(new { success = false, message = "Email đã được sử dụng bởi tài khoản khác" });
+                }
+
                 // Generate OTP
                 string otp = new Random().Next(100000, 999999).ToString();
-                
+                Console.WriteLine($"Generated OTP for {email}: {otp}"); // Debug log
+
                 // Store OTP in session
                 HttpContext.Session.SetString("Email_Verification_OTP", otp);
                 HttpContext.Session.SetString("Email_Verification_Timestamp", DateTime.Now.ToString());
                 HttpContext.Session.SetString("Email_Verification_Email", email);
 
                 // Send OTP via email
-                await _emailService.SendEmailVerificationOTP(email, otp);
+                try
+                {
+                    await _emailService.SendEmailVerificationOTP(email, otp);
+                    Console.WriteLine($"OTP sent to {email}"); // Debug log
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending email: {ex.Message}"); // Debug log
+                    return Json(new { success = false, message = "Không thể gửi email. Vui lòng thử lại sau." });
+                }
 
                 return Json(new { success = true, message = "OTP đã được gửi đến email của bạn" });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error in SendEmailVerificationOTP: {ex.Message}"); // Debug log
                 return Json(new { success = false, message = "Lỗi khi gửi OTP: " + ex.Message });
             }
         }
@@ -775,6 +791,75 @@ namespace HappyKitchen.Controllers
             {
                 return Json(new { success = false, message = "Lỗi khi xác thực OTP: " + ex.Message });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetInt32("UserID");
+                if (userId == null)
+                {
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn" });
+                }
+
+                var user = await _userService.GetUserByIdAsync(userId.Value);
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // Kiểm tra mật khẩu hiện tại
+                if (!BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash))
+                {
+                    return Json(new { success = false, message = "Mật khẩu hiện tại không đúng" });
+                }
+
+                // Kiểm tra mật khẩu mới
+                if (string.IsNullOrEmpty(model.NewPassword) || model.NewPassword.Length < 8)
+                {
+                    return Json(new { success = false, message = "Mật khẩu mới phải có ít nhất 8 ký tự" });
+                }
+
+                // Kiểm tra mật khẩu mới có đủ yêu cầu không
+                var passwordRegex = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\@\\$\\!\\%\\*\\?\\&])[A-Za-z\\d\\@\\$\\!\\%\\*\\?\\&]{8,}$");
+                if (!passwordRegex.IsMatch(model.NewPassword))
+                {
+                    return Json(new { success = false, message = "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt" });
+                }
+
+                // Cập nhật mật khẩu mới (hash trước khi lưu)
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                await _userService.UpdateUserAsync(user);
+
+                return Json(new { success = true, message = "Đổi mật khẩu thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi khi đổi mật khẩu: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Xóa tất cả session
+            HttpContext.Session.Clear();
+
+            // Xóa cookie RememberMe nếu có
+            if (Request.Cookies.ContainsKey("RememberMe_Email"))
+            {
+                Response.Cookies.Delete("RememberMe_Email");
+            }
+
+            // Xóa cookie TrustedDevice nếu có
+            if (Request.Cookies.ContainsKey("TrustedDevice"))
+            {
+                Response.Cookies.Delete("TrustedDevice");
+            }
+
+            return RedirectToAction("Index", "Home");
         }
     }
 }

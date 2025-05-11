@@ -24,9 +24,20 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/User/Profile/profile.css">
     <link rel="stylesheet" href="~/css/User/Profile/header.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
 
 <body>
+    <!--
+      - #PRELOADER
+    -->
+
+    <div class="preload" data-preaload>
+        <div class="circle"></div>
+        <p class="text">HAPPY KITCHEN</p>
+    </div>
+
     <!-- Top Bar -->
     <div class="topbar">
         <div class="container">
@@ -69,70 +80,64 @@
     <!-- Header -->
     <header class="header" data-header>
         <div class="container">
-            <a href="#" class="logo">
+            <a href="@Url.Action("Index", "Home")" class="logo">
                 <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
             </a>
 
             <nav class="navbar" data-navbar>
+
                 <button class="close-btn" aria-label="close menu" data-nav-toggler>
                     <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
                 </button>
 
-                <a href="#" class="logo">
+                <a href="@Url.Action("Index", "Home")" class="logo">
                     <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
                 </a>
 
                 <ul class="navbar-list">
+
                     <li class="navbar-item">
-                        <a href="#home" class="navbar-link hover-underline active">
+                        <a href="@Url.Action("Index", "Home")#home" class="navbar-link hover-underline active">
                             <div class="separator"></div>
+
                             <span class="span">Trang Chủ</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#about" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#about" class="navbar-link hover-underline">
                             <div class="separator"></div>
+
                             <span class="span">Giới Thiệu</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#menu" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#menu" class="navbar-link hover-underline">
                             <div class="separator"></div>
+
                             <span class="span">Thực Đơn</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#event" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#event" class="navbar-link hover-underline">
                             <div class="separator"></div>
+
                             <span class="span">Sự Kiện & Mẹo Vặt</span>
                         </a>
                     </li>
 
                     <li class="navbar-item">
-                        <a href="#connect" class="navbar-link hover-underline">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
                             <div class="separator"></div>
+
                             <span class="span">Kết Nối</span>
                         </a>
                     </li>
+
                 </ul>
 
-                <div class="text-center">
-                    <p class="headline-1 navbar-title">Visit Us</p>
-                    <address class="body-4">
-                        Restaurant St, Delicious City, <br>
-                        London 9578, UK
-                    </address>
-                    <p class="body-4 navbar-text">Open: 9.30 am - 2.30pm</p>
-                    <a href="mailto:booking@grilli.com" class="body-4 sidebar-link">booking@grilli.com</a>
-                    <div class="separator"></div>
-                    <p class="contact-label">Booking Request</p>
-                    <a href="tel:+88123123456" class="body-1 contact-number hover-underline">
-                        +88-123-123456
-                    </a>
-                </div>
             </nav>
 
             <a href="#booking" class="btn btn-secondary">
@@ -420,10 +425,50 @@
             </div>
         </section>
     </main>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" ></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "3000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+        });
+    </script>
 
     <!-- Custom JS -->
     <script src="~/js/User/Profile/profile.js"></script>
-    <script src="~/js/script.js"></script>
+    <script src="~/js/User/Profile/header.js"></script>
+
+    <script>
+        function toggleUserDropdown(event) {
+            event.stopPropagation(); // Ngăn sự kiện click lan tỏa đến window
+            const userDropdown = document.getElementById('userDropdown');
+            userDropdown.classList.toggle('show');
+        }
+
+        document.getElementById('userAvatar').addEventListener('click', toggleUserDropdown);
+
+        window.addEventListener('click', function (event) {
+            const userAvatar = document.getElementById('userAvatar');
+            const userDropdown = document.getElementById('userDropdown');
+            if (!userAvatar.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+    </script>
+
 
     <!-- Ionicon -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>

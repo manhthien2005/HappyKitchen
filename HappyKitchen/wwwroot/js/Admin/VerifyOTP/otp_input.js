@@ -56,10 +56,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    toastr.success(`<div id="countdownMsg">
-                    <span style="font-size: 15px; font-weight: bold;">🎉 Đã tạo tài khoản thành công!</span><br>
-                    🔄 Trở lại trang chủ sau <b>3</b> giây...
-                </div>`, "", {
+                    toastr.success("Đã tạo tài khoản thành công!", "", {
                         timeOut: 4000,
                         extendedTimeOut: 1000,
                         closeButton: true,
@@ -67,19 +64,12 @@
                         positionClass: "toast-bottom-right"
                     });
 
-                    let countdown = 3;
-                    let timer = setInterval(() => {
-                        countdown--;
-                        if (countdown === 0) {
-                            clearInterval(timer);
-                            window.location.href = data.redirectUrl;
-                        } else {
-                            document.querySelector("#countdownMsg b").textContent = countdown;
-                        }
-                    }, 1000);
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl;
+                    }, 3000);
                 } else {
                     otpError.textContent = data.message;
-                    toastr.error("❌ " + data.message);
+                    toastr.error(data.message);
                     inputs.forEach(input => {
                         input.value = "";
                         input.disabled = false;
