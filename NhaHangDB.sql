@@ -88,6 +88,7 @@ CREATE TABLE Reservations (
 	  Capacity INT NOT NULL,
     CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
     ReservationTime DATETIME NOT NULL, 
+    OrderID INT NULL,
     Duration INT NOT NULL,
     Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
     Notes NVARCHAR(255) NULL,
@@ -248,46 +249,6 @@ INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, Can
 (5, 6, 1,0,0,0), (5, 7, 0,0,0,0),
 (5, 8, 0,0,0,0), (5, 9, 1,0,0,0),
 (5,10, 1,0,0,0), (5,11, 1,1,1,1);
--- MANAGER: toàn quyền với danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (1, 12, 1, 1, 1, 1);
-
--- WAITER: chỉ được xem danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (2, 12, 1, 0, 0, 0);
-
--- CHEF: không cần quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (3, 12, 0, 0, 0, 0);
-
--- ADMIN: toàn quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (4, 12, 1, 1, 1, 1);
-
--- CASHIER: chỉ được xem danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (5, 12, 1, 0, 0, 0);
-
--- MANAGER: toàn quyền quản lý đơn hàng
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (1, 13, 1, 1, 1, 1);
-
--- WAITER: có thể tạo và chỉnh sửa đơn hàng, nhưng không xóa
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (2, 13, 1, 1, 1, 0);
-
--- CHEF: chỉ xem đơn hàng để chuẩn bị món
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (3, 13, 1, 0, 0, 0);
-
--- ADMIN: toàn quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (4, 13, 1, 1, 1, 1);
-
--- CASHIER: chỉ xem để xử lý thanh toán
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (5, 13, 1, 0, 0, 0);
-
 
 
 DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
@@ -678,96 +639,102 @@ BEGIN
     SET @i = @i + 1;
 END;
 GO
-
 -- Thêm dữ liệu vào bảng Orders và OrderDetails
- DECLARE @CurrentDate DATETIME = GETDATE();
- DECLARE @FirstDayLastMonth DATETIME = DATEADD(MONTH, -1, DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate));
- DECLARE @FirstDayCurrentMonth DATETIME = DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate);
+DECLARE @StartDate DATETIME = DATEADD(MONTH, -3, GETDATE());
+DECLARE @EndDate DATETIME = '2025-05-12 12:00:00';
 
- DECLARE @i INT = 1;
- DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
+DECLARE @i INT = 1;
+DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
 
- WHILE @i <= @OrderCount
- BEGIN
-     DECLARE @CustomerID INT = NULL;
-     DECLARE @EmployeeID INT = NULL;
-     DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
-     DECLARE @PaymentMethod TINYINT = CASE WHEN RAND() < 0.5 THEN 0 ELSE 2 END; -- Ngẫu nhiên chọn 0 hoặc 2
-     
-     -- 80% đơn hàng có thông tin khách hàng
-     IF RAND() < 0.8
-     BEGIN
-         SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
-     END
-     
-     -- Tất cả đơn hàng đều có nhân viên phục vụ
-     SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
-     
-     -- Tạo thời gian đặt hàng ngẫu nhiên trong tháng hiện tại và tháng trước
-     DECLARE @OrderTime DATETIME;
-     IF @i <= @OrderCount * 0.6 -- 60% đơn hàng trong tháng hiện tại
-         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayCurrentMonth);
-     ELSE -- 40% đơn hàng trong tháng trước
-         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayLastMonth);
-     
-     -- Xác định trạng thái đơn hàng
-     DECLARE @Status TINYINT;
-     DECLARE @RandomStatus FLOAT = RAND();
-     
-     IF @RandomStatus < 0.05 -- 5% đơn hàng bị hủy
-         SET @Status = 0;
-     ELSE IF @RandomStatus < 0.1 -- 5% đơn hàng đang chờ xác nhận
-         SET @Status = 1;
-     ELSE IF @RandomStatus < 0.2 -- 10% đơn hàng đang chuẩn bị
-         SET @Status = 2;
-     ELSE -- 80% đơn hàng đã hoàn thành
-         SET @Status = 3;
-     
-     -- Thêm đơn hàng
-     INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
-     VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
-     
-     -- Lấy OrderID vừa thêm
-     DECLARE @OrderID INT = SCOPE_IDENTITY();
-     
-     -- Thêm chi tiết đơn hàng (1-8 món ăn mỗi đơn)
-     DECLARE @ItemCount INT = CAST((RAND() * 7) + 1 AS INT);
-     DECLARE @j INT = 1;
-     
-     WHILE @j <= @ItemCount
-     BEGIN
-         DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
-         DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT); -- 1-4 món mỗi loại
-         
-         INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
-         VALUES (@OrderID, @MenuItemID, @Quantity);
-         
-         SET @j = @j + 1;
-     END;
-     
-     SET @i = @i + 1;
- END;
- GO
-
--- Cập nhật TotalAmount cho bảng Orders
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Orders') AND name = 'TotalAmount')
+WHILE @i <= @OrderCount
 BEGIN
-    ALTER TABLE Orders ADD TotalAmount DECIMAL(10,2) DEFAULT 0;
-END
+    DECLARE @CustomerID INT = NULL;
+    DECLARE @EmployeeID INT = NULL;
+    DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
+    DECLARE @PaymentMethod TINYINT = CASE WHEN RAND() < 0.5 THEN 0 ELSE 2 END;
+
+    -- 80% đơn hàng có thông tin khách hàng
+    IF RAND() < 0.8
+    BEGIN
+        SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
+    END
+
+    -- Tất cả đơn hàng đều có nhân viên phục vụ
+    SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
+
+    -- Thời gian đặt hàng ngẫu nhiên trong khoảng 3 tháng trước đến 12h ngày 12/5/2025
+    DECLARE @OrderTime DATETIME = DATEADD(SECOND, RAND() * DATEDIFF(SECOND, @StartDate, @EndDate), @StartDate);
+
+    -- Trạng thái đơn hàng
+    DECLARE @Status TINYINT;
+    DECLARE @RandomStatus FLOAT = RAND();
+    IF @RandomStatus < 0.05
+        SET @Status = 0; -- Hủy
+    ELSE IF @RandomStatus < 0.10
+        SET @Status = 1; -- Chờ xác nhận
+    ELSE IF @RandomStatus < 0.20
+        SET @Status = 2; -- Đang chuẩn bị
+    ELSE
+        SET @Status = 3; -- Hoàn thành
+
+    -- Thêm đơn hàng
+    INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
+    VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
+
+    -- Lấy ID đơn hàng vừa thêm
+    DECLARE @OrderID INT = SCOPE_IDENTITY();
+
+    -- Thêm từ 1–8 món ăn
+    DECLARE @ItemCount INT = CAST((RAND() * 7) + 1 AS INT);
+    DECLARE @j INT = 1;
+
+    WHILE @j <= @ItemCount
+    BEGIN
+        DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
+        DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT);
+
+        INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
+        VALUES (@OrderID, @MenuItemID, @Quantity);
+
+        SET @j = @j + 1;
+    END
+
+    SET @i = @i + 1;
+END;
 GO
 
--- Cập nhật giá trị TotalAmount dựa trên OrderDetails
-UPDATE o
-SET o.TotalAmount = (
-    SELECT SUM(od.Quantity * mi.Price)
-    FROM OrderDetails od
-    JOIN MenuItems mi ON od.MenuItemID = mi.MenuItemID
-    WHERE od.OrderID = o.OrderID
-)
-FROM Orders o;
-GO
 
-PRINT N'Đã tạo dữ liệu mẫu thành công!';
+INSERT INTO QRCodes (TableID, QRCodeImage, MenuUrl, AccessCount, CreatedAt, Status) VALUES
+(1, '504c4b0e-372b-412d-b893-e5642dd3ebdc.png', 'http://localhost:5000/OrderQR?tableId=1', 0, '2025-05-11 16:51:33.740', 0),
+(2, '57814378-ee39-49ac-8c36-0bbbca3c4dec.png', 'http://localhost:5000/OrderQR?tableId=2', 0, '2025-05-11 16:51:36.867', 0),
+(3, '0dcd942f-6ac7-46db-9b9a-7a8ed588b28e.png', 'http://localhost:5000/OrderQR?tableId=3', 0, '2025-05-11 16:51:40.357', 0),
+(4, '15c397b6-e10a-43ff-a35f-b0f3e5ba2ded.png', 'http://localhost:5000/OrderQR?tableId=4', 0, '2025-05-11 16:51:43.437', 0),
+(5, 'cca6ee88-008b-4e7b-9d4d-1a70372ec1a4.png', 'http://localhost:5000/OrderQR?tableId=5', 0, '2025-05-11 16:51:46.323', 0),
+(6, '2931364c-874b-4157-bfb3-a6ebbe880c41.png', 'http://localhost:5000/OrderQR?tableId=6', 0, '2025-05-11 16:51:49.280', 0),
+(7, '58e65c7e-5de0-4c9d-8a1e-58eb00459c40.png', 'http://localhost:5000/OrderQR?tableId=7', 0, '2025-05-11 16:51:52.073', 0),
+(8, '308ca7cc-9e99-4cd8-bc15-3a1eb761aa0f.png', 'http://localhost:5000/OrderQR?tableId=8', 0, '2025-05-11 16:51:56.870', 0),
+(9, 'c38b1a53-7d41-47a7-bf49-b1654205bb58.png', 'http://localhost:5000/OrderQR?tableId=9', 0, '2025-05-11 16:51:59.623', 0),
+(10, '528151c4-b58a-4836-895a-587022eb130a.png', 'http://localhost:5000/OrderQR?tableId=10', 0, '2025-05-11 16:52:10.670', 0),
+(11, '9bef841d-5051-40bd-be42-a1b206ca9bf5.png', 'http://localhost:5000/OrderQR?tableId=11', 0, '2025-05-11 16:52:20.053', 0),
+(12, '15dcdf38-79dd-497c-808f-98425523e7ee.png', 'http://localhost:5000/OrderQR?tableId=12', 0, '2025-05-11 16:52:28.803', 0),
+(13, '952608fc-ea7a-4e36-8cfa-82df4b70cca2.png', 'http://localhost:5000/OrderQR?tableId=13', 0, '2025-05-11 16:52:31.407', 0),
+(14, '9e84b076-f979-46e0-b4e6-15e2b9b9aae4.png', 'http://localhost:5000/OrderQR?tableId=14', 0, '2025-05-11 16:52:33.823', 0),
+(15, 'dc282a3d-dbc8-4a47-9ec8-c11bf90d8701.png', 'http://localhost:5000/OrderQR?tableId=15', 0, '2025-05-11 16:52:36.267', 0),
+(16, 'c2647c0d-87e8-41a8-92d2-de6c7e08312a.png', 'http://localhost:5000/OrderQR?tableId=16', 0, '2025-05-11 16:52:38.917', 0),
+(17, '9c0b0ea4-6669-43b9-8d58-36140ea71ecc.png', 'http://localhost:5000/OrderQR?tableId=17', 0, '2025-05-11 16:52:42.787', 0),
+(18, 'd933f1a9-1ed8-4a99-a4df-6cf76a6fa1a9.png', 'http://localhost:5000/OrderQR?tableId=18', 0, '2025-05-11 16:52:48.143', 0),
+(19, '23e1d452-f479-49f6-9d59-f46d41891a95.png', 'http://localhost:5000/OrderQR?tableId=19', 0, '2025-05-11 16:52:59.860', 0),
+(20, '4da486c8-be64-4db6-b0b9-b268a2e27db0.png', 'http://localhost:5000/OrderQR?tableId=20', 0, '2025-05-11 16:53:03.873', 0),
+(21, 'fce8c493-cd7a-49a9-80e8-c02bfc573c56.png', 'http://localhost:5000/OrderQR?tableId=21', 0, '2025-05-11 16:53:08.687', 0),
+(22, '6fc5a6de-f571-4047-a67f-dea7e4c1e43c.png', 'http://localhost:5000/OrderQR?tableId=22', 0, '2025-05-11 16:54:37.967', 0),
+(23, 'cafce36a-5053-4345-a02b-7c000a8a15dd.png', 'http://localhost:5000/OrderQR?tableId=23', 0, '2025-05-11 16:54:44.393', 0),
+(24, 'f6c7b8eb-2240-4bd0-b327-55d5025c8bb1.png', 'http://localhost:5000/OrderQR?tableId=24', 0, '2025-05-11 16:54:48.023', 0),
+(25, '913793d0-f3db-45d8-b389-ef8c399e45ad.png', 'http://localhost:5000/OrderQR?tableId=25', 0, '2025-05-11 16:54:54.013', 0),
+(26, '162d10b9-3e1c-4c8d-92d6-be9b62d44e7c.png', 'http://localhost:5000/OrderQR?tableId=26', 0, '2025-05-11 16:54:57.270', 0),
+(27, '2f1eb601-7d43-47dc-bb53-26eea4a31a09.png', 'http://localhost:5000/OrderQR?tableId=27', 0, '2025-05-11 16:55:02.357', 0),
+(28, 'eaacbde1-9a29-4cda-a501-7f78538c3d4b.png', 'http://localhost:5000/OrderQR?tableId=28', 0, '2025-05-11 16:55:05.807', 0),
+(29, '8b5e0e65-f494-48a8-a87e-fbbe17602a34.png', 'http://localhost:5000/OrderQR?tableId=29', 0, '2025-05-11 16:55:08.913', 0),
+(30, '98bef3ac-b0c7-4722-a4c2-162dd26d9d50.png', 'http://localhost:5000/OrderQR?tableId=30', 0, '2025-05-11 16:55:16.073', 0);
 
 
 USE RestaurantDB
