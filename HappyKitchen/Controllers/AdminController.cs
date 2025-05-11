@@ -50,8 +50,8 @@ namespace HappyKitchen.Controllers
                     _logger.LogInformation($"Auto-login successful for user: {user.UserID}");
                     HttpContext.Session.SetString("StaffID", user.UserID.ToString());
                     HttpContext.Session.SetString("StaffFullName", user.FullName);
-                    HttpContext.Session.SetString("Email", user.Email);
-                    HttpContext.Session.SetString("Phone", user.PhoneNumber);
+                    HttpContext.Session.SetString("StaffEmail", user.Email);
+                    HttpContext.Session.SetString("StaffPhone", user.PhoneNumber);
                     HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
                     HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
@@ -128,8 +128,8 @@ namespace HappyKitchen.Controllers
                     // Lưu thông tin vào session
                     HttpContext.Session.SetString("StaffID", user.UserID.ToString());
                     HttpContext.Session.SetString("StaffFullName", user.FullName);
-                    HttpContext.Session.SetString("Email", user.Email);
-                    HttpContext.Session.SetString("Phone", user.PhoneNumber);
+                    HttpContext.Session.SetString("StaffEmail", user.Email);
+                    HttpContext.Session.SetString("StaffPhone", user.PhoneNumber);
                     HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
                     HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
                     
@@ -300,8 +300,8 @@ namespace HappyKitchen.Controllers
             // Lưu thông tin vào session
             HttpContext.Session.SetString("StaffID", user.UserID.ToString());
             HttpContext.Session.SetString("StaffFullName", user.FullName);
-            HttpContext.Session.SetString("Email", user.Email);
-            HttpContext.Session.SetString("Phone", user.PhoneNumber);
+            HttpContext.Session.SetString("StaffEmail", user.Email);
+            HttpContext.Session.SetString("StaffPhone", user.PhoneNumber);
             HttpContext.Session.SetString("RoleID", user.RoleID?.ToString() ?? "0");
             HttpContext.Session.SetString("RoleName", user.Role?.RoleName ?? "");
 
@@ -378,9 +378,9 @@ namespace HappyKitchen.Controllers
 
                 // Lưu thông tin vào Session
                 HttpContext.Session.SetString("StaffFullName", model.FullName);
-                HttpContext.Session.SetString("Email", model.Email);
+                HttpContext.Session.SetString("StaffEmail", model.Email);
                 HttpContext.Session.SetString("Password", model.Password);
-                HttpContext.Session.SetString("PhoneNumber", model.PhoneNumber);
+                HttpContext.Session.SetString("StaffPhoneNumber", model.PhoneNumber);
 
                 // Tạo và lưu OTP vào Session
                 string otpCode = new Random().Next(100000, 999999).ToString();
@@ -804,7 +804,7 @@ namespace HappyKitchen.Controllers
 
                 // Update session
                 HttpContext.Session.SetString("StaffFullName", user.FullName);
-                HttpContext.Session.SetString("Email", user.Email);
+                HttpContext.Session.SetString("StaffEmail", user.Email);
 
                 return Json(new { success = true, message = "Cập nhật thông tin thành công" });
             }
