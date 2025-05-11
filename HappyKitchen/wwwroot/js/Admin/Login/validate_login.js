@@ -54,7 +54,7 @@
                 } else {
                     toastr.success(data.message);
                     setTimeout(() => {
-                        window.location.href = "/dashboard/index";
+                        window.location.href = "/dashboard";
                     }, 1500);
                 }
             } else {

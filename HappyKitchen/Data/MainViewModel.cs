@@ -434,4 +434,18 @@ namespace HappyKitchen.Models
         public bool IsPhoneVerified { get; set; }
     }
 
+    public class UserUpdateModel
+    {
+        public User User { get; set; }
+        public bool UpdatePassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+
+    public class ChangePasswordModel
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
+
 }

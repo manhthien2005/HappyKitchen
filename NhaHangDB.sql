@@ -1,25 +1,24 @@
-CREATE DATABASE RestaurantDB
+
+
 USE RestaurantDB
 GO
+DROP TABLE IF EXISTS MenuItemAttributes;    
+DROP TABLE IF EXISTS MenuItemRatings;    
+DROP TABLE IF EXISTS OrderDetails;         
+DROP TABLE IF EXISTS Orders;               
+DROP TABLE IF EXISTS Reservations;         
+DROP TABLE IF EXISTS QRCodes;             
+DROP TABLE IF EXISTS MenuItems;          
+DROP TABLE IF EXISTS Categories;         
+DROP TABLE IF EXISTS TrustedDevices;      
+DROP TABLE IF EXISTS Users;            
+DROP TABLE IF EXISTS RolePermissions;     
+DROP TABLE IF EXISTS Permissions;        
+DROP TABLE IF EXISTS Roles;               
+DROP TABLE IF EXISTS Tables;               
+DROP TABLE IF EXISTS Areas;               
 
 
-DROP TABLE IF EXISTS MenuItemAttributes;
-DROP TABLE IF EXISTS MenuItemRatings;
-DROP TABLE IF EXISTS MenuItemLabels;
-DROP TABLE IF EXISTS OrderDetails;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS Reservations;
-DROP TABLE IF EXISTS Tables;
-DROP TABLE IF EXISTS Areas;
-DROP TABLE IF EXISTS TrustedDevices;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS RolePermissions;
-DROP TABLE IF EXISTS Permissions;
-DROP TABLE IF EXISTS Roles;
-DROP TABLE IF EXISTS MenuItems;
-DROP TABLE IF EXISTS Categories;
-
--- Tạo bảng Roles
 CREATE TABLE Roles (
     RoleID INT IDENTITY(1,1) PRIMARY KEY,
     RoleKey NVARCHAR(50) NOT NULL UNIQUE,
@@ -27,7 +26,6 @@ CREATE TABLE Roles (
     Description NVARCHAR(255)
 );
 
--- Tạo bảng Permissions
 CREATE TABLE Permissions (
     PermissionID INT IDENTITY(1,1) PRIMARY KEY,
     PermissionKey NVARCHAR(50) NOT NULL UNIQUE, 
@@ -35,7 +33,6 @@ CREATE TABLE Permissions (
     Description NVARCHAR(255) NULL
 );
 
--- Tạo bảng RolePermissions (phải tạo sau Roles và Permissions vì có khóa ngoại)
 CREATE TABLE RolePermissions (
     RoleID INT NOT NULL,
     PermissionID INT NOT NULL,
@@ -48,75 +45,74 @@ CREATE TABLE RolePermissions (
     FOREIGN KEY (PermissionID) REFERENCES Permissions(PermissionID) ON DELETE CASCADE
 );
 
--- Tạo bảng Users (phải tạo sau Roles vì có khóa ngoại RoleID)
+
 CREATE TABLE Users (
     UserID INT IDENTITY(1,1) PRIMARY KEY,
     FullName NVARCHAR(100) NOT NULL,
     PhoneNumber NVARCHAR(15) UNIQUE NOT NULL,
     Email NVARCHAR(100) UNIQUE NOT NULL,
     Address NVARCHAR(255) NULL,
-    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)), -- 0 = Khách hàng, 1 = Nhân viên
+    UserType TINYINT NOT NULL CHECK (UserType IN (0,1)),              -- 0 = Khách hàng, 1 = Nhân viên
     PasswordHash VARCHAR(255) NOT NULL, 
-    Salary DECIMAL(10,2) NULL, -- Chỉ áp dụng cho nhân viên
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0, -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
-    RoleID INT NULL, -- Gán role trực tiếp
+    Salary DECIMAL(18,2) NULL,
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)) DEFAULT 0,      -- 0 = Hoạt động, 1 = Bị khóa, 2 = Nghỉ việc
+    RoleID INT NULL,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (RoleID) REFERENCES Roles(RoleID) ON DELETE SET NULL
 );
 
--- Tạo bảng Areas
+
 CREATE TABLE Areas (
     AreaID INT IDENTITY(1,1) PRIMARY KEY,
     AreaName NVARCHAR(50) NOT NULL UNIQUE,
     Description NVARCHAR(255) NULL
 );
 
--- Tạo bảng Tables (phải tạo sau Areas vì có khóa ngoại AreaID)
+
 CREATE TABLE Tables (
     TableID INT IDENTITY(1,1) PRIMARY KEY,
     TableName NVARCHAR(50) NOT NULL,
     AreaID INT NULL,
     Capacity INT NOT NULL CHECK (Capacity > 0),
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)),                -- 0 = Trống, 1 = Đã đặt trước, 2 = Đang sử dụng
     FOREIGN KEY (AreaID) REFERENCES Areas(AreaID) ON DELETE SET NULL
 );
 
--- Tạo bảng Reservations (phải tạo sau Users và Tables vì có khóa ngoại)
+
 CREATE TABLE Reservations (
     ReservationID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL, 
     CustomerName NVARCHAR(100) NOT NULL,
     CustomerPhone NVARCHAR(15) NOT NULL,
     TableID INT NOT NULL,
-	Capacity INT NOT NULL,
-    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL, -- Thời gian tạo đặt chỗ
-    ReservationTime DATETIME NOT NULL, -- Thời gian khách đặt chỗ thực tế
-    Duration INT NOT NULL, --Thời lượng khách dùng bữa 
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Đang chờ, 2 = Đã xác nhận
+	  Capacity INT NOT NULL,
+    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
+    ReservationTime DATETIME NOT NULL, 
+    Duration INT NOT NULL,
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
     Notes NVARCHAR(255) NULL,
     FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
     FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
 );
 
--- Tạo bảng Categories
+
 CREATE TABLE Categories (
     CategoryID INT IDENTITY(1,1) PRIMARY KEY,
     CategoryName NVARCHAR(50) NOT NULL
 );
 
--- Tạo bảng MenuItems (phải tạo sau Categories vì có khóa ngoại CategoryID)
+
 CREATE TABLE MenuItems (
     MenuItemID INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(100) NOT NULL,
     MenuItemImage VARCHAR(255) NULL,
     CategoryID INT NOT NULL,
-    Price DECIMAL(10,2) NOT NULL,
+    Price DECIMAL(18,2) NOT NULL,
     Description NVARCHAR(255) NULL,
     Status TINYINT NOT NULL CHECK (Status IN (0,1)), -- 0 = Hết hàng, 1 = Còn hàng
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Tạo bảng MenuItemRatings (phải tạo sau MenuItems và Users vì có khóa ngoại)
 CREATE TABLE MenuItemRatings (
     RatingID INT IDENTITY(1,1) PRIMARY KEY,
     MenuItemID INT NOT NULL,
@@ -128,21 +124,19 @@ CREATE TABLE MenuItemRatings (
     FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
 );
 
--- Tạo bảng Orders (phải tạo sau Users và Tables vì có khóa ngoại)
 CREATE TABLE Orders (
     OrderID INT IDENTITY(1,1) PRIMARY KEY,
     CustomerID INT NULL,
     EmployeeID INT NULL,
     TableID INT NOT NULL,
     OrderTime DATETIME DEFAULT GETDATE(),
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Đang chuẩn bị, 3 = Hoàn thành
-    PaymentMethod NVARCHAR(50) NOT NULL,
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2,3)), -- 0 = Đã hủy, 1 = Chờ xác nhận, 2 = Hoàn thành
+    PaymentMethod TINYINT NOT NULL CHECK (PaymentMethod IN (0,1,2)),
     FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE NO ACTION,
     FOREIGN KEY (EmployeeID) REFERENCES Users(UserID) ON DELETE NO ACTION,
     FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE NO ACTION
 );
 
--- Tạo bảng OrderDetails (phải tạo sau Orders và MenuItems vì có khóa ngoại)
 CREATE TABLE OrderDetails (
     OrderDetailID INT IDENTITY(1,1) PRIMARY KEY,
     OrderID INT NOT NULL,
@@ -153,16 +147,14 @@ CREATE TABLE OrderDetails (
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Tạo bảng MenuItemAttributes (phải tạo sau MenuItems vì có khóa ngoại)
 CREATE TABLE MenuItemAttributes (
     AttributeID INT IDENTITY(1,1) PRIMARY KEY,
     MenuItemID INT NOT NULL,
-    AttributeName NVARCHAR(100) NOT NULL, -- Tên thuộc tính (VD: "Spiciness", "Calories")
-    AttributeValue NVARCHAR(255) NOT NULL, -- Giá trị thuộc tính (VD: "Medium", "350 kcal")
+    AttributeName NVARCHAR(100) NOT NULL, 
+    AttributeValue NVARCHAR(255) NOT NULL, 
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- Tạo bảng TrustedDevices (phải tạo sau Users vì có khóa ngoại)
 CREATE TABLE TrustedDevices (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     UserId INT NOT NULL,
@@ -171,20 +163,29 @@ CREATE TABLE TrustedDevices (
     CONSTRAINT FK_TrustedDevices_Employees FOREIGN KEY (UserId) REFERENCES Users(UserId)
 );
 
+CREATE TABLE QRCodes (
+    QRCodeID INT IDENTITY(1,1) PRIMARY KEY,
+    TableID INT NOT NULL,
+    QRCodeImage VARCHAR(255) NULL,
+    MenuUrl VARCHAR(255) NULL,    
+    AccessCount INT NOT NULL DEFAULT 0, 
+    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(), 
+    Status TINYINT NOT NULL CHECK (Status IN (0, 1)) DEFAULT 0, -- 0 = Hoạt động, 1 = Ko hoạt động
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
+);
 
 GO
--- Thêm dữ liệu vào bảng Roles
+-- Vai trò
 INSERT INTO Roles (RoleKey, RoleName, Description) VALUES
 (N'MANAGER', N'Quản lý', N'Quản lý toàn bộ hoạt động nhà hàng'),
 (N'WAITER', N'Nhân viên phục vụ', N'Phục vụ khách hàng và xử lý đơn hàng'),
 (N'CHEF', N'Đầu bếp', N'Chuẩn bị món ăn theo đơn hàng'),
-(N'ADMIN', N'Quản trị viên', N'Quản trị viên hệ thống'),
-(N'CASHIER', N'Thu ngân', N'Xử lý thanh toán và hóa đơn');
+(N'ADMIN', N'Quản trị viên', N'Quản trị hệ thống'),
+(N'CASHIER', N'Thu ngân', N'Xử lý đơn hàng và hóa đơn thanh toán');
 
--- Thêm dữ liệu vào bảng Permissions
+-- Bảng quyền
 INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
-(N'ORDER_MANAGE', N'Quản lý đơn hàng', N'Quyền xem, tạo, chỉnh sửa và xóa đơn hàng'),
-(N'MENU_MANAGE', N'Quản lý thực đơn', N'Quyền quản lý toàn bộ món ăn trong thực đơn'),
+(N'MENU_MANAGE', N'Quản lý thực đơn', N'Quản lý toàn bộ món ăn trong thực đơn'),
 (N'MENU_CATEGORY_MANAGE', N'Quản lý danh mục món ăn', N'Quản lý các nhóm danh mục trong thực đơn'),
 (N'MENU_TAG_MANAGE', N'Quản lý thẻ thực đơn', N'Quản lý thẻ nhóm món ăn'),
 (N'TABLE_BOOKING_MANAGE', N'Quản lý đặt bàn', N'Xem và xử lý thông tin đặt bàn'),
@@ -193,77 +194,105 @@ INSERT INTO Permissions (PermissionKey, PermissionName, Description) VALUES
 (N'STAFF_ACCOUNT_MANAGE', N'Quản lý tài khoản nhân viên', N'Quản lý hồ sơ nhân viên'),
 (N'ROLE_PERMISSION_MANAGE', N'Quản lý vai trò và phân quyền', N'Tạo, phân quyền, chỉnh sửa vai trò'),
 (N'VIEW_REPORT', N'Xem báo cáo', N'Xem các báo cáo thống kê và doanh thu'),
-(N'ORDER_PREPARE', N'Chuẩn bị món ăn', N'Đánh dấu món ăn đã sẵn sàng'),
-(N'PAYMENT_MANAGE', N'Thu ngân', N'Xử lý hóa đơn và thanh toán');
+(N'TABLE_MANAGE', N'Quản lý bàn', N'Quản lý danh sách bàn, chỉnh sửa, xóa, thêm mới'),
+(N'ORDER_MANAGE', N'Quản lý đơn hàng', N'Tạo, chỉnh sửa, xóa và xem thông tin đơn hàng (gồm thanh toán)');
 
+-- MANAGER: đầy đủ quyền (trừ ROLE_PERMISSION_MANAGE view-only, QR có thể giữ lại tùy ý)
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(1, 1, 1,1,1,1), 
+(1, 2, 1,1,1,1), 
+(1, 3, 1,1,1,1),
+(1, 4, 1,1,1,1), 
+(1, 5, 1,1,1,1),
+(1, 6, 1,1,1,1), 
+(1, 7, 1,1,1,1),
+(1, 8, 0,0,0,0), -- ROLE_PERMISSION_MANAGE
+(1, 9, 1,0,0,0), -- chỉ xem báo cáo
+(1,10, 1,1,1,1), -- TABLE_MANAGE
+(1,11, 1,1,1,1); -- ORDER_MANAGE
 
+-- WAITER: xem menu, tạo/sửa đơn hàng, xử lý đặt bàn
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(2, 1, 1,0,0,0), 
+(2, 2, 1,0,0,0), 
+(2, 3, 1,0,0,0),
+(2, 4, 1,1,1,0), 
+(2, 5, 1,0,0,0),
+(2, 6, 1,0,0,0), 
+(2, 7, 0,0,0,0),
+(2, 8, 0,0,0,0), 
+(2, 9, 0,0,0,0),
+(2,10, 1,0,0,0),
+(2,11, 1,1,1,0); -- đơn hàng: tạo, sửa nhưng không xóa
+
+-- CHEF: chỉ xem menu và đơn hàng
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(3, 1, 1,0,0,0), (3, 2, 1,0,0,0), (3, 3, 1,0,0,0),
+(3, 4, 0,0,0,0), (3, 5, 0,0,0,0),
+(3, 6, 0,0,0,0), (3, 7, 0,0,0,0),
+(3, 8, 0,0,0,0), (3, 9, 0,0,0,0),
+(3,10, 0,0,0,0), (3,11, 1,0,0,0); -- chỉ xem đơn hàng
+
+-- ADMIN: toàn quyền mọi thứ
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(4, 1, 1,1,1,1), (4, 2, 1,1,1,1), (4, 3, 1,1,1,1),
+(4, 4, 1,1,1,1), (4, 5, 1,1,1,1),
+(4, 6, 1,1,1,1), (4, 7, 1,1,1,1),
+(4, 8, 1,1,1,1), (4, 9, 1,1,1,1),
+(4,10, 1,1,1,1), (4,11, 1,1,1,1);
+
+-- CASHIER: chủ yếu xem, toàn quyền với đơn hàng
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
+(5, 1, 1,0,0,0), (5, 2, 1,0,0,0), (5, 3, 1,0,0,0),
+(5, 4, 1,0,0,0), (5, 5, 0,0,0,0),
+(5, 6, 1,0,0,0), (5, 7, 0,0,0,0),
+(5, 8, 0,0,0,0), (5, 9, 1,0,0,0),
+(5,10, 1,0,0,0), (5,11, 1,1,1,1);
+-- MANAGER: toàn quyền với danh sách bàn
 INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-SELECT 4, Permissions.PermissionID, 1, 1, 1, 1 FROM Permissions;
+VALUES (1, 12, 1, 1, 1, 1);
+
+-- WAITER: chỉ được xem danh sách bàn
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (2, 12, 1, 0, 0, 0);
+
+-- CHEF: không cần quyền
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (3, 12, 0, 0, 0, 0);
+
+-- ADMIN: toàn quyền
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (4, 12, 1, 1, 1, 1);
+
+-- CASHIER: chỉ được xem danh sách bàn
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (5, 12, 1, 0, 0, 0);
+
+-- MANAGER: toàn quyền quản lý đơn hàng
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (1, 13, 1, 1, 1, 1);
+
+-- WAITER: có thể tạo và chỉnh sửa đơn hàng, nhưng không xóa
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (2, 13, 1, 1, 1, 0);
+
+-- CHEF: chỉ xem đơn hàng để chuẩn bị món
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (3, 13, 1, 0, 0, 0);
+
+-- ADMIN: toàn quyền
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (4, 13, 1, 1, 1, 1);
+
+-- CASHIER: chỉ xem để xử lý thanh toán
+INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
+VALUES (5, 13, 1, 0, 0, 0);
 
 
--- MANAGER - Quyền cao, trừ chuẩn bị món ăn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(1, 1, 1, 1, 1, 1),  -- ORDER_MANAGE
-(1, 2, 1, 1, 1, 1),  -- MENU_MANAGE
-(1, 3, 1, 1, 1, 1),  -- MENU_CATEGORY_MANAGE
-(1, 4, 1, 1, 1, 1),  -- MENU_TAG_MANAGE
-(1, 5, 1, 1, 1, 1),  -- TABLE_BOOKING_MANAGE
-(1, 6, 1, 1, 1, 1),  -- TABLE_QR_MANAGE
-(1, 7, 1, 1, 1, 1),  -- CUSTOMER_ACCOUNT_MANAGE
-(1, 8, 1, 1, 1, 1),  -- STAFF_ACCOUNT_MANAGE
-(1, 9, 1, 1, 1, 1),  -- ROLE_PERMISSION_MANAGE
-(1, 10, 1, 1, 1, 1), -- VIEW_REPORT
-(1, 11, 0, 0, 0, 0), -- ORDER_PREPARE
-(1, 12, 1, 1, 1, 1); -- PAYMENT_MANAGE
-
--- WAITER - Phục vụ khách, xử lý đơn và đặt bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(2, 1, 1, 1, 1, 0),  -- ORDER_MANAGE
-(2, 2, 0, 0, 0, 0),
-(2, 3, 0, 0, 0, 0),
-(2, 4, 0, 0, 0, 0),
-(2, 5, 1, 1, 1, 0),  -- TABLE_BOOKING_MANAGE
-(2, 6, 0, 0, 0, 0),
-(2, 7, 0, 0, 0, 0),
-(2, 8, 0, 0, 0, 0),
-(2, 9, 0, 0, 0, 0),
-(2, 10, 0, 0, 0, 0),
-(2, 11, 0, 0, 0, 0),
-(2, 12, 0, 0, 0, 0);
-
--- CHEF - Chỉ chuẩn bị món ăn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(3, 1, 1, 0, 0, 0),  -- ORDER_MANAGE (để xem món cần nấu)
-(3, 2, 0, 0, 0, 0),
-(3, 3, 0, 0, 0, 0),
-(3, 4, 0, 0, 0, 0),
-(3, 5, 0, 0, 0, 0),
-(3, 6, 0, 0, 0, 0),
-(3, 7, 0, 0, 0, 0),
-(3, 8, 0, 0, 0, 0),
-(3, 9, 0, 0, 0, 0),
-(3, 10, 0, 0, 0, 0),
-(3, 11, 1, 1, 1, 0),  -- ORDER_PREPARE
-(3, 12, 0, 0, 0, 0);
-
--- CASHIER - Chỉ xử lý thanh toán
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete) VALUES
-(5, 1, 1, 0, 0, 0),  -- ORDER_MANAGE (xem đơn để tính tiền)
-(5, 2, 0, 0, 0, 0),
-(5, 3, 0, 0, 0, 0),
-(5, 4, 0, 0, 0, 0),
-(5, 5, 0, 0, 0, 0),
-(5, 6, 0, 0, 0, 0),
-(5, 7, 0, 0, 0, 0),
-(5, 8, 0, 0, 0, 0),
-(5, 9, 0, 0, 0, 0),
-(5, 10, 1, 0, 0, 0), -- VIEW_REPORT
-(5, 11, 0, 0, 0, 0),
-(5, 12, 1, 1, 1, 0); -- PAYMENT_MANAGE
 
 DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
 DECLARE @i INT = 1;
-DECLARE @EmployeeCount INT = 10;
+DECLARE @EmployeeCount INT = 20;
 
 WHILE @i <= @EmployeeCount
 BEGIN
@@ -307,7 +336,7 @@ END;
 
 -- Thêm dữ liệu vào bảng Users (Khách hàng)
 SET @i = 1;
-DECLARE @CustomerCount INT = 10;
+DECLARE @CustomerCount INT = 100;
 
 WHILE @i <= @CustomerCount
 BEGIN
@@ -377,6 +406,7 @@ BEGIN
     SET @i = @i + 1;
 END;
 GO
+
 
 -- Thêm dữ liệu vào bảng Categories
 INSERT INTO Categories (CategoryName)
@@ -620,19 +650,10 @@ INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUE
 (24, N'Mô tả món', N'Bánh mochi Nhật Bản dẻo mềm, nhân đậu đỏ ngọt bùi, ăn kèm trà xanh.'),
 (24, N'Mô tả chi tiết', N'Bánh mochi nhân đậu đỏ được làm từ bột nếp dẻo dai, bao bọc lớp nhân đậu đỏ ngọt bùi, là món tráng miệng truyền thống Nhật Bản, thường dùng cùng trà xanh để cân bằng vị ngọt.');
 
-PRINT N'Đã thêm dữ liệu thuộc tính cho tất cả các món ăn thành công!';
-
-INSERT INTO MenuItemRatings (MenuItemID, UserID, Rating, Comment, CreatedAt)
-VALUES 
-(4, 1, 5, N'Rất ngon, sẽ quay lại lần nữa!','2025-03-13'),
-(4, 1, 4, N'Hương vị tuyệt vời nhưng hơi mặn một chút.','2025-03-13'),
-(4, 1, 3, N'Bình thường, không có gì đặc biệt.','2025-03-13'),
-(4, 1, 5, N'Món này xuất sắc, rất đáng thử!','2025-03-13'),
-(4, 1, 2, N'Không hợp khẩu vị của mình lắm.','2025-03-13');
 
 -- Thêm dữ liệu vào bảng MenuItemRatings
 DECLARE @i INT = 1;
-DECLARE @RatingCount INT = 20;
+DECLARE @RatingCount INT = 200;
 
 WHILE @i <= @RatingCount
 BEGIN
@@ -659,86 +680,74 @@ END;
 GO
 
 -- Thêm dữ liệu vào bảng Orders và OrderDetails
-DECLARE @CurrentDate DATETIME = GETDATE();
-DECLARE @FirstDayLastMonth DATETIME = DATEADD(MONTH, -1, DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate));
-DECLARE @FirstDayCurrentMonth DATETIME = DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate);
+ DECLARE @CurrentDate DATETIME = GETDATE();
+ DECLARE @FirstDayLastMonth DATETIME = DATEADD(MONTH, -1, DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate));
+ DECLARE @FirstDayCurrentMonth DATETIME = DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate);
 
-DECLARE @i INT = 1;
-DECLARE @OrderCount INT = 30; -- Tạo 300 đơn hàng
+ DECLARE @i INT = 1;
+ DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
 
-WHILE @i <= @OrderCount
-BEGIN
-    DECLARE @CustomerID INT = NULL;
-    DECLARE @EmployeeID INT = NULL;
-    DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
-    
-    -- 80% đơn hàng có thông tin khách hàng
-    IF RAND() < 0.8
-    BEGIN
-        SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
-    END
-    
-    -- Tất cả đơn hàng đều có nhân viên phục vụ
-    SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
-    
-    -- Tạo thời gian đặt hàng ngẫu nhiên trong tháng hiện tại và tháng trước
-    DECLARE @OrderTime DATETIME;
-    IF @i <= @OrderCount * 0.6 -- 60% đơn hàng trong tháng hiện tại
-        SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayCurrentMonth);
-    ELSE -- 40% đơn hàng trong tháng trước
-        SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayLastMonth);
-    
-    -- Xác định trạng thái đơn hàng
-    DECLARE @Status TINYINT;
-    DECLARE @RandomStatus FLOAT = RAND();
-    
-    IF @RandomStatus < 0.05 -- 5% đơn hàng bị hủy
-        SET @Status = 0;
-    ELSE IF @RandomStatus < 0.1 -- 5% đơn hàng đang chờ xác nhận
-        SET @Status = 1;
-    ELSE IF @RandomStatus < 0.2 -- 10% đơn hàng đang chuẩn bị
-        SET @Status = 2;
-    ELSE -- 80% đơn hàng đã hoàn thành
-        SET @Status = 3;
-    
-    -- Phương thức thanh toán
-    DECLARE @PaymentMethod NVARCHAR(50);
-    DECLARE @RandomPayment FLOAT = RAND();
-    
-    IF @RandomPayment < 0.4
-        SET @PaymentMethod = N'Tiền mặt';
-    ELSE IF @RandomPayment < 0.7
-        SET @PaymentMethod = N'Thẻ tín dụng';
-    ELSE IF @RandomPayment < 0.9
-        SET @PaymentMethod = N'Ví điện tử';
-    ELSE
-        SET @PaymentMethod = N'Chuyển khoản ngân hàng';
-    
-    -- Thêm đơn hàng
-    INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
-    VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
-    
-    -- Lấy OrderID vừa thêm
-    DECLARE @OrderID INT = SCOPE_IDENTITY();
-    
-    -- Thêm chi tiết đơn hàng (1-5 món ăn mỗi đơn)
-    DECLARE @ItemCount INT = CAST((RAND() * 4) + 1 AS INT);
-    DECLARE @j INT = 1;
-    
-    WHILE @j <= @ItemCount
-    BEGIN
-        DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
-        DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT); -- 1-4 món mỗi loại
-        
-        INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
-        VALUES (@OrderID, @MenuItemID, @Quantity);
-        
-        SET @j = @j + 1;
-    END;
-    
-    SET @i = @i + 1;
-END;
-GO
+ WHILE @i <= @OrderCount
+ BEGIN
+     DECLARE @CustomerID INT = NULL;
+     DECLARE @EmployeeID INT = NULL;
+     DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
+     DECLARE @PaymentMethod TINYINT = CASE WHEN RAND() < 0.5 THEN 0 ELSE 2 END; -- Ngẫu nhiên chọn 0 hoặc 2
+     
+     -- 80% đơn hàng có thông tin khách hàng
+     IF RAND() < 0.8
+     BEGIN
+         SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
+     END
+     
+     -- Tất cả đơn hàng đều có nhân viên phục vụ
+     SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
+     
+     -- Tạo thời gian đặt hàng ngẫu nhiên trong tháng hiện tại và tháng trước
+     DECLARE @OrderTime DATETIME;
+     IF @i <= @OrderCount * 0.6 -- 60% đơn hàng trong tháng hiện tại
+         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayCurrentMonth);
+     ELSE -- 40% đơn hàng trong tháng trước
+         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayLastMonth);
+     
+     -- Xác định trạng thái đơn hàng
+     DECLARE @Status TINYINT;
+     DECLARE @RandomStatus FLOAT = RAND();
+     
+     IF @RandomStatus < 0.05 -- 5% đơn hàng bị hủy
+         SET @Status = 0;
+     ELSE IF @RandomStatus < 0.1 -- 5% đơn hàng đang chờ xác nhận
+         SET @Status = 1;
+     ELSE IF @RandomStatus < 0.2 -- 10% đơn hàng đang chuẩn bị
+         SET @Status = 2;
+     ELSE -- 80% đơn hàng đã hoàn thành
+         SET @Status = 3;
+     
+     -- Thêm đơn hàng
+     INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
+     VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
+     
+     -- Lấy OrderID vừa thêm
+     DECLARE @OrderID INT = SCOPE_IDENTITY();
+     
+     -- Thêm chi tiết đơn hàng (1-8 món ăn mỗi đơn)
+     DECLARE @ItemCount INT = CAST((RAND() * 7) + 1 AS INT);
+     DECLARE @j INT = 1;
+     
+     WHILE @j <= @ItemCount
+     BEGIN
+         DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
+         DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT); -- 1-4 món mỗi loại
+         
+         INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
+         VALUES (@OrderID, @MenuItemID, @Quantity);
+         
+         SET @j = @j + 1;
+     END;
+     
+     SET @i = @i + 1;
+ END;
+ GO
 
 -- Cập nhật TotalAmount cho bảng Orders
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Orders') AND name = 'TotalAmount')
@@ -760,3 +769,51 @@ GO
 
 PRINT N'Đã tạo dữ liệu mẫu thành công!';
 
+
+USE RestaurantDB
+GO
+CREATE PROCEDURE sp_UpdateTableStatusByIds
+    @TableIds NVARCHAR(MAX)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        DECLARE @TableIdTable TABLE (TableID INT);
+        INSERT INTO @TableIdTable (TableID)
+        SELECT CAST(value AS INT)
+        FROM STRING_SPLIT(@TableIds, ',');
+
+        UPDATE t
+        SET t.Status = 
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM Reservations r
+                    WHERE r.TableID = t.TableID
+                    AND r.Status = 1
+                    AND GETDATE() >= r.ReservationTime
+                    AND GETDATE() < DATEADD(MINUTE, r.Duration, r.ReservationTime)
+                ) THEN 1
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM Orders o
+                    WHERE o.TableID = t.TableID
+                    AND o.Status IN (1, 2)
+                    AND o.OrderTime >= DATEADD(HOUR, -4, GETDATE())
+                ) THEN 2
+                ELSE 0
+            END
+        FROM Tables t
+        WHERE t.TableID IN (SELECT TableID FROM @TableIdTable);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorLine INT = ERROR_LINE();
+        DECLARE @ErrorNumber INT = ERROR_NUMBER();
+
+        INSERT INTO ErrorLog (ErrorMessage, ErrorLine, ErrorNumber, CreatedAt)
+        VALUES (@ErrorMessage, @ErrorLine, @ErrorNumber, GETDATE());
+    END CATCH
+END;
+GO

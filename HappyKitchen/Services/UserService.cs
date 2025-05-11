@@ -92,10 +92,10 @@ namespace HappyKitchen.Services
             if (existingUser == null)
                 throw new KeyNotFoundException($"User with ID {user.UserID} not found");
 
-            // Only update password if a new one is provided
+            // Update password if provided (không hash lại vì đã được hash từ controller)
             if (!string.IsNullOrEmpty(user.PasswordHash))
             {
-                existingUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(user.PasswordHash);
+                existingUser.PasswordHash = user.PasswordHash;
             }
 
             existingUser.FullName = user.FullName;

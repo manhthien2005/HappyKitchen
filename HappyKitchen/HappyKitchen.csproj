@@ -18,6 +18,7 @@
     <Content Remove="wwwroot\js\Menu\Comment.js" />
     <Content Remove="wwwroot\js\menu_script.js" />
     <Content Remove="wwwroot\js\Admin\SignUp\signup.js" />
+    <Content Remove="wwwroot\js\User\Profile\header.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -88,6 +89,7 @@
     <None Include="wwwroot\js\script.js" />
     <None Include="wwwroot\js\section.js" />
     <None Include="wwwroot\js\Admin\SignUp\signup.js" />
+    <None Include="wwwroot\js\User\Profile\header.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -105,10 +107,6 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\js\User\Profile\" />
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

@@ -19,36 +19,46 @@ namespace HappyKitchen.Services
             _smtpPort = 587; // Cổng SMTP của Gmail
         }
 
-        private Task SendEmailAsync(string toEmail, string subject, string body)
+        private async Task SendEmailAsync(string toEmail, string subject, string body)
         {
-            return Task.Run(async () =>
+            try
             {
-                try
-                {
-                    using var smtpClient = new SmtpClient(_smtpServer)
-                    {
-                        Port = _smtpPort,
-                        Credentials = new NetworkCredential(_fromEmail, _password),
-                        EnableSsl = true,
-                        Timeout = 10000 // 10 giây
-                    };
+                Console.WriteLine($"Attempting to send email to: {toEmail}");
+                Console.WriteLine($"Using SMTP server: {_smtpServer}:{_smtpPort}");
+                Console.WriteLine($"From email: {_fromEmail}");
 
-                    using var mailMessage = new MailMessage
-                    {
-                        From = new MailAddress(_fromEmail),
-                        Subject = subject,
-                        Body = body,
-                        IsBodyHtml = true
-                    };
-
-                    mailMessage.To.Add(toEmail);
-                    await smtpClient.SendMailAsync(mailMessage);
-                }
-                catch (Exception ex)
+                using var smtpClient = new SmtpClient(_smtpServer)
                 {
-                    Console.WriteLine($"Lỗi gửi email: {ex.Message}");
-                }
-            });
+                    Port = _smtpPort,
+                    Credentials = new NetworkCredential(_fromEmail, _password),
+                    EnableSsl = true,
+                    Timeout = 10000 // 10 giây
+                };
+
+                using var mailMessage = new MailMessage
+                {
+                    From = new MailAddress(_fromEmail),
+                    Subject = subject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+
+                mailMessage.To.Add(toEmail);
+                await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine($"Email sent successfully to: {toEmail}");
+            }
+            catch (SmtpException ex)
+            {
+                Console.WriteLine($"SMTP Error: {ex.Message}");
+                Console.WriteLine($"Status Code: {ex.StatusCode}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                throw;
+            }
         }
 
         public void SendOTP(string toEmail, string otpCode)
