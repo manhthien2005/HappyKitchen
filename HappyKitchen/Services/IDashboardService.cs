@@ -3,8 +3,8 @@ namespace HappyKitchen.Services
     public interface IDashboardService
     {
         Task<DashboardStats> GetDashboardStatsAsync();
-        Task<RevenueData> GetRevenueDataAsync(string timeRange);
-        Task<List<TopSellingFood>> GetTopSellingFoodsAsync(string timeRange);
+        Task<RevenueData> GetRevenueDataAsync(string timeRange, DateTime? startDate = null, DateTime? endDate = null);
+        Task<List<TopSellingFood>> GetTopSellingFoodsAsync(string timeRange, DateTime? startDate = null, DateTime? endDate = null);
     }
 
     public class DashboardStats

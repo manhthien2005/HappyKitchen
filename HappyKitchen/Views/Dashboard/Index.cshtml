@@ -6,6 +6,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/admin/css/dashboard.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 }
 
 <!-- Page Header -->
@@ -92,12 +93,18 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Doanh thu theo thời gian</h5>
-                    <div class="dropdown">
-                        <select class="form-select form-select-sm" id="revenueTimeRange">
-                            <option value="month" selected>Tháng này</option>
-                            <option value="quarter">Quý này</option>
-                            <option value="year">Năm nay</option>
-                        </select>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown me-2">
+                            <select class="form-select form-select-sm" id="revenueTimeRange">
+                                <option value="month" selected>Tháng này</option>
+                                <option value="quarter">Quý này</option>
+                                <option value="year">Năm nay</option>
+                                <option value="custom">Tùy chỉnh</option>
+                            </select>
+                        </div>
+                        <div id="revenueDateRangePicker" class="date-range-picker" style="display: none;">
+                            <input type="text" id="revenueCustomDateRange" class="form-control form-control-sm" placeholder="Chọn khoảng thời gian" readonly>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -119,12 +126,18 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Top món ăn bán chạy</h5>
-                    <div class="dropdown">
-                        <select class="form-select form-select-sm" id="topFoodTimeRange">
-                            <option value="day" selected>Hôm nay</option>
-                            <option value="week">Tuần này</option>
-                            <option value="month">Tháng này</option>
-                        </select>
+                    <div class="d-flex align-items-center">
+                        <div class="dropdown me-2">
+                            <select class="form-select form-select-sm" id="topFoodTimeRange">
+                                <option value="day" selected>Hôm nay</option>
+                                <option value="week">Tuần này</option>
+                                <option value="month">Tháng này</option>
+                                <option value="custom">Tùy chỉnh</option>
+                            </select>
+                        </div>
+                        <div id="foodDateRangePicker" class="date-range-picker" style="display: none;">
+                            <input type="text" id="foodCustomDateRange" class="form-control form-control-sm" placeholder="Chọn khoảng thời gian" readonly>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -216,5 +229,7 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
     <script src="~/admin/js/dashboard.js"></script>
 }

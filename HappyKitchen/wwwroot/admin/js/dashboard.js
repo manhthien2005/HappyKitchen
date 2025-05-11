@@ -9,14 +9,36 @@ document.addEventListener("DOMContentLoaded", () => {
         timeRanges: {
             revenue: 'month',
             topFoods: 'day'
+        },
+        customDateRanges: {
+            revenue: {
+                startDate: null,
+                endDate: null
+            },
+            topFoods: {
+                startDate: null,
+                endDate: null
+            }
         }
     };
 
     // API endpoints
     const API = {
         dashboardStats: '/Dashboard/GetDashboardStats',
-        revenueData: (timeRange) => `/Dashboard/GetRevenueData?timeRange=${timeRange}`,
-        topSellingFoods: (timeRange) => `/Dashboard/GetTopSellingFoods?timeRange=${timeRange}`
+        revenueData: (timeRange, startDate, endDate) => {
+            let url = `/Dashboard/GetRevenueData?timeRange=${timeRange}`;
+            if (timeRange === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+            }
+            return url;
+        },
+        topSellingFoods: (timeRange, startDate, endDate) => {
+            let url = `/Dashboard/GetTopSellingFoods?timeRange=${timeRange}`;
+            if (timeRange === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`;
+            }
+            return url;
+        }
     };
 
     // DOM elements
@@ -25,6 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
         topFoodTimeRange: document.getElementById("topFoodTimeRange"),
         revenueChart: document.getElementById("revenueChart"),
         topFoodsList: document.querySelector(".top-foods-list"),
+        revenueDateRangePicker: document.getElementById("revenueDateRangePicker"),
+        revenueCustomDateRange: document.getElementById("revenueCustomDateRange"),
+        foodDateRangePicker: document.getElementById("foodDateRangePicker"),
+        foodCustomDateRange: document.getElementById("foodCustomDateRange"),
         statCards: {
             revenue: {
                 title: document.querySelector('.stat-card.revenue .stat-card-title'),
@@ -49,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initialize
     async function initialize() {
         try {
+            initDatePickers();
             await Promise.all([
                 loadDashboardStats(),
                 initRevenueChart(),
@@ -59,6 +86,39 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Initialization error:", error);
             utils.showToast("Đã xảy ra lỗi khi tải dữ liệu", "error");
         }
+    }
+
+    // Initialize date pickers
+    function initDatePickers() {
+        // Revenue date picker
+        const revenueDatePicker = flatpickr(DOM.revenueCustomDateRange, {
+            mode: "range",
+            dateFormat: "d/m/Y",
+            locale: "vn",
+            maxDate: "today",
+            onChange: function(selectedDates) {
+                if (selectedDates.length === 2) {
+                    state.customDateRanges.revenue.startDate = selectedDates[0];
+                    state.customDateRanges.revenue.endDate = selectedDates[1];
+                    loadRevenueData('custom', selectedDates[0], selectedDates[1]);
+                }
+            }
+        });
+
+        // Top foods date picker
+        const foodDatePicker = flatpickr(DOM.foodCustomDateRange, {
+            mode: "range",
+            dateFormat: "d/m/Y",
+            locale: "vn",
+            maxDate: "today",
+            onChange: function(selectedDates) {
+                if (selectedDates.length === 2) {
+                    state.customDateRanges.topFoods.startDate = selectedDates[0];
+                    state.customDateRanges.topFoods.endDate = selectedDates[1];
+                    loadTopSellingFoods('custom', selectedDates[0], selectedDates[1]);
+                }
+            }
+        });
     }
 
     // Skeleton loaders
@@ -91,25 +151,20 @@ document.addEventListener("DOMContentLoaded", () => {
             utils.showLoadingOverlay(false);
         }
     }
-    function updateRevenueChart(data) {
-        window.revenueChart.data.labels = data.labels;
-        window.revenueChart.data.datasets[0].data = data.data;
-        window.revenueChart.update();
-        
-        // Tính tổng doanh thu
-        const totalRevenue = data.data.reduce((sum, value) => sum + value, 0);
-        
-        // Hiển thị tổng doanh thu
-        const totalRevenueElement = document.getElementById('totalRevenue');
-        if (totalRevenueElement) {
-            totalRevenueElement.textContent = utils.formatMoney(totalRevenue);
-        }
-    }
-    async function loadRevenueData(timeRange) {
+
+    async function loadRevenueData(timeRange, startDate, endDate) {
         try {
             utils.showLoadingOverlay(true);
             state.timeRanges.revenue = timeRange;
-            const result = await utils.fetchData(API.revenueData(timeRange));
+            
+            if (timeRange === 'custom') {
+                state.customDateRanges.revenue.startDate = startDate || state.customDateRanges.revenue.startDate;
+                state.customDateRanges.revenue.endDate = endDate || state.customDateRanges.revenue.endDate;
+                startDate = state.customDateRanges.revenue.startDate;
+                endDate = state.customDateRanges.revenue.endDate;
+            }
+            
+            const result = await utils.fetchData(API.revenueData(timeRange, startDate, endDate));
             state.revenueData = result;
             updateRevenueChart(result);
         } catch (error) {
@@ -119,12 +174,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function loadTopSellingFoods(timeRange) {
+    async function loadTopSellingFoods(timeRange, startDate, endDate) {
         try {
             utils.showLoadingOverlay(true);
             showTopFoodsSkeletons();
             state.timeRanges.topFoods = timeRange;
-            const result = await utils.fetchData(API.topSellingFoods(timeRange));
+            
+            if (timeRange === 'custom') {
+                state.customDateRanges.topFoods.startDate = startDate || state.customDateRanges.topFoods.startDate;
+                state.customDateRanges.topFoods.endDate = endDate || state.customDateRanges.topFoods.endDate;
+                startDate = state.customDateRanges.topFoods.startDate;
+                endDate = state.customDateRanges.topFoods.endDate;
+            }
+            
+            const result = await utils.fetchData(API.topSellingFoods(timeRange, startDate, endDate));
             state.topSellingFoods = result;
             renderTopSellingFoods(result);
         } catch (error) {
@@ -193,13 +256,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // Event listeners
     function setupEventListeners() {
         DOM.revenueTimeRange?.addEventListener("change", function() {
-            loadRevenueData(this.value);
+            const selectedValue = this.value;
+            if (selectedValue === 'custom') {
+                DOM.revenueDateRangePicker.style.display = 'block';
+            } else {
+                DOM.revenueDateRangePicker.style.display = 'none';
+                loadRevenueData(selectedValue);
+            }
         });
         
         DOM.topFoodTimeRange?.addEventListener("change", function() {
-            loadTopSellingFoods(this.value);
+            const selectedValue = this.value;
+            if (selectedValue === 'custom') {
+                DOM.foodDateRangePicker.style.display = 'block';
+            } else {
+                DOM.foodDateRangePicker.style.display = 'none';
+                loadTopSellingFoods(selectedValue);
+            }
         });
-
     }
 
     // Chart functions
@@ -289,8 +363,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         // Cập nhật tiêu đề biểu đồ theo khoảng thời gian
-        const timeRangeText = getTimeRangeText(state.timeRanges.revenue);
-        const chartTitle = document.querySelector('.revenue-chart-card .card-title');
+        let timeRangeText = getTimeRangeText(state.timeRanges.revenue);
+        
+        // Nếu là khoảng thời gian tùy chỉnh, hiển thị ngày bắt đầu và kết thúc
+        if (state.timeRanges.revenue === 'custom' && state.customDateRanges.revenue.startDate && state.customDateRanges.revenue.endDate) {
+            const startDate = state.customDateRanges.revenue.startDate.toLocaleDateString('vi-VN');
+            const endDate = state.customDateRanges.revenue.endDate.toLocaleDateString('vi-VN');
+            timeRangeText = `từ ${startDate} đến ${endDate}`;
+        }
+        
+        const chartTitle = document.querySelector('.card-header h5');
         if (chartTitle) {
             chartTitle.textContent = `Doanh thu ${timeRangeText}`;
         }
@@ -304,10 +386,10 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'month': return 'tháng này';
             case 'quarter': return 'quý này';
             case 'year': return 'năm nay';
+            case 'custom': return 'tùy chỉnh';
             default: return 'tháng này';
         }
     }
-
 
     // Khởi chạy ứng dụng
     initialize();
