@@ -152,7 +152,7 @@ namespace HappyKitchen.Controllers
                     return Json(new { success = false, message = "QR Code cho bàn này đã tồn tại" });
 
                 // Generate menu URL
-                var menuUrl = $"https://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
+                var menuUrl = $"http://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
 
                 // Generate QR code
                 using var qrGenerator = new QRCodeGenerator();
@@ -209,7 +209,7 @@ namespace HappyKitchen.Controllers
                 // Regenerate QR code if table changed
                 if (qrCode.TableID != model.TableID)
                 {
-                    var menuUrl = $"https://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
+                    var menuUrl = $"http://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
                     
                     using var qrGenerator = new QRCodeGenerator();
                     var qrCodeData = qrGenerator.CreateQrCode(menuUrl, QRCodeGenerator.ECCLevel.Q);
