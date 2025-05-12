@@ -38,7 +38,7 @@ namespace HappyKitchen.Controllers
                 _logger.LogInformation($"Attempting auto-login with email: {email}");
                 var user = _context.Users
                     .Include(u => u.Role)
-                    .FirstOrDefault(u => u.Email == email && u.UserType == 1 && u.Status == 1);
+                    .FirstOrDefault(u => u.Email == email && u.UserType == 1 && u.Status == 0);
                 
                 if (user != null)
                 {
@@ -91,6 +91,7 @@ namespace HappyKitchen.Controllers
 
             if (user == null)
             {
+
                 _logger.LogWarning($"Login failed: User not found for email: {model.Email}");
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
