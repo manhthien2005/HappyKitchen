@@ -1,13 +1,14 @@
+using HappyKitchen.Attributes;
 using HappyKitchen.Data;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Text.Json;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class OrderManageController : Controller
     {
         private readonly IPosService _posService;
@@ -24,12 +25,14 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpGet]
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public async Task<IActionResult> GetOrders(
             int page = 1,
             int pageSize = 8,
@@ -143,6 +146,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("ORDER_MANAGE", "edit")]
         public async Task<IActionResult> UpdateOrder([FromBody] OrderUpdateModel model)
         {
             _logger.LogDebug("[API] UpdateOrder: OrderID={OrderID}, Status={Status}, PaymentMethod={PaymentMethod}, ItemCount={ItemCount}",
@@ -160,7 +164,7 @@ namespace HappyKitchen.Controllers
                 }
 
                 var employee = await _context.Users
-                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 1)
+                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 0)
                     .FirstOrDefaultAsync();
                 if (employee == null)
                 {
@@ -177,15 +181,15 @@ namespace HappyKitchen.Controllers
                     return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
                 }
 
-                if (!Enum.IsDefined(typeof(OrderStatus), model.Status))
-                {
-                    return Json(new { success = false, message = "Trạng thái đơn hàng không hợp lệ" });
-                }
+                // if (!Enum.IsDefined(typeof(OrderStatus), model.Status))
+                // {
+                //     return Json(new { success = false, message = "Trạng thái đơn hàng không hợp lệ" });
+                // }
 
-                if (string.IsNullOrWhiteSpace(model.PaymentMethod))
-                {
-                    return Json(new { success = false, message = "Phương thức thanh toán không hợp lệ" });
-                }
+                // if (model.PaymentMethod == 0)
+                // {
+                //     return Json(new { success = false, message = "Phương thức thanh toán không hợp lệ" });
+                // }
 
                 order.Status = model.Status;
                 order.PaymentMethod = model.PaymentMethod;
@@ -221,6 +225,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("ORDER_MANAGE", "delete")]
         public async Task<IActionResult> DeleteOrder(int id)
         {
             _logger.LogDebug("[API] DeleteOrder: OrderID={OrderID}", id);
@@ -256,19 +261,19 @@ namespace HappyKitchen.Controllers
         }
     }
 
-    public enum OrderStatus : byte
-    {
-        Canceled = 0,
-        PendingConfirmation = 1,
-        Preparing = 2,
-        Completed = 3
-    }
+    // public enum OrderStatus : byte
+    // {
+    //     Canceled = 0,
+    //     PendingConfirmation = 1,
+    //     Preparing = 2,
+    //     Completed = 3
+    // }
 
     public class OrderUpdateModel
     {
         public int OrderID { get; set; }
         public byte Status { get; set; }
-        public string PaymentMethod { get; set; }
+        public byte PaymentMethod { get; set; }
         public List<OrderDetailModel> OrderDetails { get; set; }
     }
 

@@ -4,10 +4,11 @@ using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
+using HappyKitchen.Attributes;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class PosController : Controller
     {
         private readonly IMenuItemService _menuItemService;
@@ -30,6 +31,7 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [AuthorizeAccess("ORDER_PREPARE", "view")]
         public IActionResult Index()
         {
             return View();
@@ -60,7 +62,7 @@ namespace HappyKitchen.Controllers
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Error in GetTables ({ElapsedMs}ms): {Message}", stopwatch.ElapsedMilliseconds, ex.Message);
-                return Json(new { success = false, message = "Error retrieving tables" });
+                return Json(new { success = false, message = "Lỗi khi lấy danh sách bàn" });
             }
         }
 
@@ -89,7 +91,7 @@ namespace HappyKitchen.Controllers
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Error in GetCustomers ({ElapsedMs}ms): {Message}", stopwatch.ElapsedMilliseconds, ex.Message);
-                return Json(new { success = false, message = "Error retrieving customers" });
+                return Json(new { success = false, message = "Lỗi khi lấy danh sách khách hàng" });
             }
         }
 
@@ -100,7 +102,7 @@ namespace HappyKitchen.Controllers
             string searchTerm = "",
             int categoryId = 0)
         {
-            _logger.LogDebug("[API] GetMenuItems: page={Page}, size={Size}, search={Search}, category={Category}", 
+            _logger.LogDebug("[API] GetMenuItems: page={Page}, size={Size}, search={Search}, category={Category}",
                 page, pageSize, searchTerm, categoryId);
             var stopwatch = Stopwatch.StartNew();
             try
@@ -127,7 +129,7 @@ namespace HappyKitchen.Controllers
                     .Take(pageSize)
                     .ToList();
                 stopwatch.Stop();
-                _logger.LogDebug("GetMenuItems completed in {ElapsedMs}ms, returned {Count}/{Total} items", 
+                _logger.LogDebug("GetMenuItems completed in {ElapsedMs}ms, returned {Count}/{Total} items",
                     stopwatch.ElapsedMilliseconds, pagedMenuItems.Count, totalItems);
                 return Json(new
                 {
@@ -155,7 +157,7 @@ namespace HappyKitchen.Controllers
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Error in GetMenuItems ({ElapsedMs}ms): {Message}", stopwatch.ElapsedMilliseconds, ex.Message);
-                return Json(new { success = false, message = "Error retrieving menu items" });
+                return Json(new { success = false, message = "Lỗi khi lấy danh sách món ăn" });
             }
         }
 
@@ -168,7 +170,7 @@ namespace HappyKitchen.Controllers
             {
                 var categories = await _categoryService.GetAllCategoriesAsync();
                 stopwatch.Stop();
-                _logger.LogDebug("GetCategories completed in {ElapsedMs}ms, returned {Count} categories", 
+                _logger.LogDebug("GetCategories completed in {ElapsedMs}ms, returned {Count} categories",
                     stopwatch.ElapsedMilliseconds, categories.Count);
                 return Json(new
                 {
@@ -184,49 +186,86 @@ namespace HappyKitchen.Controllers
             {
                 stopwatch.Stop();
                 _logger.LogError(ex, "Error in GetCategories ({ElapsedMs}ms): {Message}", stopwatch.ElapsedMilliseconds, ex.Message);
-                return Json(new { success = false, message = "Error retrieving categories" });
+                return Json(new { success = false, message = "Lỗi khi lấy danh sách danh mục" });
             }
         }
 
         [HttpPost]
+        [AuthorizeAccess("ORDER_PREPARE", "add")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateModel model)
         {
-            _logger.LogDebug("[API] CreateOrder: TableID={TableID}, CustomerID={CustomerID}, PaymentMethod={PaymentMethod}, Items={ItemCount}", 
+            _logger.LogDebug("[API] CreateOrder: TableID={TableID}, CustomerID={CustomerID}, PaymentMethod={PaymentMethod}, Items={ItemCount}",
                 model.TableID, model.CustomerID, model.PaymentMethod, model.OrderDetails?.Count ?? 0);
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 // Validate session UserID
                 var userIdString = HttpContext.Session.GetString("StaffID");
-                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int employeeId))
+                _logger.LogDebug("Session StaffID={StaffID}", userIdString ?? "null");
+
+                if (string.IsNullOrEmpty(userIdString))
                 {
-                    _logger.LogWarning("CreateOrder failed: Invalid or missing UserID in session");
+                    _logger.LogWarning("CreateOrder failed: StaffID is missing in session");
                     return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." });
                 }
 
-                // Validate employee exists and is active
+                if (!int.TryParse(userIdString, out int employeeId))
+                {
+                    _logger.LogWarning("CreateOrder failed: Invalid StaffID format in session, StaffID={StaffID}", userIdString);
+                    return Json(new { success = false, message = "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại." });
+                }
+
+                // Validate employee
                 var employee = await _context.Users
-                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 1)
+                    .Where(u => u.UserID == employeeId && u.UserType == 1 && u.Status == 0)
                     .FirstOrDefaultAsync();
+
                 if (employee == null)
                 {
                     _logger.LogWarning("CreateOrder failed: Employee with UserID {UserID} not found or inactive", employeeId);
                     return Json(new { success = false, message = "Nhân viên không hợp lệ hoặc không hoạt động." });
                 }
 
-                // Validate table and order details
+                // Validate table
                 if (model.TableID <= 0)
                 {
+                    _logger.LogWarning("CreateOrder failed: Invalid TableID={TableID}", model.TableID);
                     return Json(new { success = false, message = "Bàn không hợp lệ" });
                 }
+
+                // Validate order details
                 if (model.OrderDetails == null || !model.OrderDetails.Any())
                 {
+                    _logger.LogWarning("CreateOrder failed: Order details are empty");
                     return Json(new { success = false, message = "Đơn hàng phải có ít nhất một món" });
                 }
+
+                // Validate table status
                 var table = await _posService.GetTableByIdAsync(model.TableID);
-                if (table == null || table.Status == 0 && model.OrderDetails.Any())
+                if (table == null)
                 {
+                    _logger.LogWarning("CreateOrder failed: TableID={TableID} does not exist", model.TableID);
+                    return Json(new { success = false, message = "Bàn không tồn tại" });
+                }
+
+                // Kiểm tra trạng thái bàn
+                if (table.Status == 1) // Đã đặt trước
+                {
+                    _logger.LogWarning("CreateOrder failed: TableID={TableID} is reserved", model.TableID);
+                    return Json(new { success = false, message = "Bàn đã được đặt trước" });
+                }
+                if (table.Status == 2) // Đang sử dụng
+                {
+                    _logger.LogWarning("CreateOrder failed: TableID={TableID} is in use", model.TableID);
                     return Json(new { success = false, message = "Bàn đang được sử dụng" });
+                }
+
+                // Validate payment method
+                var validPaymentMethods = new[] { 0, 1, 2 }; // 0: Chưa thanh toán, 1: Tiền mặt, 2: Thẻ
+                if (!validPaymentMethods.Contains(model.PaymentMethod ?? 0))
+                {
+                    _logger.LogWarning("CreateOrder failed: Invalid PaymentMethod={PaymentMethod}", model.PaymentMethod);
+                    return Json(new { success = false, message = "Phương thức thanh toán không hợp lệ" });
                 }
 
                 // Create order
@@ -235,8 +274,8 @@ namespace HappyKitchen.Controllers
                     TableID = model.TableID,
                     CustomerID = model.CustomerID > 0 ? model.CustomerID : null,
                     EmployeeID = employeeId,
-                    PaymentMethod = model.PaymentMethod ?? "cash",
-                    Status = 1, // Pending Confirmation
+                    PaymentMethod = model.PaymentMethod ?? 0,
+                    Status = 1, // Chờ xác nhận
                     OrderTime = DateTime.Now,
                     OrderDetails = model.OrderDetails.Select(od => new OrderDetail
                     {
@@ -249,7 +288,7 @@ namespace HappyKitchen.Controllers
                 await _posService.CreateOrderAsync(order);
                 stopwatch.Stop();
                 _logger.LogInformation("Order created successfully in {ElapsedMs}ms: OrderID={OrderID}", stopwatch.ElapsedMilliseconds, order.OrderID);
-                return Json(new { success = true });
+                return Json(new { success = true, message = "Đơn hàng được tạo thành công" });
             }
             catch (Exception ex)
             {
@@ -264,7 +303,7 @@ namespace HappyKitchen.Controllers
     {
         public int TableID { get; set; }
         public int? CustomerID { get; set; }
-        public string? PaymentMethod { get; set; }
+        public byte? PaymentMethod { get; set; }
         public List<OrderDetailModel> OrderDetails { get; set; }
     }
 

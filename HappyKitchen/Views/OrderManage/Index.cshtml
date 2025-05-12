@@ -5,19 +5,76 @@
 @section Styles {
     <link rel="stylesheet" href="~/admin/css/order-management.css">
     <style>
-        .table-responsive { max-height: 600px; overflow-y: auto; }
-        .table thead th { position: sticky; top: 0; background: #f8f9fa; z-index: 1; }
-        .search-section { margin-bottom: 20px; }
-        .filter-result { font-size: 0.9rem; color: #6c757d; margin-top: 10px; }
-        .status-badge-active { background-color: #28a745; color: white; padding: 5px 10px; border-radius: 12px; }
-        .status-badge-inactive { background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 12px; }
-        .status-badge-pending { background-color: #ffc107; color: black; padding: 5px 10px; border-radius: 12px; }
-        .status-badge-preparing { background-color: #17a2b8; color: white; padding: 5px 10px; border-radius: 12px; }
-        .order-detail-item { padding: 8px 0; border-bottom: 1px solid #eee; }
-        .order-detail-item:last-child { border-bottom: none; }
-        .menu-item-select, .quantity, .note { font-size: 0.85rem; }
-        .detail-remove { transition: color 0.2s; }
-        .detail-remove:hover { color: #dc3545 !important; }
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 1;
+        }
+
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-result {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .status-badge-active {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .status-badge-inactive {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .status-badge-pending {
+            background-color: #ffc107;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .status-badge-preparing {
+            background-color: #17a2b8;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .order-detail-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+            .order-detail-item:last-child {
+                border-bottom: none;
+            }
+
+        .menu-item-select, .quantity, .note {
+            font-size: 0.85rem;
+        }
+
+        .detail-remove {
+            transition: color 0.2s;
+        }
+
+            .detail-remove:hover {
+                color: #dc3545 !important;
+            }
     </style>
 }
 <!-- Page Header -->
@@ -133,9 +190,9 @@
                             <div class="mb-3">
                                 <label for="editPaymentMethod" class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
                                 <select class="form-select" id="editPaymentMethod" required>
-                                    <option value="cash">Tiền mặt</option>
-                                    <option value="card">Thẻ</option>
-                                    <option value="online">Chuyển khoản</option>
+                                    <option value="0">Tiền mặt</option>
+                                    <option value="1">Thẻ</option>
+                                    <option value="2">Thanh toán online</option>
                                 </select>
                             </div>
                         </div>

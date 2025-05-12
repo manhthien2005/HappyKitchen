@@ -87,7 +87,7 @@ namespace HappyKitchen.Controllers
             var user = await _context.Users
                 .Include(u => u.Role)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == model.Email && u.UserType == 1 && u.Status == 1);
+                .FirstOrDefaultAsync(u => u.Email == model.Email && u.UserType == 1 && u.Status == 0);
 
             if (user == null)
             {
@@ -249,7 +249,7 @@ namespace HappyKitchen.Controllers
 
             var user = await _context.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 1);
+                .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 0);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy người dùng." });
