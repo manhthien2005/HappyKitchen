@@ -672,9 +672,10 @@ button { cursor: pointer; }
         border-radius: 5px;
         cursor: pointer;
         transition: background-color var(--transition-1);
+        transition: all 0.3s ease;
     }
 
-        .pagination button:hover {
+        .pagination  button:hover {
             background-color: var(--gold-crayola);
             color: var(--eerie-black-1);
         }
@@ -767,3 +768,30 @@ button { cursor: pointer; }
         padding: 15px;
     }
 }
+
+.modal-pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+    .modal-pagination button {
+        padding: 8px 15px;
+        border: 1px solid var(--white-alpha-20);
+        background-color: var(--eerie-black-2);
+        color: var(--white);
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color var(--transition-1);
+        transition: all 0.3s ease;
+    }
+        .modal-pagination button:hover {
+            background-color: var(--gold-crayola);
+            color: var(--eerie-black-1);
+        }
+        .modal-pagination button.active {
+            background-color: var(--gold-crayola);
+            color: var(--eerie-black-1);
+            font-weight: var(--weight-bold);
+        }

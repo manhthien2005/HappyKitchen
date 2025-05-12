@@ -1,5 +1,8 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
-    const rowsPerPage = 5;
+    const rowsPerPage = 5; // Số đơn hàng mỗi trang (bảng chính)
+    const detailsPerPage = 5; // Số chi tiết đơn hàng mỗi trang (trong modal)
+
+    // Phân trang cho bảng đơn hàng chính
     const table = document.getElementById('orderTable');
     const tbody = document.getElementById('orderTableBody');
     const rows = Array.from(tbody.getElementsByTagName('tr'));
@@ -8,7 +11,6 @@
     let currentPage = 1;
     let filteredRows = rows;
 
-    // Phân trang
     function displayPage(page) {
         const start = (page - 1) * rowsPerPage;
         const end = start + rowsPerPage;
@@ -44,57 +46,77 @@
         displayPage(1);
     });
 
-    // Hiển thị modal
-    const modal = document.getElementById('orderModal');
-    const closeModal = document.querySelector('.close-modal');
-    const modalOrderId = document.getElementById('modalOrderId');
-    const modalOrderDate = document.getElementById('modalOrderDate');
-    const modalPaymentMethod = document.getElementById('modalPaymentMethod');
-    const modalStatus = document.getElementById('modalStatus');
-    const modalOrderDetailsBody = document.getElementById('modalOrderDetailsBody');
-    const modalTotalPrice = document.getElementById('modalTotalPrice');
+    // Phân trang cho chi tiết đơn hàng trong modal
+    function setupModalPagination(orderId) {
+        const modalTable = document.getElementById(`modalOrderDetails-${orderId}`);
+        const modalTbody = modalTable.querySelector('.modalOrderDetailsBody');
+        const detailRows = Array.from(modalTbody.getElementsByTagName('tr'));
+        const modalPagination = document.getElementById(`modalPagination-${orderId}`);
+        let currentDetailPage = 1;
 
+        function displayDetailPage(page) {
+            const start = (page - 1) * detailsPerPage;
+            const end = start + detailsPerPage;
+            detailRows.forEach(row => row.style.display = 'none');
+            detailRows.slice(start, end).forEach(row => row.style.display = '');
+            updateModalPagination();
+        }
+
+        function updateModalPagination() {
+            const pageCount = Math.ceil(detailRows.length / detailsPerPage);
+            modalPagination.innerHTML = '';
+            if (pageCount <= 1) return; // Không hiển thị phân trang nếu chỉ có 1 trang
+            for (let i = 1; i <= pageCount; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentDetailPage ? 'active' : '';
+                button.addEventListener('click', () => {
+                    currentDetailPage = i;
+                    displayDetailPage(i);
+                });
+                modalPagination.appendChild(button);
+            }
+        }
+
+        // Hiển thị trang đầu tiên
+        displayDetailPage(1);
+    }
+
+    // Hiển thị modal
     document.querySelectorAll('.view-order').forEach(button => {
         button.addEventListener('click', function () {
             const orderId = this.getAttribute('data-order-id');
-            const row = Array.from(rows).find(r => r.getAttribute('data-order-id') === orderId);
-            const orderDetailsJson = row.getAttribute('data-order-details');
-            const orderDetails = orderDetailsJson ? JSON.parse(orderDetailsJson) : [];
+            const modal = document.getElementById(`orderModal-${orderId}`);
 
-            modalOrderId.textContent = orderId;
-            modalOrderDate.textContent = row.cells[1].textContent;
-            modalPaymentMethod.textContent = row.cells[2].textContent;
-            modalStatus.textContent = row.cells[4].textContent;
-
-            modalOrderDetailsBody.innerHTML = '';
-            orderDetails.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${item.name || item.Name || 'Không có tên'}</td>
-                    <td>${item.quantity || item.Quantity || 0}</td>
-                    <td>${(item.price || item.Price || 0).toLocaleString()} VNĐ</td>
-                    <td>${((item.quantity || item.Quantity || 0) * (item.price || item.Price || 0)).toLocaleString()} VNĐ</td>
-                `;
-                modalOrderDetailsBody.appendChild(tr);
-            });
-
-            const totalPrice = orderDetails.reduce((sum, item) => sum + ((item.quantity || item.Quantity || 0) * (item.price || item.Price || 0)), 0);
-            modalTotalPrice.textContent = totalPrice.toLocaleString();
-
-            modal.style.display = 'flex';
+            if (modal) {
+                modal.style.display = 'flex';
+                setupModalPagination(orderId); // Thiết lập phân trang cho modal
+            } else {
+                console.warn('Modal not found for order ID:', orderId);
+                alert('Không tìm thấy chi tiết đơn hàng cho ID: ' + orderId);
+            }
         });
     });
 
-    closeModal.addEventListener('click', () => {
-        modal.style.display = 'none';
+    // Đóng modal
+    document.querySelectorAll('.close-modal').forEach(closeButton => {
+        closeButton.addEventListener('click', function () {
+            const orderId = this.getAttribute('data-order-id');
+            const modal = document.getElementById(`orderModal-${orderId}`);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        });
     });
 
     window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
+        document.querySelectorAll('.modal').forEach(modal => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     });
 
-    // Hiển thị trang đầu tiên
+    // Hiển thị trang đầu tiên cho bảng đơn hàng chính
     displayPage(1);
 });

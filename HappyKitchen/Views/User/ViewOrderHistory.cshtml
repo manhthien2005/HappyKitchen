@@ -207,7 +207,6 @@
     </header>
 
     <main>
-        <!-- Profile Section -->
         <section class="section">
             <div class="container">
                 <div class="profile-wrapper">
@@ -230,7 +229,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Ngày</th>
-                                            <th>Phương thức TT</th>
+                                            <th>Phương thức Thanh toán</th>
                                             <th>Giá tiền</th>
                                             <th>Trạng Thái</th>
                                             <th>Hành Động</th>
@@ -239,24 +238,14 @@
                                     <tbody id="orderTableBody">
                                         @foreach (var order in Model)
                                         {
-                                            var orderDetailsData = order.OrderDetails?.Select(od => new OrderDetailDto
-                                            {
-                                                Name = od.MenuItem?.Name ?? "Không có tên",
-                                                Quantity = od.Quantity,
-                                                Price = od.MenuItem?.Price ?? 0
-                                            }).ToList() ?? new List<OrderDetailDto>();
-
-                                            <tr data-order-id="@order.OrderID" data-order-details="@Json.Serialize(orderDetailsData)">
+                                            <tr data-order-id="@order.OrderID">
                                                 <td>#@order.OrderID</td>
                                                 <td>@order.OrderTime.ToString("dd/MM/yyyy")</td>
                                                 <td>
                                                     @(order.PaymentMethod == 0 ? "Tiền mặt" : order.PaymentMethod == 1 ? "Thẻ" : order.PaymentMethod == 2 ? "Vn Pay" : "Không xác định")
                                                 </td>
                                                 <td>
-                                                    @{
-                                                        var totalPrice = order.OrderDetails?.Sum(od => (od.MenuItem?.Price ?? 0) * od.Quantity) ?? 0;
-                                                    }
-                                                    @totalPrice.ToString("N0") VNĐ
+                                                    @((order.TotalPrice + order.TotalPrice*0.2m).ToString("N0")) VNĐ
                                                 </td>
                                                 <td class="status @(order.Status == 1 ? "pending" : order.Status == 2 ? "preparing" : order.Status == 3 ? "completed" : "canceled")">
                                                     @(order.Status == 0 ? "Đã hủy" : order.Status == 1 ? "Chờ xác nhận" : order.Status == 2 ? "Đang chuẩn bị" : "Hoàn thành")
@@ -273,37 +262,61 @@
                             </div>
                             <!-- Phân trang -->
                             <div class="pagination" id="pagination"></div>
-                            <!-- Modal hiển thị hóa đơn -->
-                            <div class="modal" id="orderModal">
-                                <div class="modal-content">
-                                    <span class="close-modal">×</span>
-                                    <h2 class="modal-title">Hóa Đơn #<span id="modalOrderId"></span></h2>
-                                    <div class="invoice-details">
-                                        <p><strong>Ngày đặt:</strong> <span id="modalOrderDate"></span></p>
-                                        <p><strong>Phương thức thanh toán:</strong> <span id="modalPaymentMethod"></span></p>
-                                        <p><strong>Trạng thái:</strong> <span id="modalStatus"></span></p>
-                                        <h3>Chi tiết đơn hàng</h3>
-                                        <table id="modalOrderDetails">
-                                            <thead>
-                                                <tr>
-                                                    <th>Tên món</th>
-                                                    <th>Số lượng</th>
-                                                    <th>Giá</th>
-                                                    <th>Tổng</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="modalOrderDetailsBody"></tbody>
-                                        </table>
-                                        <p><strong>Tổng tiền:</strong> <span id="modalTotalPrice"></span> VNĐ</p>
+
+                            <!-- Render tất cả modal cho từng đơn hàng -->
+                            @foreach (var order in Model)
+                            {
+                                <div class="modal" id="orderModal-@order.OrderID" style="display: none;">
+                                    <div class="modal-content">
+                                        <span class="close-modal" data-order-id="@order.OrderID">×</span>
+                                        <h2 class="modal-title">Hóa Đơn #@order.OrderID</h2>
+                                        <div class="invoice-details">
+                                            <p><strong>Ngày đặt:</strong> @order.OrderTime.ToString("dd/MM/yyyy")</p>
+                                            <p><strong>Thanh toán:</strong> @(order.PaymentMethod == 0 ? "Tiền mặt" : order.PaymentMethod == 1 ? "Thẻ" : order.PaymentMethod == 2 ? "Vn Pay" : "Không xác định")</p>
+                                            <p><strong>Trạng thái:</strong> @(order.Status == 0 ? "Đã hủy" : order.Status == 1 ? "Chờ xác nhận" : order.Status == 2 ? "Đang chuẩn bị" : "Hoàn thành")</p>
+                                            <h3>Chi tiết đơn hàng</h3>
+                                            <table id="modalOrderDetails-@order.OrderID">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tên món</th>
+                                                        <th>Số lượng</th>
+                                                        <th>Giá</th>
+                                                        <th>Tổng</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="modalOrderDetailsBody">
+                                                    @if (order.OrderDetails != null && order.OrderDetails.Any())
+                                                    {
+                                                        foreach (var detail in order.OrderDetails)
+                                                        {
+                                                            <tr>
+                                                                <td>@(detail.MenuItem?.Name ?? "Không có tên")</td>
+                                                                <td>@detail.Quantity</td>
+                                                                <td>@((detail.MenuItem?.Price ?? 0).ToString("N0")) VNĐ</td>
+                                                                <td>@((detail.Quantity * (detail.MenuItem?.Price ?? 0)).ToString("N0")) VNĐ</td>
+                                                            </tr>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <tr>
+                                                            <td colspan="4">Không có chi tiết đơn hàng.</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            <!-- Phân trang cho chi tiết đơn hàng -->
+                                            <div class="modal-pagination" id="modalPagination-@order.OrderID"></div>
+                                            <p><strong>Tổng tiền:</strong> @((order.TotalPrice + order.TotalPrice * 0.2m).ToString("N0")) VNĐ</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </section>
-        
     </main>
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
