@@ -1,3 +1,4 @@
+Save New Duplicate & Edit Raw Udemy Course
 
 
 USE RestaurantDB
@@ -79,23 +80,6 @@ CREATE TABLE Tables (
 );
 
 
-CREATE TABLE Reservations (
-    ReservationID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerID INT NULL, 
-    CustomerName NVARCHAR(100) NOT NULL,
-    CustomerPhone NVARCHAR(15) NOT NULL,
-    TableID INT NOT NULL,
-	  Capacity INT NOT NULL,
-    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
-    ReservationTime DATETIME NOT NULL, 
-    Duration INT NOT NULL,
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
-    Notes NVARCHAR(255) NULL,
-    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
-    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
-);
-
-
 CREATE TABLE Categories (
     CategoryID INT IDENTITY(1,1) PRIMARY KEY,
     CategoryName NVARCHAR(50) NOT NULL
@@ -146,6 +130,26 @@ CREATE TABLE OrderDetails (
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+CREATE TABLE Reservations (
+    ReservationID INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerID INT NULL, 
+    CustomerName NVARCHAR(100) NOT NULL,
+    CustomerPhone NVARCHAR(15) NOT NULL,
+    TableID INT NOT NULL,
+    Capacity INT NOT NULL,
+    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
+    ReservationTime DATETIME NOT NULL, 
+    Duration INT NOT NULL,
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
+    Notes NVARCHAR(255) NULL,
+    OrderID INT NULL,
+    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
+);
+
 
 CREATE TABLE MenuItemAttributes (
     AttributeID INT IDENTITY(1,1) PRIMARY KEY,
@@ -248,45 +252,7 @@ INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, Can
 (5, 6, 1,0,0,0), (5, 7, 0,0,0,0),
 (5, 8, 0,0,0,0), (5, 9, 1,0,0,0),
 (5,10, 1,0,0,0), (5,11, 1,1,1,1);
--- MANAGER: toàn quyền với danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (1, 12, 1, 1, 1, 1);
 
--- WAITER: chỉ được xem danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (2, 12, 1, 0, 0, 0);
-
--- CHEF: không cần quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (3, 12, 0, 0, 0, 0);
-
--- ADMIN: toàn quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (4, 12, 1, 1, 1, 1);
-
--- CASHIER: chỉ được xem danh sách bàn
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (5, 12, 1, 0, 0, 0);
-
--- MANAGER: toàn quyền quản lý đơn hàng
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (1, 13, 1, 1, 1, 1);
-
--- WAITER: có thể tạo và chỉnh sửa đơn hàng, nhưng không xóa
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (2, 13, 1, 1, 1, 0);
-
--- CHEF: chỉ xem đơn hàng để chuẩn bị món
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (3, 13, 1, 0, 0, 0);
-
--- ADMIN: toàn quyền
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (4, 13, 1, 1, 1, 1);
-
--- CASHIER: chỉ xem để xử lý thanh toán
-INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, CanDelete)
-VALUES (5, 13, 1, 0, 0, 0);
 
 
 
@@ -366,6 +332,10 @@ BEGIN
     );
     SET @i = @i + 1;
 END;
+GO
+
+INSERT INTO Users (FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Status,RoleID, CreatedAt)
+    VALUES (N'KhoaLe','0000000000','socola200500@gmail.com','HCM',1,'$2a$11$B4Wmvzb2jMjrpShWAoXyOOWDkEagCKWk0FCFFK/eiXH7scR9bGw92',0,1,DATEADD(DAY, -(RAND() * 60), GETDATE()))
 GO
 
 -- Thêm dữ liệu vào bảng Areas

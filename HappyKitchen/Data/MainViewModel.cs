@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 
 namespace HappyKitchen.Models
 {
@@ -93,6 +94,7 @@ namespace HappyKitchen.Models
         public int ReservationID { get; set; }
 
         public int? CustomerID { get; set; }
+        public int? OrderID { get; set; }
 
         [Required]
         public string CustomerName { get; set; }
@@ -115,6 +117,10 @@ namespace HappyKitchen.Models
 
         [StringLength(255)]
         public string Notes { get; set; }
+
+        // Navigation properties
+        [ForeignKey("OrderID")]
+        public virtual Order Orders { get; set; }
 
         // Navigation properties
         [ForeignKey("CustomerID")]
@@ -223,7 +229,7 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
-               public class Order
+    public class Order
         {
             [Key]
             public int OrderID { get; set; }
@@ -243,8 +249,8 @@ namespace HappyKitchen.Models
             public byte Status { get; set; }
 
             [Required]
-            [StringLength(50)]
-            public string PaymentMethod { get; set; }
+            [Range(0, 2)]
+            public byte PaymentMethod { get; set; }
 
         // Navigation properties
         [ForeignKey("CustomerID")]
@@ -256,6 +262,8 @@ namespace HappyKitchen.Models
         public virtual Table Table { get; set; }
         [InverseProperty("Order")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public decimal TotalPrice => OrderDetails.Sum(item => item.Quantity*item.MenuItem.Price);
+
     }
 
     public class OrderDetail
@@ -485,6 +493,13 @@ namespace HappyKitchen.Models
         public User User { get; set; }
         public bool IsEmailVerified { get; set; }
         public bool IsPhoneVerified { get; set; }
+    }
+
+    public class OrderDetailDto
+    {
+        public string Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
     }
 
     public class UserUpdateModel

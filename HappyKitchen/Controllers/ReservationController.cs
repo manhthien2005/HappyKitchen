@@ -111,7 +111,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrder(string payment)
+        public async Task<IActionResult> CreateOrder(byte payment)
         {
             
             int? userId = HttpContext.Session.GetInt32("UserID");
@@ -171,13 +171,14 @@ namespace HappyKitchen.Controllers
                     Status = 1, // 1 = Pending Confirmation
                     PaymentMethod = payment // Giả định phương thức thanh toán, có thể lấy từ form
                 };
-
                 
 
                 // Thêm Order vào DbContext
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
-
+                cartItems.ReservationInformation.OrderID = order.OrderID; // Gán OrderID cho ReservationInformation 
+                _context.Reservations.Update(cartItems.ReservationInformation);
+                await _context.SaveChangesAsync();
                 // Tạo OrderDetails từ CartItems
                 foreach (var cartItem in cartItems.CartItems)
                 {
@@ -196,9 +197,7 @@ namespace HappyKitchen.Controllers
                 // Xóa giỏ hàng sau khi tạo đơn hàng thành công
                 HttpContext.Session.Remove("CartSession");
 
-                payment = payment?.Trim() ?? "null"; // Loại bỏ khoảng trắng và xử lý null
-                Console.WriteLine("###pttt: {0}", payment ?? "null");
-                if (payment == "VNPAY")
+                if (payment == 2)
                 {
 
                     var VNPayRequest = new VNPayRequest
@@ -208,7 +207,6 @@ namespace HappyKitchen.Controllers
                         OrderDescription = "T"+order.OrderID.ToString(),
                     };
 
-                    Console.WriteLine("###pttt: {0}", payment ?? "null");
 
                     // Lưu VNPayRequest vào TempData dưới dạng JSON
                     TempData["VNPayRequest"] = JsonConvert.SerializeObject(VNPayRequest);
@@ -223,7 +221,7 @@ namespace HappyKitchen.Controllers
                     _context.Orders.Update(order);
                     await _context.SaveChangesAsync();
                     ViewBag.Message = $"Đơn hàng đã được tạo thành công với phương thức {payment}.";
-                    if (payment == "CARD") return RedirectToAction("CardReturn", new { id = order.OrderID, price = (int)cartItems.TotalPrice + (cartItems.TotalPrice * 0.2m) });
+                    if (payment == 1) return RedirectToAction("CardReturn", new { id = order.OrderID, price = (int)cartItems.TotalPrice + (cartItems.TotalPrice * 0.2m) });
                     else
                     {
                         order.Status = 3; // Giả định trạng thái đã thanh toán
