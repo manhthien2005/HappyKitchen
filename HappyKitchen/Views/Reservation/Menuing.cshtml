@@ -188,14 +188,20 @@
             let CartInfoJson;
             try {
                 CartInfoJson = buildCartJson();
+                cartInfo = JSON.parse(CartInfoJson);
                 console.log("DEBUG: CartInfoJson từ buildCartJson:", CartInfoJson);
             } catch (error) {
                 console.error("DEBUG: Lỗi trong buildCartJson:", error.message);
                 alert("Lỗi khi tạo dữ liệu gửi đi: " + error.message);
                 return;
             }
-
-            if (CartInfoJson === JSON.stringify({ ReservationInformation: {}, CartItems: [] })) {
+                // Kiểm tra CartItems rỗng
+            if (cartInfo.CartItems.length === 0) {
+                console.warn("DEBUG: Giỏ hàng rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng rỗng! Vui lòng thêm món ăn trước khi đặt bàn.");
+                return;
+            }
+            if (CartInfoJson === JSON.stringify({ ReservationInformation: {},CartItems: [] })) {
                 console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
                 alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng điền thông tin.");
                 return;

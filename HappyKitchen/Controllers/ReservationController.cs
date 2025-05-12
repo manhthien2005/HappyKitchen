@@ -1,8 +1,10 @@
 ﻿using System.Globalization;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using HappyKitchen.Data;
 using HappyKitchen.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -30,6 +32,9 @@ namespace HappyKitchen.Controllers
         [HttpPost]
         public async Task<IActionResult> Menuing([FromBody] DishCheckingViewModel cartInfoJson)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? userIdValue = userIdClaim != null ? int.Parse(userIdClaim) : null;
+
             // Kiểm tra dish hoặc ReservationInformation có null không
             if (cartInfoJson == null)
             {
@@ -60,7 +65,7 @@ namespace HappyKitchen.Controllers
                     r.CustomerPhone == cartInfoJson.ReservationInformation.CustomerPhone &&
                     r.ReservationTime == cartInfoJson.ReservationInformation.ReservationTime &&
                     r.TableID == cartInfoJson.ReservationInformation.TableID);
-
+            cartInfoJson.ReservationInformation.CustomerID = userIdValue;
 
 
             // Nếu chưa tồn tại, thêm mới vào database
@@ -110,11 +115,15 @@ namespace HappyKitchen.Controllers
             return View(viewModel);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateOrder(byte payment)
         {
+
+
             
-            int? userId = HttpContext.Session.GetInt32("UserID");
+
+
             // Lấy session
             string cartJson = HttpContext.Session.GetString("CartSession");
 
@@ -160,11 +169,14 @@ namespace HappyKitchen.Controllers
 
             try
             {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                int? userIdValue = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
+                Console.WriteLine($"DEBUG: UserID from Claims: {userIdValue ?? -1}");
                 // Tạo một Order mới
                 var order = new Order
                 {
-                    CustomerID = userId, // Cần lấy từ thông tin người dùng nếu có (ví dụ: từ session hoặc đăng nhập)
+                    CustomerID = userIdValue, // Cần lấy từ thông tin người dùng nếu có (ví dụ: từ session hoặc đăng nhập)
                     EmployeeID = 1, 
                     TableID = cartItems.ReservationInformation.TableID, // Giả định TableID, bạn cần lấy từ form hoặc logic khác
                     OrderTime = cartItems.ReservationInformation.CreatedTime,
