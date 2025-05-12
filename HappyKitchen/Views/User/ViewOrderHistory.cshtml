@@ -1,0 +1,343 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+@model List<Order>
+@using System.Text.Json
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Happy Kitchen - Thông Tin Tài Khoản</title>
+    <meta name="title" content="Happy Kitchen - Thông Tin Tài Khoản">
+    <meta name="description" content="Quản lý thông tin tài khoản tại Happy Kitchen">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/User/Profile/profile.css">
+    <link rel="stylesheet" href="~/css/User/Profile/header.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+</head>
+
+<body>
+    <!--
+      - #PRELOADER
+    -->
+
+    <div class="preload" data-preaload>
+        <div class="circle"></div>
+        <p class="text">HAPPY KITCHEN</p>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="container">
+            <address class="topbar-item">
+                <div class="icon">
+                    <ion-icon name="location-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">
+                    Happy Kitchen, 01 Thảo Điền, Hồ Chí Minh, VN
+                </span>
+            </address>
+
+            <div class="separator"></div>
+
+            <div class="topbar-item item-2">
+                <div class="icon">
+                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">Mở cửa : 8.00 AM - 10.00 PM</span>
+            </div>
+
+            <a href="tel:+11234567890" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="call-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">+84 977139203</span>
+            </a>
+
+            <div class="separator"></div>
+
+            <a href="mailto:booking@restaurant.com" class="topbar-item link">
+                <div class="icon">
+                    <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+                </div>
+                <span class="span">happykitchenvn2025@gmail.com</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" data-header>
+        <div class="container">
+            <a href="@Url.Action("Index", "Home")" class="logo">
+                <img src="~/images/logo.png" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+
+            <nav class="navbar" data-navbar>
+
+                <button class="close-btn" aria-label="close menu" data-nav-toggler>
+                    <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+                </button>
+
+                <a href="@Url.Action("Index", "Home")" class="logo">
+                    <img src="~/images/logo.svg" width="160" height="50" alt="Happy Kitchen - Home">
+                </a>
+
+                <ul class="navbar-list">
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#home" class="navbar-link hover-underline active">
+                            <div class="separator"></div>
+
+                            <span class="span">Trang Chủ</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#about" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Giới Thiệu</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#menu" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Thực Đơn</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#event" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Sự Kiện & Mẹo Vặt</span>
+                        </a>
+                    </li>
+
+                    <li class="navbar-item">
+                        <a href="@Url.Action("Index", "Home")#connect" class="navbar-link hover-underline">
+                            <div class="separator"></div>
+
+                            <span class="span">Kết Nối</span>
+                        </a>
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <a href="#booking" class="btn btn-secondary">
+                <span class="text text-1">Đặt Bàn</span>
+                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+            </a>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <span class="line line-1"></span>
+                <span class="line line-2"></span>
+                <span class="line line-3"></span>
+            </button>
+
+            <!-- Login Button / User Avatar -->
+            <div class="login-container">
+                @if (Context.Session.GetString("Email") != null)
+                {
+                    <!-- Avatar khi đã đăng nhập -->
+                    <div id="userAvatar" class="user-avatar">
+
+                        <img src="@Context.Session.GetString("Avatar")" class="avatar-img" alt="User" id="avatarDropdown">
+
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-arrow"></div>
+                            <a class="dropdown-item" href="@Url.Action("Profile", "User")">
+                                <i class="bi bi-person"></i>
+                                Thông tin tài khoản
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Đơn đặt bàn
+                            </a>
+                            <a class="dropdown-item" href="reservations.html">
+                                <i class="bi bi-calendar"></i>
+                                Lịch sử đặt bàn
+                            </a>
+                            <hr class="dropdown-divider">
+                            <a class="dropdown-item text-danger" href="@Url.Action("Logout", "User")">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Đăng Xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <!-- Nút đăng nhập khi chưa đăng nhập -->
+                    <div id="loginButton" class="login-btn">
+                        <a href="@Url.Action("Login", "User")" class="btn btn-outline-primary">
+                            <i class="bi bi-person"></i>
+                            <span>Đăng Nhập</span>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <button class="nav-open-btn" aria-label="open menu" data-nav-toggler>
+                <i class="bi bi-list"></i>
+            </button>
+
+            <div class="overlay" data-nav-toggler data-overlay></div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Profile Section -->
+        <section class="section">
+            <div class="container">
+                <div class="profile-wrapper">
+                    <!-- Sidebar -->
+                    @await Html.PartialAsync("/Views/Shared/User/ProfileSidebarPartial.cshtml")
+                    <!-- Profile Container (Thay bằng bảng) -->
+                    <div class="profile-container">
+                        <div class="profile-header">
+                            <h1 class="headline-1">Đơn Đặt Bàn</h1>
+                        </div>
+                        <div class="profile-content">
+                            <!-- Thanh tìm kiếm -->
+                            <div class="search-bar">
+                                <input type="text" id="searchInput" placeholder="Tìm kiếm theo ID hoặc Ngày (dd/MM/yyyy)" class="search-input">
+                            </div>
+                            <!-- Bảng -->
+                            <div class="reservation-table">
+                                <table id="orderTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Ngày</th>
+                                            <th>Phương thức TT</th>
+                                            <th>Giá tiền</th>
+                                            <th>Trạng Thái</th>
+                                            <th>Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orderTableBody">
+                                        @foreach (var order in Model)
+                                        {
+                                            var orderDetailsData = order.OrderDetails?.Select(od => new OrderDetailDto
+                                            {
+                                                Name = od.MenuItem?.Name ?? "Không có tên",
+                                                Quantity = od.Quantity,
+                                                Price = od.MenuItem?.Price ?? 0
+                                            }).ToList() ?? new List<OrderDetailDto>();
+
+                                            <tr data-order-id="@order.OrderID" data-order-details="@Json.Serialize(orderDetailsData)">
+                                                <td>#@order.OrderID</td>
+                                                <td>@order.OrderTime.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    @(order.PaymentMethod == 0 ? "Tiền mặt" : order.PaymentMethod == 1 ? "Thẻ" : order.PaymentMethod == 2 ? "Vn Pay" : "Không xác định")
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var totalPrice = order.OrderDetails?.Sum(od => (od.MenuItem?.Price ?? 0) * od.Quantity) ?? 0;
+                                                    }
+                                                    @totalPrice.ToString("N0") VNĐ
+                                                </td>
+                                                <td class="status @(order.Status == 1 ? "pending" : order.Status == 2 ? "preparing" : order.Status == 3 ? "completed" : "canceled")">
+                                                    @(order.Status == 0 ? "Đã hủy" : order.Status == 1 ? "Chờ xác nhận" : order.Status == 2 ? "Đang chuẩn bị" : "Hoàn thành")
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-secondary btn-action view-order" data-order-id="@order.OrderID" title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Phân trang -->
+                            <div class="pagination" id="pagination"></div>
+                            <!-- Modal hiển thị hóa đơn -->
+                            <div class="modal" id="orderModal">
+                                <div class="modal-content">
+                                    <span class="close-modal">×</span>
+                                    <h2 class="modal-title">Hóa Đơn #<span id="modalOrderId"></span></h2>
+                                    <div class="invoice-details">
+                                        <p><strong>Ngày đặt:</strong> <span id="modalOrderDate"></span></p>
+                                        <p><strong>Phương thức thanh toán:</strong> <span id="modalPaymentMethod"></span></p>
+                                        <p><strong>Trạng thái:</strong> <span id="modalStatus"></span></p>
+                                        <h3>Chi tiết đơn hàng</h3>
+                                        <table id="modalOrderDetails">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tên món</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Giá</th>
+                                                    <th>Tổng</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="modalOrderDetailsBody"></tbody>
+                                        </table>
+                                        <p><strong>Tổng tiền:</strong> <span id="modalTotalPrice"></span> VNĐ</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-bottom-right",
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "3000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+        });
+    </script>
+
+    <!-- Custom JS -->
+    <script src="~/js/User/Profile/orderList.js"></script>
+    <script src="~/js/User/Profile/header.js"></script>
+
+
+
+
+    <!-- Ionicon -->
+
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

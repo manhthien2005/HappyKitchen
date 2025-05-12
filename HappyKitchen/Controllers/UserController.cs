@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using static QRCoder.PayloadGenerator;
 
 namespace HappyKitchen.Controllers
 {
@@ -839,6 +840,21 @@ namespace HappyKitchen.Controllers
             {
                 return Json(new { success = false, message = "Lỗi khi đổi mật khẩu: " + ex.Message });
             }
+        }
+        public IActionResult ViewOrderHistory()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserID");
+
+            Console.WriteLine($"OTP sent to {userId}"); // Debug log
+
+            var orders = _context.Orders
+            .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.MenuItem) // Bao gồm MenuItem để lấy Name, Price
+            .Where(o => o.CustomerID == userId)
+            .ToList();
+            return View(orders);
+
+
         }
 
         [HttpGet]
