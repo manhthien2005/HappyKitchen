@@ -1,9 +1,11 @@
 ﻿using HappyKitchen.Data;
 using HappyKitchen.Models;
 using HappyKitchen.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using static QRCoder.PayloadGenerator;
 
@@ -98,6 +100,21 @@ namespace HappyKitchen.Controllers
                     HttpContext.Session.SetInt32("UserID", user.UserID);
                     HttpContext.Session.SetString("Email", user.Email);
                     HttpContext.Session.SetString("Phone", user.PhoneNumber);
+                    //khoa
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user.FullName),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+                        new Claim("Phone", user.PhoneNumber)
+                    };
+                    var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = model.RememberMe, // Lưu cookie lâu dài nếu chọn "Remember Me"
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                    };
+                    await HttpContext.SignInAsync("Cookies", new ClaimsPrincipal(claimsIdentity), authProperties);
 
                     // Kiểm tra "Remember Me"
                     if (model.RememberMe)
@@ -187,14 +204,33 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Mã OTP đã hết hạn. Vui lòng đăng nhập lại." });
             }
 
+            var user = _context.Users.FirstOrDefault(e => e.Email == email);
             // So sánh OTP nhập vào với OTP trong Session
             if (model.OTPCode != sessionOTP)
             {
+                //khoa
+                // Tạo claims cho người dùng
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.FullName),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.NameIdentifier, user.UserID.ToString()),
+                    new Claim("Phone", user.PhoneNumber)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = model.RememberMe,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                };
+
+                // Đăng nhập người dùng
+                HttpContext.SignInAsync("Cookies", new ClaimsPrincipal(claimsIdentity), authProperties).GetAwaiter().GetResult();
                 return Json(new { success = false, message = "Mã OTP không chính xác." });
             }
 
             // OTP hợp lệ, tiến hành xác định thiết bị tin cậy
-            var user = _context.Users.FirstOrDefault(e => e.Email == email);
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy người dùng." });
@@ -564,7 +600,7 @@ namespace HappyKitchen.Controllers
             {
                 return Json(new { success = false, message = "Phiên đăng ký hết hạn hoặc email không hợp lệ!" });
             }
-
+            
             // Tạo OTP mới
             string newOtp = new Random().Next(100000, 999999).ToString();
 
@@ -739,7 +775,8 @@ namespace HappyKitchen.Controllers
                 try
                 {
                     await _emailService.SendEmailVerificationOTP(email, otp);
-                    Console.WriteLine($"OTP sent to {email}"); // Debug log
+                    Console.WriteLine($"" +
+                        $"OTP sent to {email}"); // Debug log
                 }
                 catch (Exception ex)
                 {
@@ -841,6 +878,8 @@ namespace HappyKitchen.Controllers
                 return Json(new { success = false, message = "Lỗi khi đổi mật khẩu: " + ex.Message });
             }
         }
+
+        /*Xem lịch sử của người dùng*/
         public IActionResult ViewOrderHistory()
         {
             int? userId = HttpContext.Session.GetInt32("UserID");
@@ -855,6 +894,23 @@ namespace HappyKitchen.Controllers
             return View(orders);
 
 
+        }
+
+        public IActionResult ViewReservationHistory()
+        {
+            int? userId = HttpContext.Session.GetInt32("UserID");
+            if (userId == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var reservations = _context.Reservations
+                .Include(r => r.Table) // Bao gồm thông tin bàn
+                .Include(r => r.Orders) // Bao gồm thông tin đơn hàng liên quan
+                .Where(r => r.CustomerID == userId)
+                .ToList();
+
+            return View(reservations);
         }
 
         [HttpGet]
