@@ -137,13 +137,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     </td>
                 </tr>
             `).join('');
-
-        document.querySelectorAll(".print-order-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const orderId = btn.getAttribute("data-order-id");
-                window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
+            
+            document.querySelectorAll(".print-order-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const orderId = btn.getAttribute("data-order-id");
+                    window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
+                });
             });
-        });
     }
 
     function getPaymentMethodText(paymentMethod) {
@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const detailItem = document.createElement("div");
             detailItem.className = "order-detail-item mb-2";
             detailItem.setAttribute("data-detail-id", detailId);
-
+            
             // Thêm tiêu đề cột nếu là món đầu tiên
             if (container.children.length === 0) {
                 const headerRow = document.createElement("div");
@@ -290,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
                 container.appendChild(headerRow);
             }
-
+            
             detailItem.innerHTML = `
                 <small class="text-muted mt-1 d-block">Món #${container.children.length}</small>
                 <div class="row g-2 align-items-center">
@@ -317,14 +317,14 @@ document.addEventListener("DOMContentLoaded", () => {
             detailItem.querySelector(".detail-remove").addEventListener("click", () => {
                 detailItem.remove();
                 console.log(`Order detail removed`, { detailId });
-
+                
                 // Cập nhật lại số thứ tự của các món
                 updateOrderDetailNumbers();
             });
 
             console.log(`Order detail added`, { detailId });
         });
-
+        
         // Hàm cập nhật số thứ tự của các món
         function updateOrderDetailNumbers() {
             const detailItems = document.querySelectorAll("#editOrderDetails .order-detail-item");
@@ -498,10 +498,10 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("editOrderId").value = order.orderID;
             document.getElementById("editOrderStatus").value = order.status;
             document.getElementById("editPaymentMethod").value = order.paymentMethod;
-
+            
             // Xóa chi tiết đơn hàng cũ
             DOM.editOrderDetails.innerHTML = "";
-
+            
             // Thêm tiêu đề cột nếu có chi tiết đơn hàng
             if (order.orderDetails && order.orderDetails.length > 0) {
                 const headerRow = document.createElement("div");
@@ -513,14 +513,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="col-1"></div>
                 `;
                 DOM.editOrderDetails.appendChild(headerRow);
-
+                
                 // Thêm từng chi tiết đơn hàng
                 order.orderDetails.forEach((detail, index) => {
                     const detailId = Date.now() + index;
                     const detailItem = document.createElement("div");
                     detailItem.className = "order-detail-item mb-2";
                     detailItem.setAttribute("data-detail-id", detailId);
-
+                    
                     detailItem.innerHTML = `
                         <small class="text-muted mt-1 d-block">Món #${index + 1}</small>
                         <div class="row g-2 align-items-center">
@@ -541,40 +541,34 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `;
                     DOM.editOrderDetails.appendChild(detailItem);
-
+                    
                     const selectElement = detailItem.querySelector(".menu-item-select");
                     loadMenuItemsForSelect(selectElement, detail.menuItemID);
-
+                    
                     detailItem.querySelector(".detail-remove").addEventListener("click", () => {
                         detailItem.remove();
                         updateOrderDetailNumbers();
                     });
                 });
             }
-
+            
             console.log("Edit order modal opened for order:", order);
         } catch (error) {
             console.error("Open edit modal error:", error);
-            utils.showToast("Lỗi khi mở form chỉnh sửa", "error");      
+            utils.showToast("Lỗi khi mở form chỉnh sửa", "error");
         }
     }
 
+    // Initialize
     async function initialize() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('orderId');
-        if (orderId) {
-            state.searchTerm = orderId;
-            DOM.orderSearchInput.value = orderId;
-            state.searchInDetails = true;
+        try {
+            await loadOrders();
+            setupEventListeners();
+        } catch (error) {
+            console.error("Initialization error:", error);
+            utils.showToast("Đã xảy ra lỗi khi khởi tạo trang", "error");
         }
-        await loadOrders();
-        setupEventListeners();
-    } catch (error) {
-        console.error("Initialization error:", error);
-        utils.showToast("Đã xảy ra lỗi khi khởi tạo trang", "error");
     }
-}
 
     initialize();
 });

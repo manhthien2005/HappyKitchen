@@ -1,4 +1,3 @@
-Save New Duplicate & Edit Raw Udemy Course
 
 
 USE RestaurantDB
@@ -80,6 +79,24 @@ CREATE TABLE Tables (
 );
 
 
+CREATE TABLE Reservations (
+    ReservationID INT IDENTITY(1,1) PRIMARY KEY,
+    CustomerID INT NULL, 
+    CustomerName NVARCHAR(100) NOT NULL,
+    CustomerPhone NVARCHAR(15) NOT NULL,
+    TableID INT NOT NULL,
+	  Capacity INT NOT NULL,
+    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
+    ReservationTime DATETIME NOT NULL, 
+    OrderID INT NULL,
+    Duration INT NOT NULL,
+    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
+    Notes NVARCHAR(255) NULL,
+    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
+    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
+);
+
+
 CREATE TABLE Categories (
     CategoryID INT IDENTITY(1,1) PRIMARY KEY,
     CategoryName NVARCHAR(50) NOT NULL
@@ -130,26 +147,6 @@ CREATE TABLE OrderDetails (
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (MenuItemID) REFERENCES MenuItems(MenuItemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
-
-
-CREATE TABLE Reservations (
-    ReservationID INT IDENTITY(1,1) PRIMARY KEY,
-    CustomerID INT NULL, 
-    CustomerName NVARCHAR(100) NOT NULL,
-    CustomerPhone NVARCHAR(15) NOT NULL,
-    TableID INT NOT NULL,
-    Capacity INT NOT NULL,
-    CreatedTime DATETIME DEFAULT GETDATE() NOT NULL,
-    ReservationTime DATETIME NOT NULL, 
-    Duration INT NOT NULL,
-    Status TINYINT NOT NULL CHECK (Status IN (0,1,2)), -- 0 = Đã hủy, 1 = Xác nhận
-    Notes NVARCHAR(255) NULL,
-    OrderID INT NULL,
-    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID) ON DELETE SET NULL,
-    FOREIGN KEY (CustomerID) REFERENCES Users(UserID) ON DELETE SET NULL,
-    FOREIGN KEY (TableID) REFERENCES Tables(TableID) ON DELETE CASCADE
-);
-
 
 CREATE TABLE MenuItemAttributes (
     AttributeID INT IDENTITY(1,1) PRIMARY KEY,
@@ -254,8 +251,6 @@ INSERT INTO RolePermissions (RoleID, PermissionID, CanView, CanAdd, CanEdit, Can
 (5,10, 1,0,0,0), (5,11, 1,1,1,1);
 
 
-
-
 DECLARE @PasswordHash VARCHAR(255) = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'; -- 'password' đã hash
 DECLARE @i INT = 1;
 DECLARE @EmployeeCount INT = 20;
@@ -334,10 +329,6 @@ BEGIN
 END;
 GO
 
-INSERT INTO Users (FullName, PhoneNumber, Email, Address, UserType, PasswordHash, Status,RoleID, CreatedAt)
-    VALUES (N'KhoaLe','0000000000','socola200500@gmail.com','HCM',1,'$2a$11$B4Wmvzb2jMjrpShWAoXyOOWDkEagCKWk0FCFFK/eiXH7scR9bGw92',0,1,DATEADD(DAY, -(RAND() * 60), GETDATE()))
-GO
-
 -- Thêm dữ liệu vào bảng Areas
 INSERT INTO Areas (AreaName, Description)
 VALUES 
@@ -391,51 +382,234 @@ VALUES
     (N'Món hải sản');
 GO
 
--- Thêm dữ liệu vào bảng MenuItems
-INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status)
-VALUES 
-    -- Món khai vị
-    (N'Gỏi cuốn tôm thịt', '/images/menu/goi-cuon.jpg', 1, 45000, N'Gỏi cuốn tươi với tôm, thịt heo và rau thơm', 1),
-    (N'Chả giò hải sản', '/images/menu/cha-gio.jpg', 1, 55000, N'Chả giò giòn với nhân hải sản thơm ngon', 1),
-    (N'Salad trộn kiểu Thái', '/images/menu/salad-thai.jpg', 1, 65000, N'Salad rau củ trộn chua cay kiểu Thái', 1),
-    (N'Súp hải sản', '/images/menu/sup-hai-san.jpg', 1, 75000, N'Súp hải sản đậm đà với tôm, mực và các loại hải sản', 1),
-    
-    -- Món chính
-    (N'Cơm chiên hải sản', '/images/menu/com-chien-hai-san.jpg', 2, 85000, N'Cơm chiên với hải sản tươi ngon', 1),
-    (N'Bò lúc lắc', '/images/menu/bo-luc-lac.jpg', 2, 120000, N'Thịt bò xào với ớt chuông và hành tây', 1),
-    (N'Cá hồi nướng', '/images/menu/ca-hoi-nuong.jpg', 2, 150000, N'Cá hồi Na Uy nướng với sốt chanh dây', 1),
-    (N'Gà nướng sả', '/images/menu/ga-nuong-sa.jpg', 2, 110000, N'Gà nướng với sả và gia vị đặc biệt', 1),
-    (N'Lẩu Thái hải sản', '/images/menu/lau-thai.jpg', 2, 250000, N'Lẩu Thái chua cay với hải sản tươi sống', 1),
-    (N'Bún chả Hà Nội', '/images/menu/bun-cha.jpg', 2, 95000, N'Bún chả truyền thống kiểu Hà Nội', 1),
-    
-    -- Món tráng miệng
-    (N'Chè hạt sen', '/images/menu/che-hat-sen.jpg', 3, 35000, N'Chè hạt sen với nước cốt dừa', 1),
-    (N'Bánh flan', '/images/menu/banh-flan.jpg', 3, 30000, N'Bánh flan mềm mịn với caramel', 1),
-    (N'Trái cây thập cẩm', '/images/menu/trai-cay.jpg', 3, 5000, N'Đĩa trái cây tươi theo mùa', 1),
-    
-    -- Đồ uống
-    (N'Nước ép cam', '/images/menu/nuoc-cam.jpg', 4, 35000, N'Nước ép cam tươi', 1),
-    (N'Sinh tố bơ', '/images/menu/sinh-to-bo.jpg', 4, 40000, N'Sinh tố bơ đặc creamy', 1),
-    (N'Trà đào', '/images/menu/tra-dao.jpg', 4, 35000, N'Trà đào với đào tươi', 1),
-    (N'Cà phê đen', '/images/menu/ca-phe-den.jpg', 4, 30000, N'Cà phê đen đậm đà', 1),
-    (N'Cà phê sữa', '/images/menu/ca-phe-sua.jpg', 4, 35000, N'Cà phê sữa đặc', 1),
-    
-    -- Món đặc biệt
-    (N'Cua rang me', '/images/menu/cua-rang-me.jpg', 5, 250000, N'Cua biển rang với sốt me chua ngọt', 1),
-    (N'Tôm hùm nướng phô mai', '/images/menu/tom-hum-nuong.jpg', 5, 450000, N'Tôm hùm nướng với phô mai béo ngậy', 1),
-    
-    -- Món chay
-    (N'Đậu hũ sốt nấm', '/images/menu/dau-hu-nam.jpg', 6, 75000, N'Đậu hũ non sốt nấm thơm ngon', 1),
-    (N'Canh rau củ', '/images/menu/canh-rau-cu.jpg', 6, 65000, N'Canh rau củ thanh đạm', 1),
-    
-    -- Món nướng
-    (N'Sườn nướng BBQ', '/images/menu/suon-nuong.jpg', 7, 135000, N'Sườn heo nướng với sốt BBQ', 1),
-    (N'Thịt xiên nướng', '/images/menu/thit-xien-nuong.jpg', 7, 95000, N'Thịt bò và heo xiên nướng', 1),
-    
-    -- Món hải sản
-    (N'Mực xào sa tế', '/images/menu/muc-xao.jpg', 8, 120000, N'Mực tươi xào với sa tế cay', 1),
-    (N'Tôm sú nướng muối ớt', '/images/menu/tom-nuong.jpg', 8, 150000, N'Tôm sú nướng với muối ớt', 1);
-GO
+-- Thêm món ăn vào MenuItems
+INSERT INTO MenuItems (Name, MenuItemImage, CategoryID, Price, Description, Status) VALUES
+-- Khai vị
+(N'Gỏi ngó sen tôm thịt', 'goi-ngo-sen.png', 1, 89000, N'Món gỏi thanh mát với tôm tươi, thịt luộc và ngó sen giòn.', 1),
+(N'Nộm bò bóp thấu', 'nom-bo.png' ,1, 95000, N'Món gỏi thịt bò mềm, hòa quyện với vị chua ngọt đặc trưng.', 1),
+(N'Bò tái chanh', 'bo-tai-chanh.png', 1, 95000, N'Thịt bò tái kết hợp với chanh tươi, hành tây và rau thơm.', 1),
+(N'Súp hải sản bào ngư', 'sup-hai-san-bao-ngu.png', 1, 129000, N'Súp hải sản cao cấp với bào ngư, tôm và nấm hương.', 1),
+(N'Chả giò hải sản', 'cha-gio-hai-san.png', 1, 89000, N'Chả giò giòn rụm, nhân hải sản tươi ngon, chấm kèm nước mắm chua ngọt.', 1),
+(N'Hàu nướng phô mai', 'hau-nuong-pho-mai.png', 1, 120000, N'Hàu tươi nướng phô mai béo ngậy, thơm lừng.', 1),
+
+-- Món chính
+(N'Bò lúc lắc sốt tiêu đen', 'bo-luc-lac.png', 2, 139000, N'Thịt bò mềm, sốt tiêu đen cay nhẹ, ăn kèm khoai tây chiên.', 1),
+(N'Sườn heo nướng mật ong', 'suon-heo-nuong.png',2, 129000, N'Sườn heo nướng vàng ruộm, thơm lừng với sốt mật ong đặc biệt.', 1),
+(N'Gà nướng muối ớt Tây Nguyên', 'ga-nuong-muoi-ot.png', 2, 159000, N'Gà nướng đậm vị muối ớt, thơm ngon hấp dẫn.', 1),
+(N'Vịt quay Bắc Kinh', 'vit-quay-bac-kinh.png', 2, 229000, N'Vịt quay da giòn, ăn kèm bánh tráng và nước sốt đặc biệt.', 1),
+(N'Tôm hùm nướng bơ tỏi', 'tom-hum-nuong-bo-toi.png', 2, 399000, N'Tôm hùm nướng với bơ tỏi, thơm lừng và hấp dẫn.', 1),
+(N'Cua rang me', 'cua-rang-me.png', 2, 349000, N'Cua tươi ngon rang cùng nước sốt me chua ngọt hấp dẫn.', 1),
+(N'Lẩu gà lá é', 'lau-ga-la-e.png', 2, 239000, N'Lẩu gà đặc sản Đà Lạt với lá é thơm lừng.', 1),
+
+-- Thức uống
+(N'Cà phê sữa đá','ca-phe-sua-da.png', 3, 45000, N'Cà phê Việt Nam pha phin, hòa quyện cùng sữa đặc.', 1),
+(N'Sinh tố bơ', 'sinh-to-bo.png',3, 65000, N'Sinh tố bơ béo ngậy, giàu dinh dưỡng và tốt cho sức khỏe.', 1),
+(N'Trà đào cam sả', 'tra-dao-cam-sa.png', 3, 55000, N'Trà đào thơm lừng kết hợp vị cam tươi mát và sả.', 1),
+(N'Matcha latte', 'matcha-latte.png', 3, 65000, N'Matcha latte thơm béo với vị trà xanh Nhật Bản.', 1),
+(N'Nước sâm bí đao', 'nuoc-sam-bi-dao.png', 3, 45000, N'Nước sâm nấu từ bí đao, mía lau và thảo mộc, thanh nhiệt và giải độc.', 1),
+(N'Chanh dây mật ong', 'chanh-day-mat-ong.png', 3, 55000, N'Chanh dây chua ngọt kết hợp với mật ong thơm lừng, tốt cho sức khỏe.', 1),
+
+-- Tráng miệng
+(N'Chè khúc bạch','che-khuc-bach.png', 4, 49000, N'Chè thanh mát với khúc bạch mềm mịn, hạnh nhân giòn, vải ngọt.', 1),
+(N'Tiramisu mềm mịn','tiramisu.png', 4, 65000, N'Bánh tiramisu béo thơm, hòa quyện vị cà phê và cacao.', 1),
+(N'Kem dừa non sầu riêng', 'kem-dua-non.png', 4, 89000, N'Kem dừa non mát lạnh, kết hợp sầu riêng thơm béo.', 1),
+(N'Chè hạt sen long nhãn', 'che-hat-sen.png', 4, 69000, N'Chè hạt sen long nhãn ngọt thanh, tốt cho sức khỏe.', 1),
+(N'Bánh mochi nhân đậu đỏ', 'mochi-dau-do.png', 4, 75000, N'Bánh mochi Nhật Bản dẻo mềm, nhân đậu đỏ ngọt bùi.', 1);
+
+
+-- Thuộc tính của Gỏi ngó sen tôm thịt (MenuItemID = 1)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(1, N'Thành phần', N'Ngó sen, tôm, thịt heo, rau thơm, đậu phộng, hành phi'),
+(1, N'Khẩu phần', N'1 dĩa (2-3 người)'),
+(1, N'Thời gian hoàn tất', N'15 phút'),
+(1, N'Mô tả món', N'Món gỏi thanh mát với tôm tươi, thịt luộc và ngó sen giòn, trộn đều với nước mắm chua ngọt.'),
+(1, N'Hướng dẫn sử dụng', N'Dùng lạnh để cảm nhận độ giòn của ngó sen và vị tươi của tôm.'),
+(1, N'Mô tả chi tiết', N'Gỏi ngó sen tôm thịt là món khai vị đặc trưng của ẩm thực Việt Nam, kết hợp hài hòa giữa vị giòn của ngó sen, vị ngọt của tôm tươi và thịt heo luộc mềm, điểm xuyết bởi đậu phộng rang và hành phi thơm lừng.');
+
+-- Thuộc tính của Nộm bò bóp thấu (MenuItemID = 2)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(2, N'Thành phần', N'Thịt bò, dưa chuột, cà rốt, hành tây, rau thơm, đậu phộng'),
+(2, N'Khẩu phần', N'1 dĩa (2-3 người)'),
+(2, N'Thời gian hoàn tất', N'20 phút'),
+(2, N'Mô tả món', N'Món gỏi thịt bò mềm, hòa quyện với vị chua ngọt đặc trưng, ăn kèm bánh tráng.'),
+(2, N'Mô tả chi tiết', N'Nộm bò bóp thấu mang đến sự tươi mát từ rau củ như dưa chuột, cà rốt và hành tây, kết hợp với thịt bò mềm được trộn đều trong nước mắm chua ngọt, tạo nên hương vị đậm đà.');
+
+-- Thuộc tính của Bò tái chanh (MenuItemID = 3)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(3, N'Thành phần', N'Thịt bò, chanh, hành tây, rau thơm, đậu phộng'),
+(3, N'Khẩu phần', N'1 dĩa (2-3 người)'),
+(3, N'Thời gian hoàn tất', N'10 phút'),
+(3, N'Mô tả món', N'Thịt bò tái kết hợp với chanh tươi, hành tây và rau thơm, tạo nên hương vị độc đáo.'),
+(3, N'Mô tả chi tiết', N'Bò tái chanh là món ăn nhẹ nhàng nhưng đầy cuốn hút, với thịt bò tái được làm chín nhẹ bằng nước cốt chanh, kết hợp cùng rau thơm và đậu phộng rang, mang đến trải nghiệm ẩm thực tươi mới.');
+
+-- Thuộc tính của Súp hải sản bào ngư (MenuItemID = 4)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(4, N'Thành phần', N'Bào ngư, tôm, mực, nấm hương, ngô ngọt, trứng'),
+(4, N'Khẩu phần', N'1 bát (1 người)'),
+(4, N'Thời gian hoàn tất', N'25 phút'),
+(4, N'Mô tả món', N'Súp hải sản cao cấp với bào ngư, tôm và nấm hương, giàu dinh dưỡng và hương vị.'),
+(4, N'Mô tả chi tiết', N'Súp hải sản bào ngư là món ăn bổ dưỡng với sự kết hợp của bào ngư quý hiếm, tôm mực tươi ngon và nấm hương thơm ngát, được nấu sệt với trứng và ngô ngọt, thích hợp để khai vị hoặc dùng trong bữa ăn nhẹ.');
+
+-- Thuộc tính của Chả giò hải sản (MenuItemID = 5)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(5, N'Thành phần', N'Tôm, mực, cua, hành lá, tiêu, bột chiên giòn'),
+(5, N'Khẩu phần', N'1 dĩa (6-8 cuốn)'),
+(5, N'Thời gian hoàn tất', N'20 phút'),
+(5, N'Mô tả món', N'Chả giò giòn rụm, nhân hải sản tươi ngon, chấm kèm nước mắm chua ngọt.'),
+(5, N'Mô tả chi tiết', N'Chả giò hải sản được làm từ tôm, mực và cua tươi, cuốn trong lớp bánh tráng mỏng, chiên vàng giòn, mang đến hương vị đậm đà của biển cả, phù hợp cho mọi bữa tiệc.');
+
+-- Thuộc tính của Hàu nướng phô mai (MenuItemID = 6)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(6, N'Thành phần', N'Hàu tươi, phô mai mozzarella, tỏi, bơ, rau mùi'),
+(6, N'Khẩu phần', N'1 dĩa (4-6 con hàu)'),
+(6, N'Thời gian hoàn tất', N'15 phút'),
+(6, N'Mô tả món', N'Hàu tươi nướng với phô mai béo ngậy, thơm lừng, ăn kèm bánh mì.'),
+(6, N'Mô tả chi tiết', N'Hàu nướng phô mai là sự kết hợp hoàn hảo giữa vị ngọt tự nhiên của hàu tươi và lớp phô mai mozzarella tan chảy, được nướng cùng bơ tỏi thơm lừng, tạo nên món khai vị sang trọng.');
+
+-- Thuộc tính của Bò lúc lắc sốt tiêu đen (MenuItemID = 7)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(7, N'Thành phần', N'Thịt bò, tiêu đen, hành tây, ớt chuông, tỏi, nước tương'),
+(7, N'Khẩu phần', N'1 dĩa (1-2 người)'),
+(7, N'Thời gian hoàn tất', N'25 phút'),
+(7, N'Mô tả món', N'Thịt bò mềm, sốt tiêu đen cay nhẹ, ăn kèm khoai tây chiên và salad.'),
+(7, N'Mô tả chi tiết', N'Bò lúc lắc sốt tiêu đen là món chính hấp dẫn với thịt bò áp chảo mềm ngọt, phủ sốt tiêu đen cay nhẹ, kết hợp cùng hành tây và ớt chuông xào thơm, thường được phục vụ cùng khoai tây chiên giòn.');
+
+-- Thuộc tính của Sườn heo nướng mật ong (MenuItemID = 8)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(8, N'Thành phần', N'Sườn heo, mật ong, tỏi, nước mắm, tiêu, dầu ăn'),
+(8, N'Khẩu phần', N'1 dĩa (1-2 người)'),
+(8, N'Thời gian hoàn tất', N'30 phút'),
+(8, N'Mô tả món', N'Sườn heo được tẩm ướp với sốt mật ong, nướng đến khi vàng ruộm, thơm lừng, ăn kèm dưa chua.'),
+(8, N'Hướng dẫn sử dụng', N'Dùng nóng để cảm nhận trọn vẹn hương vị, có thể chấm kèm sốt BBQ.'),
+(8, N'Mô tả chi tiết', N'Sườn heo nướng mật ong mang hương vị ngọt ngào từ mật ong tự nhiên, hòa quyện với vị mặn nhẹ của nước mắm và thơm nồng của tỏi, nướng vàng óng, là lựa chọn lý tưởng cho bữa ăn gia đình.');
+
+-- Thuộc tính của Gà nướng muối ớt Tây Nguyên (MenuItemID = 9)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(9, N'Thành phần', N'Gà, muối ớt Tây Nguyên, sả, tỏi, dầu ăn'),
+(9, N'Khẩu phần', N'1 con (4-5 người)'),
+(9, N'Thời gian hoàn tất', N'45 phút'),
+(9, N'Mô tả món', N'Gà nướng đậm vị muối ớt, thơm lừng với sả và tỏi, ăn kèm rau sống.'),
+(9, N'Mô tả chi tiết', N'Gà nướng muối ớt Tây Nguyên là món ăn đặc sản với lớp da giòn, thịt gà thấm đẫm muối ớt cay nồng, hòa quyện cùng hương thơm của sả và tỏi, phù hợp cho các bữa tiệc đông người.');
+
+-- Thuộc tính của Vịt quay Bắc Kinh (MenuItemID = 10)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(10, N'Thành phần', N'Vịt, ngũ vị hương, mật ong, giấm, đường, bột mì'),
+(10, N'Khẩu phần', N'1 con (4-5 người)'),
+(10, N'Thời gian hoàn tất', N'60 phút'),
+(10, N'Mô tả món', N'Vịt quay da giòn, ăn kèm bánh tráng, dưa leo, hành lá và nước sốt đặc biệt.'),
+(10, N'Mô tả chi tiết', N'Vịt quay Bắc Kinh nổi tiếng với lớp da giòn tan, thịt mềm thơm mùi ngũ vị hương, được phục vụ cùng bánh tráng mỏng, dưa leo giòn và nước sốt đậm đà, mang đậm phong cách ẩm thực Trung Hoa.');
+
+-- Thuộc tính của Tôm hùm nướng bơ tỏi (MenuItemID = 11)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(11, N'Thành phần', N'Tôm hùm, bơ, tỏi, chanh, rau mùi, tiêu'),
+(11, N'Khẩu phần', N'1 con (1-2 người)'),
+(11, N'Thời gian hoàn tất', N'20 phút'),
+(11, N'Mô tả món', N'Tôm hùm nướng với bơ tỏi, thơm lừng và hấp dẫn, ăn kèm salad.'),
+(11, N'Mô tả chi tiết', N'Tôm hùm nướng bơ tỏi là món hải sản cao cấp với thịt tôm hùm ngọt chắc, thấm đẫm hương vị bơ tỏi béo ngậy, thêm chút chanh tươi để cân bằng, tạo nên món ăn sang trọng và tinh tế.');
+
+-- Thuộc tính của Cua rang me (MenuItemID = 12)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(12, N'Thành phần', N'Cua, me, đường, tỏi, ớt, hành lá'),
+(12, N'Khẩu phần', N'1 dĩa (2-3 người)'),
+(12, N'Thời gian hoàn tất', N'30 phút'),
+(12, N'Mô tả món', N'Cua tươi ngon rang cùng nước sốt me chua ngọt hấp dẫn, ăn kèm cơm trắng.'),
+(12, N'Mô tả chi tiết', N'Cua rang me mang đến hương vị đậm đà với thịt cua tươi ngọt, phủ lớp sốt me chua ngọt được chế biến từ me tươi, tỏi và ớt, là món ăn lý tưởng khi dùng cùng cơm nóng.');
+
+-- Thuộc tính của Lẩu gà lá é (MenuItemID = 13)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(13, N'Thành phần', N'Gà, lá é, nấm, rau cải, bún tươi, gia vị lẩu'),
+(13, N'Khẩu phần', N'1 nồi (3-4 người)'),
+(13, N'Thời gian hoàn tất', N'40 phút'),
+(13, N'Mô tả món', N'Lẩu gà đặc sản Đà Lạt với lá é thơm lừng, nước dùng đậm đà.'),
+(13, N'Mô tả chi tiết', N'Lẩu gà lá é là món ăn ấm nóng với nước dùng gà ngọt thanh, điểm nhấn là hương thơm đặc trưng của lá é Đà Lạt, kết hợp cùng nấm và rau cải, thích hợp cho những ngày se lạnh.');
+
+-- Thuộc tính của Cà phê sữa đá (MenuItemID = 14)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(14, N'Thành phần', N'Cà phê phin, sữa đặc, đá'),
+(14, N'Khẩu phần', N'1 ly (1 người)'),
+(14, N'Thời gian hoàn tất', N'5 phút'),
+(14, N'Mô tả món', N'Cà phê Việt Nam pha phin, hòa quyện cùng sữa đặc, uống lạnh.'),
+(14, N'Mô tả chi tiết', N'Cà phê sữa đá là thức uống truyền thống Việt Nam, được pha từ cà phê phin đậm đà, thêm sữa đặc béo ngọt và đá lạnh, mang đến cảm giác sảng khoái tức thì.');
+
+-- Thuộc tính của Sinh tố bơ (MenuItemID = 15)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(15, N'Thành phần', N'Bơ, sữa tươi, đường, đá'),
+(15, N'Khẩu phần', N'1 ly (1 người)'),
+(15, N'Thời gian hoàn tất', N'5 phút'),
+(15, N'Mô tả món', N'Sinh tố bơ béo ngậy, giàu dinh dưỡng và tốt cho sức khỏe.'),
+(15, N'Mô tả chi tiết', N'Sinh tố bơ được xay nhuyễn từ bơ tươi, sữa tươi và chút đường, tạo nên thức uống mịn màng, béo nhẹ, là lựa chọn hoàn hảo cho những ai yêu thích đồ uống lành mạnh.');
+
+-- Thuộc tính của Trà đào cam sả (MenuItemID = 16)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(16, N'Thành phần', N'Trà đen, đào, cam, sả, đường, đá'),
+(16, N'Khẩu phần', N'1 ly (1 người)'),
+(16, N'Thời gian hoàn tất', N'5 phút'),
+(16, N'Mô tả món', N'Trà đào thơm lừng kết hợp vị cam tươi mát và sả, uống lạnh.'),
+(16, N'Mô tả chi tiết', N'Trà đào cam sả là thức uống giải nhiệt với vị ngọt thanh của đào, chua nhẹ của cam và hương thơm đặc trưng của sả, hòa quyện trong trà đen đậm vị, thích hợp cho mọi thời điểm trong ngày.');
+
+-- Thuộc tính của Matcha latte (MenuItemID = 17)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(17, N'Thành phần', N'Bột matcha, sữa tươi, đường, đá'),
+(17, N'Khẩu phần', N'1 ly (1 người)'),
+(17, N'Thời gian hoàn tất', N'5 phút'),
+(17, N'Mô tả món', N'Matcha latte thơm béo với vị trà xanh Nhật Bản, có thể uống nóng hoặc lạnh.'),
+(17, N'Mô tả chi tiết', N'Matcha latte được làm từ bột matcha Nhật Bản nguyên chất, kết hợp với sữa tươi béo ngậy và chút đường, mang đến hương vị trà xanh đậm đà, phù hợp cho cả ngày đông ấm áp hay hè mát lạnh.');
+
+-- Thuộc tính của Nước sâm bí đao (MenuItemID = 18)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(18, N'Thành phần', N'Bí đao, mía lau, đường phèn, thảo mộc'),
+(18, N'Khẩu phần', N'1 ly (1 người)'),
+(18, N'Thời gian hoàn tất', N'10 phút'),
+(18, N'Mô tả món', N'Nước sâm nấu từ bí đao, mía lau và thảo mộc, thanh nhiệt và giải độc.'),
+(18, N'Mô tả chi tiết', N'Nước sâm bí đao là thức uống truyền thống với vị ngọt nhẹ từ mía lau và đường phèn, kết hợp bí đao thanh mát và thảo mộc, giúp giải nhiệt và hỗ trợ sức khỏe.');
+
+-- Thuộc tính của Chanh dây mật ong (MenuItemID = 19)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(19, N'Thành phần', N'Chanh dây, mật ong, đường, đá'),
+(19, N'Khẩu phần', N'1 ly (1 người)'),
+(19, N'Thời gian hoàn tất', N'5 phút'),
+(19, N'Mô tả món', N'Chanh dây chua ngọt kết hợp với mật ong thơm lừng, tốt cho sức khỏe.'),
+(19, N'Mô tả chi tiết', N'Chanh dây mật ong mang vị chua ngọt đặc trưng của chanh dây tươi, hòa cùng mật ong nguyên chất, tạo nên thức uống vừa ngon miệng vừa giàu vitamin, lý tưởng cho ngày hè.');
+
+-- Thuộc tính của Chè khúc bạch (MenuItemID = 20)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(20, N'Thành phần', N'Sữa tươi, gelatin, hạnh nhân, vải thiều, nhãn, đường phèn'),
+(20, N'Khẩu phần', N'1 chén (1 người)'),
+(20, N'Thời gian hoàn tất', N'30 phút'),
+(20, N'Mô tả món', N'Món chè thanh mát với những viên khúc bạch mềm mịn, béo nhẹ, kết hợp cùng nước chè ngọt thanh và hạnh nhân rang giòn.'),
+(20, N'Mô tả chi tiết', N'Chè khúc bạch là món tráng miệng tinh tế với khúc bạch làm từ sữa tươi và gelatin, mềm mịn như panna cotta, ăn cùng vải thiều, nhãn tươi và hạnh nhân giòn, tạo nên sự hòa quyện hoàn hảo.');
+
+-- Thuộc tính của Tiramisu mềm mịn (MenuItemID = 21)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(21, N'Thành phần', N'Phô mai mascarpone, lòng đỏ trứng, đường, cà phê, rượu rum, bánh ladyfinger'),
+(21, N'Khẩu phần', N'1 miếng (1 người)'),
+(21, N'Thời gian hoàn tất', N'60 phút'),
+(21, N'Mô tả món', N'Bánh tiramisu béo thơm, hòa quyện vị cà phê và cacao, mềm mịn tan trong miệng.'),
+(21, N'Mô tả chi tiết', N'Tiramisu mềm mịn là món tráng miệng Ý kinh điển với lớp bánh ladyfinger thấm cà phê và rượu rum, phủ kem phô mai mascarpone béo ngậy, rắc cacao, mang đến hương vị ngọt ngào đầy quyến rũ.');
+
+-- Thuộc tính của Kem dừa non sầu riêng (MenuItemID = 22)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(22, N'Thành phần', N'Dừa non, sầu riêng, sữa tươi, đường, kem whipping'),
+(22, N'Khẩu phần', N'1 ly (1 người)'),
+(22, N'Thời gian hoàn tất', N'15 phút'),
+(22, N'Mô tả món', N'Kem dừa non mát lạnh, kết hợp sầu riêng thơm béo, ăn kèm dừa nạo.'),
+(22, N'Mô tả chi tiết', N'Kem dừa non sầu riêng là sự kết hợp độc đáo giữa vị béo ngọt của dừa non, hương thơm nồng nàn của sầu riêng và kem whipping mềm mịn, thêm dừa nạo để tăng độ hấp dẫn.');
+
+-- Thuộc tính của Chè hạt sen long nhãn (MenuItemID = 23)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(23, N'Thành phần', N'Hạt sen, long nhãn, đường phèn, táo đỏ'),
+(23, N'Khẩu phần', N'1 chén (1 người)'),
+(23, N'Thời gian hoàn tất', N'40 phút'),
+(23, N'Mô tả món', N'Chè hạt sen long nhãn ngọt thanh, tốt cho sức khỏe, giúp an thần.'),
+(23, N'Mô tả chi tiết', N'Chè hạt sen long nhãn là món tráng miệng bổ dưỡng với hạt sen bùi bùi, long nhãn ngọt thơm và chút táo đỏ, nấu cùng đường phèn, mang lại cảm giác thư giãn và tốt cho giấc ngủ.');
+
+-- Thuộc tính của Bánh mochi nhân đậu đỏ (MenuItemID = 24)
+INSERT INTO MenuItemAttributes (MenuItemID, AttributeName, AttributeValue) VALUES
+(24, N'Thành phần', N'Bột nếp, đậu đỏ, đường, nước'),
+(24, N'Khẩu phần', N'1 dĩa (4-5 viên)'),
+(24, N'Thời gian hoàn tất', N'30 phút'),
+(24, N'Mô tả món', N'Bánh mochi Nhật Bản dẻo mềm, nhân đậu đỏ ngọt bùi, ăn kèm trà xanh.'),
+(24, N'Mô tả chi tiết', N'Bánh mochi nhân đậu đỏ được làm từ bột nếp dẻo dai, bao bọc lớp nhân đậu đỏ ngọt bùi, là món tráng miệng truyền thống Nhật Bản, thường dùng cùng trà xanh để cân bằng vị ngọt.');
 
 
 -- Thêm dữ liệu vào bảng MenuItemRatings
@@ -465,79 +639,102 @@ BEGIN
     SET @i = @i + 1;
 END;
 GO
-
 -- Thêm dữ liệu vào bảng Orders và OrderDetails
- DECLARE @CurrentDate DATETIME = GETDATE();
- DECLARE @FirstDayLastMonth DATETIME = DATEADD(MONTH, -1, DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate));
- DECLARE @FirstDayCurrentMonth DATETIME = DATEADD(DAY, 1-DAY(@CurrentDate), @CurrentDate);
+DECLARE @StartDate DATETIME = DATEADD(MONTH, -3, GETDATE());
+DECLARE @EndDate DATETIME = '2025-05-12 12:00:00';
 
- DECLARE @i INT = 1;
- DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
+DECLARE @i INT = 1;
+DECLARE @OrderCount INT = 300; -- Tạo 300 đơn hàng
 
- WHILE @i <= @OrderCount
- BEGIN
-     DECLARE @CustomerID INT = NULL;
-     DECLARE @EmployeeID INT = NULL;
-     DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
-     DECLARE @PaymentMethod TINYINT = CASE WHEN RAND() < 0.5 THEN 0 ELSE 2 END; -- Ngẫu nhiên chọn 0 hoặc 2
-     
-     -- 80% đơn hàng có thông tin khách hàng
-     IF RAND() < 0.8
-     BEGIN
-         SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
-     END
-     
-     -- Tất cả đơn hàng đều có nhân viên phục vụ
-     SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
-     
-     -- Tạo thời gian đặt hàng ngẫu nhiên trong tháng hiện tại và tháng trước
-     DECLARE @OrderTime DATETIME;
-     IF @i <= @OrderCount * 0.6 -- 60% đơn hàng trong tháng hiện tại
-         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayCurrentMonth);
-     ELSE -- 40% đơn hàng trong tháng trước
-         SET @OrderTime = DATEADD(MINUTE, CAST(RAND() * 60 * 24 * 30 AS INT), @FirstDayLastMonth);
-     
-     -- Xác định trạng thái đơn hàng
-     DECLARE @Status TINYINT;
-     DECLARE @RandomStatus FLOAT = RAND();
-     
-     IF @RandomStatus < 0.05 -- 5% đơn hàng bị hủy
-         SET @Status = 0;
-     ELSE IF @RandomStatus < 0.1 -- 5% đơn hàng đang chờ xác nhận
-         SET @Status = 1;
-     ELSE IF @RandomStatus < 0.2 -- 10% đơn hàng đang chuẩn bị
-         SET @Status = 2;
-     ELSE -- 80% đơn hàng đã hoàn thành
-         SET @Status = 3;
-     
-     -- Thêm đơn hàng
-     INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
-     VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
-     
-     -- Lấy OrderID vừa thêm
-     DECLARE @OrderID INT = SCOPE_IDENTITY();
-     
-     -- Thêm chi tiết đơn hàng (1-8 món ăn mỗi đơn)
-     DECLARE @ItemCount INT = CAST((RAND() * 7) + 1 AS INT);
-     DECLARE @j INT = 1;
-     
-     WHILE @j <= @ItemCount
-     BEGIN
-         DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
-         DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT); -- 1-4 món mỗi loại
-         
-         INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
-         VALUES (@OrderID, @MenuItemID, @Quantity);
-         
-         SET @j = @j + 1;
-     END;
-     
-     SET @i = @i + 1;
- END;
- GO
+WHILE @i <= @OrderCount
+BEGIN
+    DECLARE @CustomerID INT = NULL;
+    DECLARE @EmployeeID INT = NULL;
+    DECLARE @TableID INT = (SELECT TOP 1 TableID FROM Tables ORDER BY NEWID());
+    DECLARE @PaymentMethod TINYINT = CASE WHEN RAND() < 0.5 THEN 0 ELSE 2 END;
+
+    -- 80% đơn hàng có thông tin khách hàng
+    IF RAND() < 0.8
+    BEGIN
+        SET @CustomerID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 0 ORDER BY NEWID());
+    END
+
+    -- Tất cả đơn hàng đều có nhân viên phục vụ
+    SET @EmployeeID = (SELECT TOP 1 UserID FROM Users WHERE UserType = 1 ORDER BY NEWID());
+
+    -- Thời gian đặt hàng ngẫu nhiên trong khoảng 3 tháng trước đến 12h ngày 12/5/2025
+    DECLARE @OrderTime DATETIME = DATEADD(SECOND, RAND() * DATEDIFF(SECOND, @StartDate, @EndDate), @StartDate);
+
+    -- Trạng thái đơn hàng
+    DECLARE @Status TINYINT;
+    DECLARE @RandomStatus FLOAT = RAND();
+    IF @RandomStatus < 0.05
+        SET @Status = 0; -- Hủy
+    ELSE IF @RandomStatus < 0.10
+        SET @Status = 1; -- Chờ xác nhận
+    ELSE IF @RandomStatus < 0.20
+        SET @Status = 2; -- Đang chuẩn bị
+    ELSE
+        SET @Status = 3; -- Hoàn thành
+
+    -- Thêm đơn hàng
+    INSERT INTO Orders (CustomerID, EmployeeID, TableID, OrderTime, Status, PaymentMethod)
+    VALUES (@CustomerID, @EmployeeID, @TableID, @OrderTime, @Status, @PaymentMethod);
+
+    -- Lấy ID đơn hàng vừa thêm
+    DECLARE @OrderID INT = SCOPE_IDENTITY();
+
+    -- Thêm từ 1–8 món ăn
+    DECLARE @ItemCount INT = CAST((RAND() * 7) + 1 AS INT);
+    DECLARE @j INT = 1;
+
+    WHILE @j <= @ItemCount
+    BEGIN
+        DECLARE @MenuItemID INT = (SELECT TOP 1 MenuItemID FROM MenuItems ORDER BY NEWID());
+        DECLARE @Quantity INT = CAST((RAND() * 3) + 1 AS INT);
+
+        INSERT INTO OrderDetails (OrderID, MenuItemID, Quantity)
+        VALUES (@OrderID, @MenuItemID, @Quantity);
+
+        SET @j = @j + 1;
+    END
+
+    SET @i = @i + 1;
+END;
+GO
 
 
-PRINT N'Đã tạo dữ liệu mẫu thành công!';
+INSERT INTO QRCodes (TableID, QRCodeImage, MenuUrl, AccessCount, CreatedAt, Status) VALUES
+(1, '504c4b0e-372b-412d-b893-e5642dd3ebdc.png', 'http://localhost:5000/OrderQR?tableId=1', 0, '2025-05-11 16:51:33.740', 0),
+(2, '57814378-ee39-49ac-8c36-0bbbca3c4dec.png', 'http://localhost:5000/OrderQR?tableId=2', 0, '2025-05-11 16:51:36.867', 0),
+(3, '0dcd942f-6ac7-46db-9b9a-7a8ed588b28e.png', 'http://localhost:5000/OrderQR?tableId=3', 0, '2025-05-11 16:51:40.357', 0),
+(4, '15c397b6-e10a-43ff-a35f-b0f3e5ba2ded.png', 'http://localhost:5000/OrderQR?tableId=4', 0, '2025-05-11 16:51:43.437', 0),
+(5, 'cca6ee88-008b-4e7b-9d4d-1a70372ec1a4.png', 'http://localhost:5000/OrderQR?tableId=5', 0, '2025-05-11 16:51:46.323', 0),
+(6, '2931364c-874b-4157-bfb3-a6ebbe880c41.png', 'http://localhost:5000/OrderQR?tableId=6', 0, '2025-05-11 16:51:49.280', 0),
+(7, '58e65c7e-5de0-4c9d-8a1e-58eb00459c40.png', 'http://localhost:5000/OrderQR?tableId=7', 0, '2025-05-11 16:51:52.073', 0),
+(8, '308ca7cc-9e99-4cd8-bc15-3a1eb761aa0f.png', 'http://localhost:5000/OrderQR?tableId=8', 0, '2025-05-11 16:51:56.870', 0),
+(9, 'c38b1a53-7d41-47a7-bf49-b1654205bb58.png', 'http://localhost:5000/OrderQR?tableId=9', 0, '2025-05-11 16:51:59.623', 0),
+(10, '528151c4-b58a-4836-895a-587022eb130a.png', 'http://localhost:5000/OrderQR?tableId=10', 0, '2025-05-11 16:52:10.670', 0),
+(11, '9bef841d-5051-40bd-be42-a1b206ca9bf5.png', 'http://localhost:5000/OrderQR?tableId=11', 0, '2025-05-11 16:52:20.053', 0),
+(12, '15dcdf38-79dd-497c-808f-98425523e7ee.png', 'http://localhost:5000/OrderQR?tableId=12', 0, '2025-05-11 16:52:28.803', 0),
+(13, '952608fc-ea7a-4e36-8cfa-82df4b70cca2.png', 'http://localhost:5000/OrderQR?tableId=13', 0, '2025-05-11 16:52:31.407', 0),
+(14, '9e84b076-f979-46e0-b4e6-15e2b9b9aae4.png', 'http://localhost:5000/OrderQR?tableId=14', 0, '2025-05-11 16:52:33.823', 0),
+(15, 'dc282a3d-dbc8-4a47-9ec8-c11bf90d8701.png', 'http://localhost:5000/OrderQR?tableId=15', 0, '2025-05-11 16:52:36.267', 0),
+(16, 'c2647c0d-87e8-41a8-92d2-de6c7e08312a.png', 'http://localhost:5000/OrderQR?tableId=16', 0, '2025-05-11 16:52:38.917', 0),
+(17, '9c0b0ea4-6669-43b9-8d58-36140ea71ecc.png', 'http://localhost:5000/OrderQR?tableId=17', 0, '2025-05-11 16:52:42.787', 0),
+(18, 'd933f1a9-1ed8-4a99-a4df-6cf76a6fa1a9.png', 'http://localhost:5000/OrderQR?tableId=18', 0, '2025-05-11 16:52:48.143', 0),
+(19, '23e1d452-f479-49f6-9d59-f46d41891a95.png', 'http://localhost:5000/OrderQR?tableId=19', 0, '2025-05-11 16:52:59.860', 0),
+(20, '4da486c8-be64-4db6-b0b9-b268a2e27db0.png', 'http://localhost:5000/OrderQR?tableId=20', 0, '2025-05-11 16:53:03.873', 0),
+(21, 'fce8c493-cd7a-49a9-80e8-c02bfc573c56.png', 'http://localhost:5000/OrderQR?tableId=21', 0, '2025-05-11 16:53:08.687', 0),
+(22, '6fc5a6de-f571-4047-a67f-dea7e4c1e43c.png', 'http://localhost:5000/OrderQR?tableId=22', 0, '2025-05-11 16:54:37.967', 0),
+(23, 'cafce36a-5053-4345-a02b-7c000a8a15dd.png', 'http://localhost:5000/OrderQR?tableId=23', 0, '2025-05-11 16:54:44.393', 0),
+(24, 'f6c7b8eb-2240-4bd0-b327-55d5025c8bb1.png', 'http://localhost:5000/OrderQR?tableId=24', 0, '2025-05-11 16:54:48.023', 0),
+(25, '913793d0-f3db-45d8-b389-ef8c399e45ad.png', 'http://localhost:5000/OrderQR?tableId=25', 0, '2025-05-11 16:54:54.013', 0),
+(26, '162d10b9-3e1c-4c8d-92d6-be9b62d44e7c.png', 'http://localhost:5000/OrderQR?tableId=26', 0, '2025-05-11 16:54:57.270', 0),
+(27, '2f1eb601-7d43-47dc-bb53-26eea4a31a09.png', 'http://localhost:5000/OrderQR?tableId=27', 0, '2025-05-11 16:55:02.357', 0),
+(28, 'eaacbde1-9a29-4cda-a501-7f78538c3d4b.png', 'http://localhost:5000/OrderQR?tableId=28', 0, '2025-05-11 16:55:05.807', 0),
+(29, '8b5e0e65-f494-48a8-a87e-fbbe17602a34.png', 'http://localhost:5000/OrderQR?tableId=29', 0, '2025-05-11 16:55:08.913', 0),
+(30, '98bef3ac-b0c7-4722-a4c2-162dd26d9d50.png', 'http://localhost:5000/OrderQR?tableId=30', 0, '2025-05-11 16:55:16.073', 0);
 
 
 USE RestaurantDB

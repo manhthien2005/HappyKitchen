@@ -412,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm người dùng", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi thêm người dùng", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -454,7 +454,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật người dùng", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi cập nhật người dùng", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -483,7 +483,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     utils.showToast(result.message || "Lỗi khi xóa người dùng", "error");
                 }
             } catch (error) {
-                utils.showToast("Đã xảy ra lỗi khi xóa người dùng", "error");
+                utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
             }finally {
                 utils.showLoadingOverlay(false);
             }
@@ -534,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm vai trò", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi thêm vai trò", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -566,7 +566,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật vai trò", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi cập nhật vai trò", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         }finally {
             utils.showLoadingOverlay(false);
         }
@@ -586,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi xóa vai trò", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi xóa vai trò", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         }finally {
             utils.showLoadingOverlay(false);
         }
@@ -632,7 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật quyền", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi cập nhật quyền", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         }finally {
             utils.showLoadingOverlay(false);
         }

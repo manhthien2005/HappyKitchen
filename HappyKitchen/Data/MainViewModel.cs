@@ -229,28 +229,27 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
+    
     public class Order
-        {
-            [Key]
-            public int OrderID { get; set; }
+    {
+        [Key]
+        public int OrderID { get; set; }
 
-            public int? CustomerID { get; set; }
+        public int? CustomerID { get; set; }
 
-            public int? EmployeeID { get; set; }
+        public int? EmployeeID { get; set; }
 
-            [Required]
-            public int TableID { get; set; }
+        [Required]
+        public int TableID { get; set; }
 
-            [Required]
-            public DateTime OrderTime { get; set; } = DateTime.Now;
+        [Required]
+        public DateTime OrderTime { get; set; } = DateTime.Now;
 
-            [Required]
-            [Range(0, 3, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending Confirmation), 2 (Preparing), or 3 (Completed)")]
-            public byte Status { get; set; }
+        [Required]
+        [Range(0, 3, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending Confirmation), 2 (Preparing), or 3 (Completed)")]
+        public byte Status { get; set; }
 
-            [Required]
-            [Range(0, 2)]
-            public byte PaymentMethod { get; set; }
+        public byte PaymentMethod { get; set; }
 
         // Navigation properties
         [ForeignKey("CustomerID")]

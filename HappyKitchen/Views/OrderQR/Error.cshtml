@@ -1,0 +1,157 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Đặt món - HappyKitchen";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lỗi - HappyKitchen</title>
+    <link rel="stylesheet" href="~/admin/css/orderqr.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .error-container {
+            min-height: 80vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .error-card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .error-header {
+            background-color: var(--error-bg);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--error-text);
+            margin-bottom: 1rem;
+        }
+
+        .error-body {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--error-text);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: var(--back-button-bg);
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            background-color: var(--back-button-hover);
+        }
+
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: var(--primary-color);
+            color: #000000;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+            text-decoration: none;
+        }
+
+        .home-button:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <a href="/Home/Index">
+                <img src="/images/logo.png" width="160" height="50" alt="HappyKitchen - Home">
+            </a>
+        </div>
+    </header>
+
+    <div class="error-container">
+        <div class="error-card">
+            <div class="error-header">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div class="error-body">
+                <h1 class="error-title">Không thể sử dụng bàn này</h1>
+                <div class="error-message">
+                    <p>@Model.Message</p>
+                </div>
+                <div class="error-actions">
+                    <a href="javascript:history.back()" class="back-button">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại
+                    </a>
+                    <a href="/Home/Index" class="home-button">
+                        <i class="fas fa-home"></i>
+                        Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Thêm animation cho thông báo lỗi
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const errorCard = document.querySelector('.error-card');
+                if (errorCard) {
+                    errorCard.style.transition = 'transform 0.3s ease-in-out';
+                    errorCard.style.transform = 'translateY(0)';
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,17 +1,11 @@
 using HappyKitchen.Attributes;
-using HappyKitchen.Models;
 using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using QRCoder;
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HappyKitchen.Controllers
 {
+    [AuthorizeAccess]
     public class QRCodeManageController : Controller
     {
         private readonly IQRCodeService _qrCodeService;
@@ -31,12 +25,15 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
         }
     
         [HttpGet]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "view")]
         public async Task<IActionResult> GetTables()
         {
             _logger.LogDebug("[API] GettingTables");
@@ -61,6 +58,7 @@ namespace HappyKitchen.Controllers
             }
         }
         [HttpGet]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "view")]
         public async Task<IActionResult> GetQRCodes(
             int page = 1,
             int pageSize = 8,
@@ -137,6 +135,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "add")]
         public async Task<JsonResult> CreateQRCode([FromBody] QRCodeCreateModel model)
         {
             try
@@ -153,7 +152,7 @@ namespace HappyKitchen.Controllers
                     return Json(new { success = false, message = "QR Code cho bàn này đã tồn tại" });
 
                 // Generate menu URL
-                var menuUrl = $"https://{HttpContext.Request.Host}/Menu?tableId={model.TableID}";
+                var menuUrl = $"http://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
 
                 // Generate QR code
                 using var qrGenerator = new QRCodeGenerator();
@@ -172,7 +171,7 @@ namespace HappyKitchen.Controllers
                     TableID = model.TableID,
                     QRCodeImage = fileName,
                     MenuUrl = menuUrl,
-                    Status = 1
+                    Status = 0
                 };
 
                 await _qrCodeService.CreateQRCodeAsync(qrCodeModel);
@@ -186,6 +185,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "edit")]
         public async Task<JsonResult> UpdateQRCode([FromBody] QRCodeUpdateModel model)
         {
             try
@@ -209,7 +209,7 @@ namespace HappyKitchen.Controllers
                 // Regenerate QR code if table changed
                 if (qrCode.TableID != model.TableID)
                 {
-                    var menuUrl = $"https://{HttpContext.Request.Host}/Menu?tableId={model.TableID}";
+                    var menuUrl = $"http://{HttpContext.Request.Host}/OrderQR?tableId={model.TableID}";
                     
                     using var qrGenerator = new QRCodeGenerator();
                     var qrCodeData = qrGenerator.CreateQrCode(menuUrl, QRCodeGenerator.ECCLevel.Q);
@@ -247,6 +247,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
+        [AuthorizeAccess("TABLE_QR_MANAGE", "delete")]
         public async Task<JsonResult> DeleteQRCode(int id)
         {
             try
@@ -279,7 +280,7 @@ namespace HappyKitchen.Controllers
             try
             {
                 var qrCode = await _qrCodeService.GetQRCodeByIdAsync(qrCodeId);
-                if (qrCode == null || qrCode.Status == 0)
+                if (qrCode == null || qrCode.Status == 1)
                     return NotFound();
 
                 qrCode.AccessCount++;

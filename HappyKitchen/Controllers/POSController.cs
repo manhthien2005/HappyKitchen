@@ -31,7 +31,7 @@ namespace HappyKitchen.Controllers
             _logger = logger;
         }
 
-        [AuthorizeAccess("ORDER_PREPARE", "view")]
+        [AuthorizeAccess("ORDER_MANAGE", "view")]
         public IActionResult Index()
         {
             return View();
@@ -191,7 +191,7 @@ namespace HappyKitchen.Controllers
         }
 
         [HttpPost]
-        [AuthorizeAccess("ORDER_PREPARE", "add")]
+        [AuthorizeAccess("ORDER_MANAGE", "add")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateModel model)
         {
             _logger.LogDebug("[API] CreateOrder: TableID={TableID}, CustomerID={CustomerID}, PaymentMethod={PaymentMethod}, Items={ItemCount}",

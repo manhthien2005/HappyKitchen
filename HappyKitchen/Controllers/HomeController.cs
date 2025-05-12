@@ -1,14 +1,7 @@
 ﻿using HappyKitchen.Data;
 using HappyKitchen.Models;
-using HappyKitchen.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using System.Configuration;
-using System.Diagnostics;
-using System.Net.WebSockets;
-using static System.Net.WebRequestMethods;
 
 namespace HappyKitchen.Controllers
 {
@@ -96,7 +89,7 @@ namespace HappyKitchen.Controllers
         {
             var categories = await _context.Categories
                 .Include(c => c.MenuItems)
-                .Where(c => c.MenuItems.Any(m => m.Status == 1)) 
+                .Where(c => c.MenuItems.Any(m => m.Status == 1))
                 .ToListAsync();
 
             return View(categories);
@@ -131,7 +124,7 @@ namespace HappyKitchen.Controllers
                 .Include(m => m.Attributes)
                 .Include(m => m.Ratings)
                 .ThenInclude(r => r.User)
-                .FirstOrDefaultAsync(m => m.MenuItemID == MenuItemID); 
+                .FirstOrDefaultAsync(m => m.MenuItemID == MenuItemID);
 
             if (menuItem == null)
             {
@@ -140,7 +133,7 @@ namespace HappyKitchen.Controllers
 
             menuItem.Ratings = menuItem.Ratings.OrderByDescending(r => r.CreatedAt).ToList();
 
-            return View(menuItem); 
+            return View(menuItem);
         }
 
         [HttpPost]

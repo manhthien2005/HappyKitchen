@@ -410,9 +410,9 @@ document.addEventListener("DOMContentLoaded", () => {
               <a href= "/CustomerManage/OrderDetail?orderId=${order.orderID}" class="btn btn-sm btn-outline-primary view-details-btn">
                 <i class="fas fa-eye me-1"></i> Chi tiết
               </a>
-              <button class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}">
+              <a class="btn btn-sm btn-outline-secondary print-order-btn" data-order-id="${order.orderID}">
                 <i class="fas fa-print me-1"></i> In hóa đơn
-              </button>
+              </a>
             </div>
           `;
           orderElement.appendChild(orderFooter);
@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".print-order-btn").forEach(btn => {
           btn.addEventListener("click", () => {
               const orderId = btn.getAttribute("data-order-id");
-              alert(`Đơn hàng ${orderId} sẽ được in`);
+              window.open(`he-thong/in-hoa-don/${orderId}`, '_blank', 'width=800,height=600');
           });
       });
   }
@@ -551,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi thêm người dùng", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi thêm người dùng", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -591,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 utils.showToast(result.message || "Lỗi khi cập nhật người dùng", "error");
             }
         } catch (error) {
-            utils.showToast("Đã xảy ra lỗi khi cập nhật người dùng", "error");
+            utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
         } finally {
             utils.showLoadingOverlay(false);
         }
@@ -620,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     utils.showToast(result.message || "Lỗi khi xóa người dùng", "error");
                 }
             } catch (error) {
-                utils.showToast("Đã xảy ra lỗi khi xóa người dùng", "error");
+                utils.showToast("Bạn không có quyền truy cập chức năng này", "error");
             } finally {
                 utils.showLoadingOverlay(false);
                 confirmBtn.removeEventListener("click", deleteHandler);

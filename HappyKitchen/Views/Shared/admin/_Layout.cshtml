@@ -82,8 +82,8 @@
         
         <!-- User profile at bottom -->
         <div class="user-profile">
-            <div class="user-avatar">@(Context.Session.GetString("StaffFullName")?.Substring(0, 1) ?? "U")</div>
-            <div class="user-info">
+            <div class="user-avatar" title="Nhấn để chỉnh sửa thông tin cá nhân">@(Context.Session.GetString("StaffFullName")?.Substring(0, 1) ?? "U")</div>
+            <div class="user-info" title="Nhấn để chỉnh sửa thông tin cá nhân">
                 <p class="user-name">@(Context.Session.GetString("StaffFullName") ?? "Người dùng")</p>
                 <p class="user-role">@(Context.Session.GetString("RoleName") ?? "Nhân viên")</p>
             </div>
@@ -100,7 +100,6 @@
         </div>
         
         @RenderBody()
-        @* Content *@
     </div>
     <!-- Bootstrap JS and dependencies -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
