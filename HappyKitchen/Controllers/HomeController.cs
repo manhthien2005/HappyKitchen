@@ -9,16 +9,80 @@ namespace HappyKitchen.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ApplicationDbContext context, IConfiguration configuration)
+        public HomeController(ApplicationDbContext context, IConfiguration configuration, ILogger<HomeController> logger)
         {
             _context = context;
+            _logger = logger;
             _configuration = configuration;
         }
 
+
         public IActionResult Index()
         {
-            return View();
+            // Lấy session
+            string cartJson = HttpContext.Session.GetString("CartSession");
+            Console.WriteLine($"DEBUG: Data retrieved from session: {cartJson ?? "null"}");
+
+            // Khởi tạo cartItems mặc định
+            DishCheckingViewModel cartItems = new DishCheckingViewModel
+            {
+                ReservationInformation = null,
+                CartItems = new List<CartItem>()
+            };
+
+            // Deserialize cartJson nếu tồn tại
+            if (!string.IsNullOrEmpty(cartJson))
+            {
+                try
+                {
+                    cartItems = JsonConvert.DeserializeObject<DishCheckingViewModel>(cartJson);
+                    Console.WriteLine($"DEBUG: Deserialized cartItems: {(cartItems != null ? $"CartItems count: {cartItems.CartItems?.Count ?? 0}" : "null")}");
+
+                    // Kiểm tra và khởi tạo CartItems nếu null
+                    if (cartItems != null && cartItems.CartItems == null)
+                    {
+                        Console.WriteLine("DEBUG: CartItems is null, initializing to empty list");
+                        cartItems.CartItems = new List<CartItem>();
+                    }
+
+                    // Log chi tiết các CartItem
+                    if (cartItems?.CartItems != null)
+                    {
+                        foreach (var item in cartItems.CartItems)
+                        {
+                            Console.WriteLine($"DEBUG: CartItem - MenuItemID: {item.MenuItemID}, MenuItem: {item.MenuItem?.ToString() ?? "null"}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"DEBUG: Deserialize error: {ex.Message}");
+                    // Giữ cartItems mặc định (rỗng) nếu deserialize thất bại
+                    cartItems = new DishCheckingViewModel
+                    {
+                        ReservationInformation = null,
+                        CartItems = new List<CartItem>()
+                    };
+                }
+            }
+            else
+            {
+                Console.WriteLine("DEBUG: cartJson is null or empty, using default empty cart");
+            }
+
+            // Lấy danh sách bàn
+            var tables = _context.Tables.ToList();
+
+            // Tạo view model
+            var viewModel = new HomeIndexViewModel
+            {
+                Tables = tables,
+                Cart = cartItems
+            };
+
+            return View(viewModel);
         }
 
         public async Task<IActionResult> Menu()
@@ -29,6 +93,29 @@ namespace HappyKitchen.Controllers
                 .ToListAsync();
 
             return View(categories);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetAvailableTables(DateTime startTime, int people, int duration)
+        {
+            _logger.LogInformation($"Checking availability for: {startTime} - {startTime.AddHours(duration)}, People: {people}");
+
+            var reservedTableIds = await _context.Reservations
+                .Where(r => r.ReservationTime.Date == startTime.Date)
+                .Where(r => startTime < r.ReservationTime.AddMinutes(r.Duration) && startTime.AddHours(duration) > r.ReservationTime)
+                .Select(r => r.TableID)
+                .ToListAsync();
+
+            _logger.LogInformation($"Reserved Table IDs: {string.Join(", ", reservedTableIds)}");
+
+            var availableTables = await _context.Tables
+                .Where(t => t.Capacity >= people && !reservedTableIds.Contains(t.TableID))
+                .Select(t => new { t.TableID, t.TableName, t.Capacity })
+                .ToListAsync();
+
+            _logger.LogInformation($"Available Tables: {string.Join(", ", availableTables.Select(t => t.TableID))}");
+
+            return Json(availableTables);
         }
 
         public async Task<IActionResult> DetailDish(int MenuItemID)

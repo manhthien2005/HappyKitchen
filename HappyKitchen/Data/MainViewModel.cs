@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 
 namespace HappyKitchen.Models
 {
@@ -92,25 +93,34 @@ namespace HappyKitchen.Models
         [Key]
         public int ReservationID { get; set; }
 
-        [Required]
-        public int CustomerID { get; set; }
+        public int? CustomerID { get; set; }
+        public int? OrderID { get; set; }
 
         [Required]
+        public string CustomerName { get; set; }
+        [Required]
+        public string CustomerPhone { get; set; }
         public int TableID { get; set; }
 
+        [Required]
+        public int Duration { get; set; }
+        [Required]
+        public int Capacity { get; set; }
         [Required]
         public DateTime CreatedTime { get; set; } = DateTime.Now;
 
         [Required]
         public DateTime ReservationTime { get; set; }
-        public int Duration { get; set; }
-
         [Required]
         [Range(0, 2, ErrorMessage = "Status must be 0 (Canceled), 1 (Pending), or 2 (Confirmed)")]
         public byte Status { get; set; }
 
         [StringLength(255)]
         public string Notes { get; set; }
+
+        // Navigation properties
+        [ForeignKey("OrderID")]
+        public virtual Order Orders { get; set; }
 
         // Navigation properties
         [ForeignKey("CustomerID")]
@@ -219,6 +229,7 @@ namespace HappyKitchen.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 
+    
     public class Order
     {
         [Key]
@@ -250,6 +261,8 @@ namespace HappyKitchen.Models
         public virtual Table Table { get; set; }
         [InverseProperty("Order")]
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
+        public decimal TotalPrice => OrderDetails.Sum(item => item.Quantity*item.MenuItem.Price);
+
     }
 
     public class OrderDetail
@@ -425,6 +438,53 @@ namespace HappyKitchen.Models
 
         public virtual Table Table { get; set; }
     }
+    public class HomeIndexViewModel
+    {
+        public List<Table> Tables { get; set; }
+        public DishCheckingViewModel Cart { get; set; }
+    }
+
+    public class MenuViewModel
+    {
+        public DishCheckingViewModel Cart { get; set; }
+        public List<Category> Categories { get; set; }
+    }
+
+    public class DishCheckingViewModel
+    {
+        public Reservation ReservationInformation { get; set; }
+        // Danh sách món ăn trong giỏ
+        public List<CartItem> CartItems { get; set; } = new List<CartItem>();
+
+        // Tổng giá của giỏ hàng
+        public decimal TotalPrice => CartItems.Sum(item => item.TotalPrice);
+    }
+
+    // Cart Model 
+
+    public class CartItem
+    {
+        public int MenuItemID { get; set; }
+        public int Quantity { get; set; }
+
+        // Thông tin chi tiết món ăn
+        public MenuItem MenuItem { get; set; }
+
+        // Tổng giá tiền của món này (Quantity * MenuItem.Price)
+        public decimal TotalPrice => MenuItem != null ? MenuItem.Price * Quantity : 0;
+    }
+
+
+
+    public class VNPayRequest
+    {
+        public string OrderId { get; set; }
+        public int Amount { get; set; }
+        public string OrderDescription { get; set; }
+        public string CreatedDate { get; set; } 
+        public string ClientIp { get; set; }
+    }
+
 
     // Thêm class mới vào MainViewModel.cs
     public class UserProfileViewModel
@@ -432,6 +492,13 @@ namespace HappyKitchen.Models
         public User User { get; set; }
         public bool IsEmailVerified { get; set; }
         public bool IsPhoneVerified { get; set; }
+    }
+
+    public class OrderDetailDto
+    {
+        public string Name { get; set; }
+        public int Quantity { get; set; }
+        public decimal Price { get; set; }
     }
 
     public class UserUpdateModel

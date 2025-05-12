@@ -29,6 +29,9 @@
                 case "OrderManage":
                     <text>Happy Kitchen - Quản lý đơn hàng</text>
                     break;
+                case "ReservationManage":
+                    <text>Happy Kitchen - Quản lý đơn đặt bàn</text>
+                    break;
                 case "UserManage":
                     <text>Happy Kitchen - Cài đặt hệ thống</text>
                     break;
@@ -70,6 +73,7 @@
                 <li><a href="/CustomerManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "CustomerManage" ? "active" : "")"><i class="fas fa-users"></i> <span class="menu-text">Khách hàng</span></a></li>
                 <li><a href="/TableManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "TableManage" ? "active" : "")"><i class="fas fa-chair"></i> <span class="menu-text">Quản lý bàn</span></a></li>
                 <li><a href="/OrderManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "OrderManage" ? "active" : "")"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Quản lý đơn hàng</span></a></li>
+                <li><a href="/ReservationManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "ReservationManage" ? "active" : "")"><i class="fas fa-concierge-bell"></i> <span class="menu-text">Quản lý đơn đặt bàn</span></a></li>
                 <li><a href="/QRCodeManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "QRCodeManage" ? "active" : "")"><i class="fas fa-qrcode"></i> <span class="menu-text">Mã QR</span></a></li>
                 <li><a href="/UserManage" class="@(ViewContext.RouteData.Values["controller"].ToString() == "UserManage" ? "active" : "")"><i class="fas fa-user-cog"></i> <span class="menu-text">Cài đặt hệ thống</span></a></li>
             </ul>

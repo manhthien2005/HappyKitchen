@@ -1,0 +1,22 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+
+}
+<link rel="stylesheet" href="~/css/User/Profile/sidebar.css">
+
+
+<div class="sidebar">
+    <ul class="sidebar-list">
+        <li class="sidebar-item">
+            <a href="@Url.Action("Profile","User")" class="sidebar-link">Thông tin cá nhân</a>
+        </li>
+        <li class="sidebar-item">
+            <a href="@Url.Action("ViewOrderHistory","User" )" class="sidebar-link">Đơn đặt bàn</a>
+        </li>
+        <li class="sidebar-item">
+            <a href="@Url.Action("ViewReservationHistory","User" )" class="sidebar-link">Lịch sử đặt bàn</a>
+        </li>
+    </ul>
+</div>

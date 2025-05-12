@@ -2,6 +2,8 @@
     Layout = null;
 }
 
+@model HomeIndexViewModel
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,6 +39,8 @@
     <!--
       - custom css link
     -->
+    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.2/air-datepicker.min.css">
     <link rel="stylesheet" href="~/css/index.css">
 
     <!--
@@ -162,6 +166,8 @@
                         </a>
                     </li>
 
+
+
                     <li class="navbar-item">
                         <a href="#event" class="navbar-link hover-underline">
                             <div class="separator"></div>
@@ -229,11 +235,11 @@
                                 <i class="bi bi-person"></i>
                                 Thông tin tài khoản
                             </a>
-                            <a class="dropdown-item" href="reservations.html">
+                            <a class="dropdown-item" href="@Url.Action("ViewOrderHistory","User" )">
                                 <i class="bi bi-calendar"></i>
-                                Đơn đặt bàn
+                                Lịch sử dùng bữa
                             </a>
-                            <a class="dropdown-item" href="reservations.html">
+                            <a class="dropdown-item" href="@Url.Action("ViewReservationHistory","User" )">
                                 <i class="bi bi-calendar"></i>
                                 Lịch sử đặt bàn
                             </a>
@@ -276,7 +282,7 @@
         <article>
 
             <!--
-              - #HERO
+              --#HERO
             -->
 
             <section class="hero text-center" aria-label="home" id="home">
@@ -792,7 +798,7 @@
             -->
 
             <section class="section testi text-center has-bg-image"
-                     style="background-image: url('~/images/testimonial-bg.jpg')" aria-label="testimonials">
+                     style="background-image: url('@Url.Content("~/images/testimonial-bg.jpg")')" aria-label="testimonials">
                 <div class="container">
 
                     <div class="quote">”</div>
@@ -845,8 +851,7 @@
 
                     <div class="form reservation-form bg-black-10">
 
-                        <form action="" class="form-left">
-
+                        <div class="form-left">
                             <h2 class="headline-1 text-center">Đặt Bàn Trực Tuyến</h2>
 
                             <p class="form-text text-center">
@@ -855,74 +860,161 @@
                             </p>
 
                             <div class="input-wrapper">
-                                <input type="text" name="name" placeholder="Họ & Tên" autocomplete="off" class="input-field">
-
-                                <input type="tel" name="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field">
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <input type="text" id="name" placeholder="Họ & Tên" autocomplete="off" class="input-field" required />
+                                    <input type="tel" id="phone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" required />
+                                }
+                                else
+                                {
+                                    <input type="text" id="name" value="@Model.Cart.ReservationInformation.CustomerName" placeholder="Họ & Tên" autocomplete="off" class="input-field" disabled required />
+                                    <input type="tel" id="phone" value="@Model.Cart.ReservationInformation.CustomerPhone" placeholder="Số Điện Thoại" autocomplete="off" class="input-field" disabled required />
+                                }
                             </div>
 
                             <div class="input-wrapper">
+                                <div class="icon-wrapper">
+                                    <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+                                        <select id="person" class="input-field" required>
+                                        @if (Model?.Cart?.ReservationInformation == null)
+                                        {
+                                        
+                                                <option value="" disabled selected>Chọn sức chứa</option>
+                                                @for (int i = 1; i <= 10; i++)
+                                                {
+                                                    <option value="@i">@i Người</option>
+                                                }
+                                        
+                                        }
+                                        else
+                                        {
+                                            
+                                                <option value="" disabled>Chọn sức chứa</option>
+                                                @for (int i = 1; i <= 10; i++)
+                                                {
+                                                    if (Model.Cart.ReservationInformation.Capacity == i)
+                                                    {
+                                                        <option value="@i" selected>@i Người</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@i">@i Người</option>
+                                                    }
+                                                }
+                                            
+                                        }
+                                      </select>
+                                    <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                                </div>
+
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <div class="icon-wrapper">
+                                        <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+                                        <input type="text" id="reservationDate" class="input-field" placeholder="Chọn ngày giờ" required />
+                                        <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="icon-wrapper">
+                                        <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
+                                        <input type="text" id="reservationDate" value="@Model.Cart.ReservationInformation.ReservationTime.ToString("dd/MM/yyyy HH:mm")" class="input-field" placeholder="Chọn ngày giờ" disabled required />
+                                        <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                                    </div>
+                                }
 
                                 <div class="icon-wrapper">
                                     <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
-
-                                    <select name="person" class="input-field">
-                                        <option value="1-person">1 Người</option>
-                                        <option value="2-person">2 Người</option>
-                                        <option value="3-person">3 Người</option>
-                                        <option value="4-person">4 Người</option>
-                                        <option value="5-person">5 Người</option>
-                                        <option value="6-person">6 Người</option>
-                                        <option value="7-person">7 Người</option>
-                                    </select>
-
+                                    @if (Model?.Cart?.ReservationInformation == null)
+                                    {
+                                        <select id="duration" class="input-field" required>
+                                            <option value="" disabled selected>Chọn thời lượng</option>
+                                            <option value="1">1 giờ</option>
+                                            <option value="2">2 giờ</option>
+                                            <option value="3">3 giờ</option>
+                                            <option value="4">4 giờ</option>
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <select id="duration" class="input-field" disabled required>
+                                            <option value="" disabled>Chọn thời lượng</option>
+                                            @for (int i = 1; i <= 4; i++)
+                                            {
+                                                if (Model.Cart.ReservationInformation.Duration == i)
+                                                {
+                                                    <option value="@i" selected>@i giờ</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@i">@i giờ</option>
+                                                }
+                                            }
+                                        </select>
+                                    }
                                     <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
                                 </div>
-
-                                <div class="icon-wrapper">
-                                    <ion-icon name="calendar-clear-outline" aria-hidden="true"></ion-icon>
-
-                                    <input type="date" name="reservation-date" class="input-field">
-
-                                    <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
-                                </div>
-
-                                <div class="icon-wrapper">
-                                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
-
-                                    <select name="person" class="input-field">
-                                        <option value="08:00am">08 : 00 am</option>
-                                        <option value="09:00am">09 : 00 am</option>
-                                        <option value="010:00am">10 : 00 am</option>
-                                        <option value="011:00am">11 : 00 am</option>
-                                        <option value="012:00am">12 : 00 am</option>
-                                        <option value="01:00pm">01 : 00 pm</option>
-                                        <option value="02:00pm">02 : 00 pm</option>
-                                        <option value="03:00pm">03 : 00 pm</option>
-                                        <option value="04:00pm">04 : 00 pm</option>
-                                        <option value="05:00pm">05 : 00 pm</option>
-                                        <option value="06:00pm">06 : 00 pm</option>
-                                        <option value="07:00pm">07 : 00 pm</option>
-                                        <option value="08:00pm">08 : 00 pm</option>
-                                        <option value="09:00pm">09 : 00 pm</option>
-                                        <option value="10:00pm">10 : 00 pm</option>
-                                    </select>
-
-                                    <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
-                                </div>
-
                             </div>
 
-                            <textarea name="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
-
-                            <button type="submit" class="btn btn-secondary">
-                                <span class="text text-1">Đặt Bàn</span>
-
-                                <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
-                            </button>
-
-                        </form>
-
-                        <div class="form-right text-center" style="background-image: url('~/images/form-pattern.png')">
+                            <div class="icon-wrapper">
+                                <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <select id="table" class="input-field" required>
+                                        <option value="" disabled selected>Chọn bàn</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select id="table" class="input-field" disabled required>
+                                        <option value="" disabled>Chọn bàn</option>
+                                        @foreach (var table in Model?.Tables ?? new List<Table>())
+                                        {
+                                            if (Model.Cart.ReservationInformation.TableID == table.TableID)
+                                            {
+                                                <option value="@table.TableID" selected>@table.TableName</option>
+                                            }
+                                        }
+                                    </select>
+                                }
+                                <ion-icon name="chevron-down" aria-hidden="true"></ion-icon>
+                            </div>
+                            @if (Context.Session.GetString("Email") != null)
+                            {
+                                @if (Model?.Cart?.ReservationInformation == null)
+                                {
+                                    <textarea id="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
+                                    <button onclick="submitCartToMenuing()" class="btn btn-secondary">
+                                        <span class="text text-1">Đặt Bàn</span>
+                                        <span class="text text-2" aria-hidden="true">Đặt Bàn</span>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <textarea id="message" class="input-field" readonly>@Model.Cart.ReservationInformation.Notes</textarea>
+                                    <div class="action-buttons">
+                                        <a href="javascript:void(0)" onclick="submitCartToMenuing()" class="btn btn-primary back-button">
+                                            <span class="text text-1" style="text-align: center;">Quay lại thực đơn</span>
+                                            <span class="text text-2" aria-hidden="true">Quay lại thực đơn</span>
+                                        </a>
+                                        <a href="javascript:void(0)" onclick="submitCartToDishChecking()" class="btn btn-secondary proceed-button">
+                                            <span class="text text-1" style="text-align: center;">Tiếp tục thanh toán</span>
+                                            <span class="text text-2" aria-hidden="true">Tiếp tục thanh toán</span>
+                                        </a>
+                                    </div>
+                                }
+							}
+							else
+							{
+                                <textarea id="message" placeholder="Ghi Chú" autocomplete="off" class="input-field"></textarea>
+								<a href="@Url.Action("Login", "User")" class="btn btn-secondary">
+                                    <span class="text text-1" style="text-align: center;">Đăng Nhập Để Đặt Bàn</span>
+									<span class="text text-2" aria-hidden="true">Đăng Nhập Để Đặt Bàn</span>
+								</a>
+							}
+                        </div>
+                        <div class="form-right text-center" style="background-image:url('@Url.Content("~/images/form-pattern.png")')">
 
                             <h2 class="headline-1 text-center">Liên Hệ</h2>
 
@@ -1042,15 +1134,10 @@
                          class="shape shape-2">
 
                 </div>
-            </section>
+            </section>    
 
 
-
-
-
-            <!--
-              - #EVENT
-            -->
+    <!--- #EVENT-->
 
             <section class="section event bg-black-10" aria-label="event" id="event">
                 <div class="container">
@@ -1140,14 +1227,12 @@
 
 
 
-
-
     <!--
       - #FOOTER
     -->
 
     <footer class="footer section has-bg-image text-center" id="connect"
-            style="background-image: url('~/images/footer-bg.jpg')">
+            style="background-image: url('@Url.Content("~/images/footer-bg.jpg")')">
         <div class="container">
 
             <div class="footer-top grid-list">
@@ -1280,13 +1365,411 @@
       - custom js link
     -->
     <script src="~/js/script.js"></script>
+    <!--chỉnh sửa hiển thị bảng chọn ngày giờ đặt bàn-->
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.2/air-datepicker.min.js"></script>
+    <script>
+            new AirDatepicker('#reservationDate', {
+            timepicker: true,
+            locale: {
+                days: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
+                daysShort: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                daysMin: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+                months: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                monthsShort: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                today: 'Hôm nay',
+                clear: 'Xóa',
+                dateFormat: 'dd/MM/yyyy',
+                timeFormat: 'HH:mm',
+                firstDay: 1
+            },
+            minDate: new Date(),
+            minHours: 9,  // Giới hạn giờ nhỏ nhất là 9 (09:00 AM)
+            maxHours: 22, // Giới hạn giờ lớn nhất là 22 (10:00 PM)
+            onSelect: function ({ date, formattedDate, datepicker }) {
+                if (date) {
+                    const hours = date.getHours();
+                    const minutes = date.getMinutes();
+
+                    // Nếu giờ không nằm trong khoảng 9-22, điều chỉnh lại
+                    if (hours < 9) {
+                        date.setHours(9);
+                        date.setMinutes(0);
+                        datepicker.selectDate(date);
+                        alert("Nhà hàng mở cửa từ 9:00 sáng. Thời gian đã được điều chỉnh.");
+                    } else if (hours > 22 || (hours === 22 && minutes > 0)) {
+                        date.setHours(22);
+                        date.setMinutes(0);
+                        datepicker.selectDate(date);
+                        alert("Nhà hàng đóng cửa lúc 22:00 tối. Thời gian đã được điều chỉnh.");
+                    }
+                }
+            }
+        });
+        function parseDateStringToDateObject(dateString) {
+            console.log("DEBUG: Bắt đầu parseDateStringToDateObject cho chuỗi:", dateString);
+            const parts = dateString.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
+
+            if (parts) {
+                const day = parseInt(parts[1], 10);
+                const month = parseInt(parts[2], 10) - 1; // THÁNG trong JavaScript Date là 0-indexed
+                const year = parseInt(parts[3], 10);
+                const hours = parseInt(parts[4], 10);
+                const minutes = parseInt(parts[5], 10);
+
+                const dateObject = new Date(year, month, day, hours, minutes);
+
+                // Kiểm tra tính hợp lệ của Date object
+                if (isNaN(dateObject.getTime())) {
+                    console.error("DEBUG: Parse thất bại cho chuỗi:", dateString);
+                    return null; // Trả về null nếu không tạo được Date hợp lệ
+                }
+
+                console.log("DEBUG: Parse thành công:", dateObject);
+                return dateObject;
+            } else {
+                console.error("DEBUG: Chuỗi không khớp định dạng dd/MM/yyyy HH:mm:", dateString);
+                return null; // Trả về null nếu chuỗi không đúng định dạng
+            }
+        }
+        const cartData = @Html.Raw(
+            Model?.Cart != null
+            ? System.Text.Json.JsonSerializer.Serialize(
+            new
+            {
+                ReservationInformation = Model.Cart.ReservationInformation,
+                CartItems = Model.Cart.CartItems.Select(item => new
+                {
+            MenuItemID = item.MenuItemID,
+            Quantity = item.Quantity
+                }).ToList()
+            },
+            new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null // Giữ nguyên PascalCase
+            })
+            : "{}"
+            );
+
+        function buildCartJson() {
+            console.log("DEBUG: Bắt đầu buildCartJson");
+
+
+            // Log dữ liệu
+            console.log("DEBUG: cartData trước khi stringify:", cartData);
+
+            let cartInfoJson;
+            try {
+                cartInfoJson = JSON.stringify(cartData);
+                console.log("DEBUG: Cart JSON gửi lên:", cartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi stringify JSON:", error.message);
+                return JSON.stringify({ ReservationInformation: {}, CartItems: [] });
+            }
+
+            return cartInfoJson;
+        }
+
+        function submitCartToDishChecking() {
+            console.log("DEBUG: Bắt đầu submitCartToDishChecking");
+
+            const cartInfoJson = buildCartJson();
+
+            // Kiểm tra nếu JSON rỗng
+            if (cartInfoJson === JSON.stringify({ ReservationInformation: {}, CartItems: [] })) {
+                console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng kiểm tra.");
+                return;
+            }
+
+            const url = '@Url.Action("DishChecking", "Reservation")';
+            console.log("DEBUG: URL yêu cầu:", url);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: cartInfoJson
+            })
+                .then(response => {
+                    console.log("DEBUG: Phản hồi từ server - Status:", response.status, "OK:", response.ok);
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            console.error("DEBUG: Nội dung lỗi từ server:", errorText);
+                            throw new Error(errorText || `Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                        });
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (!html || html.trim() === "") {
+                        console.error("DEBUG: Phản hồi HTML rỗng hoặc không hợp lệ");
+                        alert("Không nhận được nội dung hợp lệ từ server.");
+                        return;
+                    }
+                    if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {
+                        console.error("DEBUG: Phản hồi không phải HTML:", html);
+                        alert("Phản hồi từ server không phải trang HTML hợp lệ.");
+                        return;
+                    }
+                    console.log("DEBUG: Nhận được HTML, bắt đầu tải view");
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    console.log("DEBUG: View đã được tải");
+                })
+                .catch(error => {
+                    console.error("DEBUG: Lỗi khi gửi JSON:", error.message);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+                });
+        }
+
+        function submitCartToMenuing() {
+            console.log("DEBUG: Bắt đầu submitCartToMenuing");
+
+            let reservationInfo = {};
+            if (cartData.ReservationInformation != null) {
+                console.log("DEBUG: Sử dụng thông tin đặt bàn đã có trong cartData.");
+                reservationInfo = cartData.ReservationInformation;
+
+                if (typeof reservationInfo.ReservationTime === 'string' && !reservationInfo.ReservationTime.endsWith('Z')) {
+                    console.warn("DEBUG: ReservationTime trong cartData có vẻ là chuỗi non-ISO, cố gắng parse lại.");
+                    const dateObject = parseDateStringToDateObject(reservationInfo.ReservationTime);
+                    if (dateObject) {
+                        reservationInfo.ReservationTime = dateObject.toISOString();
+                    } else {
+                        console.error("DEBUG: Không thể parse ReservationTime trong cartData:", reservationInfo.ReservationTime);
+                        alert("Định dạng ngày giờ đặt bàn trong dữ liệu đã có không hợp lệ.");
+                        return; 
+                    }
+                }
+
+
+            } else {
+                console.log("DEBUG: Lấy thông tin đặt bàn từ input fields.");
+                const reservationTimeString = document.getElementById('reservationDate').value;
+                console.log("DEBUG: Chuỗi ngày giờ từ input:", reservationTimeString); 
+
+                let reservationDateObject = null;
+                const parts = reservationTimeString.match(/(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2})/);
+
+                if (parts) {
+                    // parts[1] = ngày, parts[2] = tháng, parts[3] = năm, parts[4] = giờ, parts[5] = phút
+                    const day = parseInt(parts[1], 10);
+                    const month = parseInt(parts[2], 10) - 1; // THÁNG trong JavaScript Date là 0-indexed (0=Tháng 1)
+                    const year = parseInt(parts[3], 10);
+                    const hours = parseInt(parts[4], 10);
+                    const minutes = parseInt(parts[5], 10);
+
+                    reservationDateObject = new Date(year, month, day, hours, minutes);
+
+                    if (isNaN(reservationDateObject.getTime())) {
+                        console.error("DEBUG: Không thể parse ngày giờ đặt bàn:", reservationTimeString);
+                        alert("Định dạng ngày giờ đặt bàn không hợp lệ.");
+                        return; 
+                    }
+
+                } else {
+                    console.error("DEBUG: Chuỗi ngày giờ từ input không đúng định dạng dd/MM/yyyy HH:mm:", reservationTimeString);
+                    alert("Định dạng ngày giờ đặt bàn không đúng định dạng dd/MM/yyyy HH:mm.");
+                    return;
+                }
+
+
+                reservationInfo = {
+                    CustomerName: document.getElementById('name').value,
+                    CustomerPhone: document.getElementById('phone').value,
+                    TableID: parseInt(document.getElementById('table').value),
+                    Capacity: parseInt(document.getElementById('person').value),
+                    ReservationTime: reservationDateObject.toISOString(), 
+                    Duration: parseInt(document.getElementById('duration').value),
+                    Notes: document.getElementById('message').value,
+                    Status: 1
+                };
+
+                console.log("DEBUG: Thông tin đặt bàn mới được tạo:", reservationInfo);
+
+
+                cartData.ReservationInformation = reservationInfo;
+            }
+            if (!reservationInfo.CustomerName || !reservationInfo.CustomerPhone || !reservationInfo.TableID || !reservationInfo.Capacity || !reservationInfo.ReservationTime || !reservationInfo.Duration) {
+                console.warn("DEBUG: Thiếu thông tin đặt bàn");
+                alert("Vui lòng điền đầy đủ thông tin đặt bàn!");
+                return;
+            }
+
+
+            // Kiểm tra nếu JSON rỗng
+            if (!cartData.ReservationInformation.CustomerName && !cartData.ReservationInformation.CustomerPhone && !cartData.ReservationInformation.TableID && !cartData.ReservationInformation.Capacity && !cartData.ReservationInformation.ReservationTime && !cartData.ReservationInformation.Duration && cartData.CartItems.length === 0) {
+                console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng kiểm tra.");
+                return;
+            }
+
+            const url = '@Url.Action("Menuing", "Reservation")';
+            console.log("DEBUG: URL yêu cầu:", url);
+
+            let cartInfoJson = buildCartJson();
+            console.log("DEBUG: Cart JSON gửi lên:", cartInfoJson);
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: cartInfoJson
+            })
+                .then(response => {
+                    console.log("DEBUG: Phản hồi từ server - Status:", response.status, "OK:", response.ok);
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            console.error("DEBUG: Nội dung lỗi từ server:", errorText);
+                            throw new Error(errorText || `Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                        });
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (!html || html.trim() === "") {
+                        console.error("DEBUG: Phản hồi HTML rỗng hoặc không hợp lệ");
+                        alert("Không nhận được nội dung hợp lệ từ server.");
+                        return;
+                    }
+                    if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {
+                        console.error("DEBUG: Phản hồi không phải HTML:", html);
+                        alert("Phản hồi từ server không phải trang HTML hợp lệ.");
+                        return;
+                    }
+                    console.log("DEBUG: Nhận được HTML, bắt đầu tải view");
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    console.log("DEBUG: View đã được tải");
+                })
+                .catch(error => {
+                    console.error("DEBUG: Lỗi khi gửi JSON:", error.message);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+                });
+        }
+
+        function fetchAvailableTables() {
+            let datetime = document.getElementById("reservationDate").value;
+            let people = document.getElementById("person").value;
+            let duration = document.getElementById("duration").value;
+
+            if (!datetime || !people || !duration ) return; // Nếu chưa chọn đủ, không gửi yêu cầu
+
+            fetch(`/Home/GetAvailableTables?datetime=${encodeURIComponent(datetime)}&people=${people}&duration=${duration}`)
+                .then(response => {
+                    console.log("Response Status:", response.status);
+                    return response.text();  // Lấy raw response trước
+                })
+                .then(text => {
+                    console.log("Raw Response:", text);  // Xem dữ liệu trước khi chuyển JSON
+                    return text ? JSON.parse(text) : {}; // Chỉ parse nếu không rỗng
+                })
+                .then(data => {
+                    console.log("Parsed JSON:", data); // Kiểm tra dữ liệu nhận được
+                    let tableSelect = document.getElementById("table");
+                    tableSelect.innerHTML = "<option value=''>Chọn bàn</option>";
+                    data.forEach(table => {
+                        tableSelect.innerHTML += `<option value="${table.tableID}">${table.tableName} - Sức chứa: ${table.capacity}</option>`;
+                    });
+                })
+                .catch(error => console.error("Fetch Error:", error));
+        }
+
+        document.getElementById("reservationDate").addEventListener("change", fetchAvailableTables);
+        document.getElementById("person").addEventListener("change", fetchAvailableTables);
+        document.getElementById("duration").addEventListener("change", fetchAvailableTables);
+
+        // Sample order data (simulating items already chosen)
+        const orderItems = [
+
+        @foreach (var item in Model ?.Cart.CartItems ?? new List<CartItem>())
+            {
+                <text>
+                    {
+                    id: "@item.MenuItemID",
+                    name: "@item.MenuItem.Name",
+                    quantity:"@item.Quantity",
+                    description: "@item.MenuItem.Description",
+                    price: "@(Convert.ToInt32(item.MenuItem.Price))", // Chuyển decimal về int
+                    image: "@item.MenuItem.MenuItemImage",
+
+                            },
+                </text>   
+            }
+        ];
+        console.log('orderItems:', orderItems);
+        // Format price with thousand separators
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + " đ";
+        }
+
+        // Render order items
+        function renderOrderItems() {
+            const orderItemsContainer = document.getElementById('order-items');
+            orderItemsContainer.innerHTML = '';
+
+            orderItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                const orderItemElement = document.createElement('div');
+                orderItemElement.className = 'order-item';
+                orderItemElement.innerHTML = `
+                        <img src="/images/MenuItem/${item.image}" alt="${item.name}" class="item-image">
+                    <div class="item-details">
+                        <h3 class="item-name">${item.name}</h3>
+                        <p class="item-description">${item.description}</p>
+                        <div class="item-price-row">
+                            <div>
+                                <span class="item-quantity">${item.quantity}</span>
+                                <span class="item-price">× ${formatPrice(item.price)}</span>
+                            </div>
+                            <span class="item-total">${formatPrice(itemTotal)}</span>
+                        </div>
+                    </div>
+                `;
+                orderItemsContainer.appendChild(orderItemElement);
+            });
+        }
+
+        // Calculate and update order summary
+        function updateOrderSummary() {
+            const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discount = 0; // No discount in this example
+            const tax = subtotal * 0.1;
+            const total = subtotal - discount + tax;
+
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('discount').textContent = formatPrice(discount);
+            document.getElementById('tax').textContent = formatPrice(tax);
+            document.getElementById('total').textContent = formatPrice(total);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrderItems();
+            updateOrderSummary();
+
+            // Add event listeners to buttons
+            document.querySelector('.back-button').addEventListener('click', function() {
+                alert('Quay lại thực đơn');
+            });
+
+            document.querySelector('.proceed-button').addEventListener('click', function() {
+                alert('Tiến hành thanh toán');
+            });
+        });
+
+
+    </script>
 
     <!--
       - ionicon link
     -->
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
-    <script src="assets/js/section.js"></script>
+    <script src="~/js/section.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const avatar = document.getElementById('avatarDropdown');

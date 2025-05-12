@@ -154,3 +154,10 @@ body {
     padding-left: 10px;
     display: block;
 }
+
+/*
+    remove Microsoft Edge default password reveal 
+ */
+input::-ms-reveal {
+    display: none;
+}

@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bill</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        function toggleView(view) {
+            const tableView = document.getElementById('table-view');
+            const gridView = document.getElementById('grid-view');
+            const listBtn = document.getElementById('list-btn');
+            const gridBtn = document.getElementById('grid-btn');
+                
+            if (view === 'list') {
+                tableView.classList.remove('hidden');
+                gridView.classList.add('hidden');
+                listBtn.classList.add('bg-blue-200');
+                gridBtn.classList.remove('bg-blue-200');
+            } else {
+                tableView.classList.add('hidden');
+                gridView.classList.remove('hidden');
+                listBtn.classList.remove('bg-blue-200');
+                gridBtn.classList.add('bg-blue-200');
+            }
+        }
+
+
+        function toggleDateFilter() {
+            const filter = document.getElementById('date-filter');
+            filter.classList.toggle('hidden');
+        }
+
+        function closeDateFilter(event) {
+            const filter = document.getElementById('date-filter');
+            if (!filter.contains(event.target) && !event.target.closest("button[onclick='toggleDateFilter()']")) {
+                filter.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('click', closeDateFilter);
+
+        function setDateLimits() {
+            const startDate = document.getElementById('start-date');
+            const endDate = document.getElementById('end-date');
+            const today = new Date().toISOString().split('T')[0];
+            const pastDate = new Date();
+            pastDate.setFullYear(pastDate.getFullYear() - 5);
+            const pastDateString = pastDate.toISOString().split('T')[0];
+
+            startDate.setAttribute('min', pastDateString);
+            startDate.setAttribute('max', today);
+            endDate.setAttribute('min', pastDateString);
+            endDate.setAttribute('max', today);
+        }
+
+        document.addEventListener("DOMContentLoaded", setDateLimits);
+
+        function copyToClipboard(imgElement) {
+            // Tìm phần tử cha chứa mã bill (cả danh sách & bảng)
+            let billCodeSpan = imgElement.closest("td")?.querySelector(".bill-code") ||
+                imgElement.closest("p")?.querySelector(".bill-code");
+
+            if (!billCodeSpan) {
+                showToast("Không tìm thấy mã bill!", "bg-red-500");
+                return;
+            }
+
+            const billCode = billCodeSpan.innerText.trim();
+
+            // Kiểm tra hỗ trợ Clipboard API
+            if (!navigator.clipboard) {
+                showToast("Trình duyệt không hỗ trợ sao chép!", "bg-red-500");
+                return;
+            }
+
+            // Sao chép mã bill vào clipboard
+            navigator.clipboard.writeText(billCode)
+                .then(() => showToast("Sao chép thành công!", "bg-green-500"))
+                .catch(err => {
+                    console.error("Lỗi sao chép: ", err);
+                    showToast("Sao chép thất bại!", "bg-red-500");
+                });
+        }
+
+        function showToast(message, bgColor) {
+            const toast = document.createElement("div");
+            toast.innerText = message;
+            toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 text-white rounded ${bgColor}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 2000);
+        }
+
+
+    </script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-5xl mx-auto bg-white shadow-lg rounded-lg p-4">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-4">
+                <img src="https://logowik.com/content/uploads/images/chef-restaurant5078.logowik.com.webp" alt="Drive Logo" class="w-8 h-8">
+                <input type="text" placeholder="Tìm kiếm hóa đơn" class="border p-2 rounded-lg w-96">
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button class="p-2 border rounded-lg">Loại</button>
+            <button class="p-2 border rounded-lg">Người</button>
+            <button class="p-2 border rounded-lg" onclick="toggleDateFilter()">Khoảng thời gian</button>
+            <div id="date-filter" class="hidden absolute bg-white shadow-lg p-4 border rounded-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold">Chọn khoảng thời gian</span>
+                    <button onclick="toggleDateFilter()" class="text-gray-500">&times;</button>
+                </div>
+                <label for="start-date">Từ:</label>
+                <input type="date" id="start-date" class="border p-1 rounded mb-2 block">
+                <label for="end-date">Đến:</label>
+                <input type="date" id="end-date" class="border p-1 rounded block">
+            </div>
+            <button class="p-2 border rounded-lg">Nguồn</button>
+            <div class="flex border rounded-full overflow-hidden" style="margin-left: auto">
+                <button id="list-btn" class="p-2 px-4 flex items-center bg-blue-200" onclick="toggleView('list')">
+                    <span class="mr-2">☰</span>
+                </button>
+                <button id="grid-btn" class="p-2 px-4 flex items-center" onclick="toggleView('grid')">
+                    <span class="mr-2">⏹</span>
+                </button>
+            </div>
+        </div>
+        <div id="grid-view" class="hidden grid grid-cols-3 gap-4">
+            <div class="border p-4 shadow rounded-lg text-center">
+
+                <p class="justify-center flex items-center space-x-2 text-red-500 font-bold mt-2">
+                    <img class="copy-btn w-5 h-5 cursor-pointer"
+                         src="https://www.svgrepo.com/show/82319/clipboard-outline.svg"
+                         onclick="copyToClipboard(this)">
+                    <span class="bill-code">111111111</span>
+                </p>
+                <p class="text-gray-600 text-sm">Tên khách hàng: dungta.uit</p>
+                <p class="text-gray-600 text-sm">Nhân viên phụ trách: -</p>
+                <p class="text-gray-600 text-sm">Ngày bán: 725 KB</p>
+                <p class="flex justify-center space-x-2">
+                    <button class="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
+                        <span class="mr-1">👁</span> Xem
+                    </button>
+                    <button class="bg-yellow-500 text-white px-2 py-1 rounded flex items-center">
+                        <span class="mr-1">✏️</span> Sửa
+                    </button>
+                    <button class="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                        <span class="mr-1">🗑</span> Xóa
+                    </button>
+                </p>
+            </div>
+        </div>
+        <div id="table-view">
+            <table class="w-full text-center">
+                <thead>
+                    <tr class="border-b">
+                        <th class="py-2">Mã bill</th>
+                        <th class="py-2">Tên khách hàng</th>
+                        <th class="py-2">Nhân viên phụ trách</th>
+                        <th class="py-2">Ngày bán</th>
+                        <th class="py-2">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b hover:bg-gray-100">
+                        <td class="py-2 justify-center flex items-center space-x-2">
+                            <img class="copy-btn w-5 h-5 cursor-pointer"
+                                 src="https://www.svgrepo.com/show/82319/clipboard-outline.svg"
+                                 onclick="copyToClipboard(this)">
+                            <span class="bill-code">111111111</span>
+                        </td>
+                        <td>dungta.uit</td>
+                        <td> - </td>
+                        <td>725 KB</td>
+                        <td class="flex justify-center space-x-2">
+                            <button class="bg-blue-500 text-white px-2 py-1 rounded flex items-center">
+                                <span class="mr-1">👁</span> Xem
+                            </button>
+                            <button class="bg-yellow-500 text-white px-2 py-1 rounded flex items-center">
+                                <span class="mr-1">✏️</span> Sửa
+                            </button>
+                            <button class="bg-red-500 text-white px-2 py-1 rounded flex items-center">
+                                <span class="mr-1">🗑</span> Xóa
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+</body>
+</html>

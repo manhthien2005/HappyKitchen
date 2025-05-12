@@ -1,0 +1,195 @@
+﻿
+/* Custom Properties */
+:root {
+    /* Colors */
+    --gold-crayola: hsl(38, 61%, 73%);
+    --quick-silver: hsla(0, 0%, 65%, 1);
+    --davys-grey: hsla(30, 3%, 34%, 1);
+    --smoky-black-1: hsla(40, 12%, 5%, 1);
+    --smoky-black-2: hsla(30, 8%, 5%, 1);
+    --smoky-black-3: hsla(0, 3%, 7%, 1);
+    --eerie-black-1: hsla(210, 4%, 9%, 1);
+    --eerie-black-2: hsla(210, 4%, 11%, 1);
+    --eerie-black-3: hsla(180, 2%, 8%, 1);
+    --eerie-black-4: hsla(0, 0%, 13%, 1);
+    --white: hsla(0, 0%, 100%, 1);
+    --white-alpha-20: hsla(0, 0%, 100%, 0.2);
+    --white-alpha-10: hsla(0, 0%, 100%, 0.1);
+    --black: hsla(0, 0%, 0%, 1);
+    --black-alpha-80: hsla(0, 0%, 0%, 0.8);
+    --black-alpha-15: hsla(0, 0%, 0%, 0.15);
+    /* Typography */
+    --fontFamily-forum: 'Forum', cursive;
+    --fontFamily-dm_sans: 'DM Sans', sans-serif;
+    --fontSize-display-1: calc(1.3rem + 6.7vw);
+    --fontSize-headline-1: calc(2rem + 2.5vw);
+    --fontSize-headline-2: calc(1.3rem + 2.4vw);
+    --fontSize-title-1: calc(1.6rem + 1.2vw);
+    --fontSize-title-2: 2.2rem;
+    --fontSize-title-3: 2.1rem;
+    --fontSize-title-4: calc(1.6rem + 1.2vw);
+    --fontSize-body-1: 2.4rem;
+    --fontSize-body-2: 1.6rem;
+    --fontSize-body-3: 1.8rem;
+    --fontSize-body-4: 1.6rem;
+    --fontSize-label-1: 1.4rem;
+    --fontSize-label-2: 1.2rem;
+    --weight-regular: 400;
+    --weight-bold: 700;
+    --lineHeight-1: 1em;
+    --lineHeight-2: 1.2em;
+    --lineHeight-3: 1.5em;
+    --lineHeight-4: 1.6em;
+    --lineHeight-5: 1.85em;
+    --lineHeight-6: 1.4em;
+    --letterSpacing-1: 0.15em;
+    --letterSpacing-2: 0.4em;
+    --letterSpacing-3: 0.2em;
+    --letterSpacing-4: 0.3em;
+    --letterSpacing-5: 3px;
+    /* Spacing & Others */
+    --section-space: 70px;
+    --shadow-1: 0px 0px 25px 0px hsla(0, 0%, 0%, 0.25);
+    --radius-24: 24px;
+    --radius-circle: 50%;
+    --transition-1: 250ms ease;
+    --transition-2: 500ms ease;
+    --transition-3: 1000ms ease;
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 10px;
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--eerie-black-1);
+    color: var(--white);
+    font-family: var(--fontFamily-dm_sans);
+    font-size: var(--fontSize-body-4);
+    font-weight: var(--weight-regular);
+    line-height: var(--lineHeight-5);
+    overflow-x: visible;
+    overflow-y: auto;
+    overflow-x: visible !important;
+}
+
+input,
+button,
+select,
+textarea {
+    background: none;
+    border: none;
+    font: inherit;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    outline: none;
+}
+
+button {
+    cursor: pointer;
+}
+
+/*SIDEBAR*/
+.profile-wrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.sidebar {
+    background-color: rgba(0, 0, 0, 0.5); /* Background trong suốt với độ mờ */
+    background-image: url('/images/shape-4.png');
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 150px;
+    flex: 1;
+    max-width: 250px; /* Chiều rộng tối đa */
+}
+
+.sidebar-list {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar-item {
+    margin-bottom: 25px; /* Tăng khoảng cách giữa các mục để thoáng hơn */
+    padding-bottom: 10px; /* Khoảng cách giữa chữ và đường ngang */
+    border-bottom: 1px solid var(--white-alpha-20); /* Đường ngang dưới mỗi mục */
+}
+
+    /* Bỏ đường ngang cho mục cuối cùng */
+    .sidebar-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+.sidebar-link {
+    color: var(--white);
+    text-decoration: none;
+    font-family: var(--fontFamily-dm_sans);
+    font-size: var(--fontSize-body-4);
+    font-weight: var(--weight-bold);
+    position: relative;
+    display: block; /* Để hiệu ứng background highlight áp dụng đúng */
+    transition: color var(--transition-1), transform var(--transition-1);
+}
+
+    .sidebar-link:hover {
+        color: var(--gold-crayola);
+        transform: scale(1.05); /* Hiệu ứng scale nhẹ khi hover */
+    }
+
+    /* Hiệu ứng hover: Background highlight */
+    .sidebar-link::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -10px; /* Mở rộng vùng highlight để đẹp hơn */
+        width: 0;
+        height: 100%;
+        background-color: var(--gold-crayola);
+        opacity: 0.2; /* Độ mờ của nền highlight */
+        border-radius: 5px;
+        transition: width var(--transition-2);
+        z-index: -1; /* Đặt nền phía sau chữ */
+    }
+
+    .sidebar-link:hover::before {
+        width: calc(100% + 20px); /* Mở rộng chiều rộng khi hover */
+    }
+
+.profile-container {
+    flex: 3;
+    margin-left: 20px; /* Khoảng cách với sidebar */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .profile-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        max-width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .profile-container {
+        margin-left: 0;
+    }
+}
+
+

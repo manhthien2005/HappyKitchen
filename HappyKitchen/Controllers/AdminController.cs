@@ -99,6 +99,7 @@ namespace HappyKitchen.Controllers
             
             if (user == null)
             {
+
                 _logger.LogWarning($"Login failed: User not found for email: {model.Email}");
                 return Json(new { success = false, message = "Sai tài khoản hoặc mật khẩu." });
             }
@@ -259,8 +260,6 @@ namespace HappyKitchen.Controllers
             var user = await _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == email && u.UserType == 1 && u.Status == 0);
-            
-            
             if (user == null)
             {
                 return Json(new { success = false, message = "Không tìm thấy người dùng." });

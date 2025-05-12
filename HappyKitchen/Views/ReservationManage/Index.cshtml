@@ -1,0 +1,156 @@
+﻿@{
+    Layout = "~/Views/Shared/Admin/_Layout.cshtml";
+    var title = ViewBag.Title ?? "Happy Kitchen - Quản lý đơn đặt bàn";
+}
+@section Styles {
+
+    <link rel="stylesheet" href="~/admin/css/reservation-management.css">
+    <style>
+        .table-responsive {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 1;
+        }
+
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .filter-result {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .status-badge-active {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .status-badge-inactive {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .status-badge-preparing {
+            background-color: #17a2b8;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+</style>
+ }
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Quản lý đơn đặt bàn</h1>
+    <p>Quản lý các đơn đặt bàn của nhà hàng</p>
+</div> <!-- Reservation Management Content -->
+<div class="reservation-management-container">
+    <!-- Search and Filter Section -->
+    <div class="search-section card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group"> <span class="input-group-text bg-white border-end-0"> <i class="fas fa-search text-muted"></i> </span> <input type="text" class="form-control border-start-0" id="reservationSearchInput" placeholder="Tìm mã đơn, tên khách, tên bàn..."> </div>
+                </div>
+                <div class="col-md-3"> <input type="date" class="form-control" id="startDateInput" placeholder="Từ ngày"> </div>
+                <div class="col-md-3"> <input type="date" class="form-control" id="endDateInput" placeholder="Đến ngày"> </div>
+                <div class="col-md-2"> <button class="btn btn-outline-secondary w-100" id="clearFiltersBtn"> <i class="fas fa-times me-1"></i> Xóa bộ lọc </button> </div>
+            </div>
+            <div class="mt-3">
+                <div class="btn-group" id="statusFilter"> <button type="button" class="btn btn-outline-primary active" data-status="all">Tất cả</button> <button type="button" class="btn btn-outline-primary" data-status="0">Đã hủy</button> <button type="button" class="btn btn-outline-primary" data-status="1">Đã xác nhận</button> <button type="button" class="btn btn-outline-primary" data-status="2">Hoàn thành</button> </div>
+            </div>
+            <div class="filter-result" id="filterResult"></div>
+        </div>
+    </div> <!-- Reservations Table -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="reservationsTable">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Tên khách</th>
+                            <th>Thời gian</th>
+                            <th>Số người</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationsGrid"></tbody>
+                </table>
+            </div>
+        </div>
+    </div> <!-- Pagination -->
+    <nav aria-label="Reservation pagination">
+        <ul class="pagination justify-content-center mt-5" id="reservationPagination">
+            <li class="page-item" id="paginationPrev"> <a class="page-link" href="#" aria-label="Previous"> <span aria-hidden="true">«</span> </a> </li>
+            <div class="d-flex" id="paginationItems"></div>
+            <li class="page-item" id="paginationNext"> <a class="page-link" href="#" aria-label="Next"> <span aria-hidden="true">»</span> </a> </li>
+        </ul>
+    </nav>
+</div> <!-- Edit Reservation Modal -->
+<div class="modal fade reservation-modal" id="editReservationModal" tabindex="-1" aria-labelledby="editReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReservationModalLabel">Chỉnh sửa Đơn đặt bàn</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editReservationForm">
+                    <input type="hidden" id="editReservationId">
+                    <div class="row">
+                        <!-- Reservation Info -->
+                        <div class="col-md-6">
+                            <div class="mb-3"> <label for="editCustomerName" class="form-label">Tên khách hàng <span class="text-danger">*</span></label> <input type="text" class="form-control" id="editCustomerName" required> </div>
+                            <div class="mb-3"> <label for="editCustomerPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label> <input type="text" class="form-control" id="editCustomerPhone" required> </div>
+                            <div class="mb-3"> <label for="editDuration" class="form-label">Thời gian (giờ) <span class="text-danger">*</span></label> <input type="number" class="form-control" id="editDuration" min="1" required> </div>
+                            <div class="mb-3"> <label for="editCapacity" class="form-label">Số lượng khách <span class="text-danger">*</span></label> <input type="number" class="form-control" id="editCapacity" min="1" required> </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3"> <label for="editCreatedTime" class="form-label">Thời gian tạo <span class="text-danger">*</span></label> <input type="datetime-local" class="form-control" id="editCreatedTime" required> </div>
+                            <div class="mb-3"> <label for="editReservationTime" class="form-label">Thời gian đặt bàn <span class="text-danger">*</span></label> <input type="datetime-local" class="form-control" id="editReservationTime" required> </div>
+                            <div class="mb-3">
+                                <label for="editReservationStatus" class="form-label">Trạng thái <span class="text-danger">*</span></label> <select class="form-select" id="editReservationStatus" required>
+                                    <option value="0">Đã hủy</option>
+                                    <option value="1">Đã xác nhận</option>
+                                    <option value="2">Hoàn thành</option>
+                                </select>
+                            </div>
+                            <div class="mb-3"> <label for="editNotes" class="form-label">Ghi chú</label> <textarea class="form-control" id="editNotes" rows="4"></textarea> </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button> <button type="button" class="btn btn-primary" id="updateReservationBtn">Cập nhật Đơn đặt bàn</button> </div>
+        </div>
+    </div>
+</div> <!-- Delete Reservation Modal -->
+<div class="modal fade" id="deleteReservationModal" tabindex="-1" aria-labelledby="deleteReservationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteReservationModalLabel">Xác nhận xóa</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa đơn đặt bàn <span id="deleteReservationName" class="fw-bold"></span>?</p>
+                <p class="text-danger">Hành động này không thể hoàn tác.</p> <input type="hidden" id="deleteReservationId">
+            </div>
+            <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button> <button type="button" class="btn btn-danger" id="confirmDeleteReservationBtn">Xóa</button> </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+
+    <script src="~/admin/js/reservation-management.js"></script>
+}

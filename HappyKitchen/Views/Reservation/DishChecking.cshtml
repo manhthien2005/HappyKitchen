@@ -1,0 +1,132 @@
+﻿@{
+    Layout = null;
+}
+
+@model DishCheckingViewModel
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hương Sen - Đơn hàng</title>
+
+    <link rel="stylesheet" href="~/css/Reservation/style2.css">
+
+    
+        
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <a href="/Home/Index">
+                <img src="~/images/logo.png" style="height:auto" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+        </div>
+
+        <div class="header-actions">
+            <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="order-items">
+            <h2 class="order-title">Đơn hàng (@Model.CartItems.Count() sản phẩm)</h2>
+            @foreach (var item in Model.CartItems)
+            {
+                <div class="order-item">
+                    <img src="/images/MenuItem/@item.MenuItem.MenuItemImage?height=80&width=80" alt="@item.MenuItem.Name">
+                    <div class="item-details">
+                        <div class="item-name">@item.MenuItem.Name</div>
+                        <span class="item-quantity">@item.Quantity</span>
+                        <span class="item-price">@item.TotalPrice.ToString("N0") đ</span>
+                    </div>
+                </div>
+            }
+            
+            
+
+        </div> 
+
+        <div class="order-summary">
+            <h2 class="summary-title">Tóm tắt đơn hàng</h2>
+             <div class="price-breakdown">
+                <div class="price-row"> 
+                    <span>Tạm tính:</span>
+                    <span>@Model.TotalPrice.ToString("N0") đ</span>
+                </div>
+                <div class="price-row">
+                    <span>Giảm giá:</span>
+                    <span>0 đ</span>
+                </div>
+                <div class="price-row">
+                    <span>Thuế (20%):</span>
+                    <span>@((Model.TotalPrice*0.2m).ToString("N0")) đ</span>
+                </div>
+                <div class="total-row">
+                    <span>Tổng thanh toán:</span>
+                    <span>@(((Model.TotalPrice * 0.2m) + Model.TotalPrice).ToString("N0"))đ</span>
+                </div>
+            </div>
+            <form asp-controller="Reservation" asp-action="CreateOrder" method="post">
+                <div class="payment-methods">
+                    <h3 class="payment-title">Phương thức thanh toán</h3>
+                    <div class="payment-option">
+                        <input type="radio" id="cash" name="payment" value="0">
+                        <label for="cash">Thanh toán bằng Tiền mặt</label>
+                        <input type="radio" id="card" name="payment" value="1">
+                        <label for="card">Thanh toán bằng Thẻ</label>
+                        <input type="radio" id="vnpay" name="payment" value="2">
+                        <label for="vnpay">Thanh toán bằng VNPay</label>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="back-button">TRỞ LẠI</button>
+                    <button type="submit" class="confirm-button">XÁC NHẬN THANH TOÁN</button>
+                </div>
+            </form>
+            
+        </div>
+    </main>
+
+    <script>
+        // Add discount code functionality
+        const discountForm = document.querySelector('.discount-code');
+        const discountInput = document.querySelector('.discount-input');
+        const applyButton = document.querySelector('.apply-button');
+
+        applyButton.addEventListener('click', () => {
+            const code = discountInput.value.trim();
+            if (code) {
+                alert('Mã giảm giá không hợp lệ');
+                discountInput.value = '';
+            }
+        });
+        console.log("DEBUG: cartItems sau khi lọc:", @Model.CartItems);
+        // Add payment method handling
+        const paymentOptions = document.querySelectorAll('input[name="payment"]');
+        paymentOptions.forEach(option => {
+            option.addEventListener('change', (e) => {
+                console.log('Selected payment method:', e.target.id);
+            });
+        });
+
+        // Add navigation handling
+        const backButton = document.querySelector('.back-button');
+        const confirmButton = document.querySelector('.confirm-button');
+
+        backButton.addEventListener('click', () => {
+            // Navigate back
+            console.log('Navigating back');
+        });
+
+        confirmButton.addEventListener('click', () => {
+            // Process payment
+            console.log('Processing payment');
+        });
+    </script>
+</body>
+</html>

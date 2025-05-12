@@ -1,0 +1,594 @@
+﻿@{
+    Layout = null;
+}
+@model MenuViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hương Sen Restaurant</title>
+
+    <link rel="stylesheet" href="~/css/Reservation/style.css">
+
+
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <a href="/Home/Index">
+                <img src="~/images/logo.png" style="height:auto" width="160" height="50" alt="Happy Kitchen - Home">
+            </a>
+        </div>
+
+        <div class="header-actions">
+            <svg class="user-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>Thông tin đặt bàn</h2>
+            <div class="booking-info">
+                <p>Họ tên: @(Model?.Cart?.ReservationInformation?.CustomerName ?? "")</p>
+                <p>Số điện thoại: @(Model?.Cart?.ReservationInformation?.CustomerPhone ?? "")</p>
+                <p>Thời gian đặt bàn: @(Model?.Cart?.ReservationInformation?.ReservationTime != null ? Model.Cart.ReservationInformation.ReservationTime.ToString("dd/MM/yyyy HH:mm") : "")</p>
+                <p>Số người: @(Model?.Cart?.ReservationInformation?.Table?.TableName ?? "Chưa có bàn") - @(Model?.Cart?.ReservationInformation?.Table?.Capacity ?? 0) người</p>
+                <p>Ghi chú: @(Model?.Cart?.ReservationInformation?.Notes ?? "")</p>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Main Content -->
+            <div class="content">
+                <!-- Menu Tabs -->
+                <div class="menu-tabs">
+                    <button class="tab-button active" data-tab="all">Tất cả</button>
+                    @if (Model?.Categories != null)
+                    {
+                        @foreach (var cate in Model.Categories)
+                        {
+                            <button class="tab-button" data-tab="@cate.CategoryID">@cate.CategoryName</button>
+                        }
+                    }
+                </div>
+                <!-- Menu Items -->
+                <div class="menu-items" id="menu-items-container">
+                    <!-- Menu items will be dynamically added here -->
+                </div>
+                <!-- Pagination -->
+                <div class="pagination" id="pagination-container">
+                    <!-- Pagination buttons will be added here -->
+                </div>
+            </div>
+                <!-- Selected Items Sidebar -->
+            <div class="selected-items-sidebar">
+                <!-- Selected Items -->
+                <div class="selected-items-container">
+                    <h2>Danh sách món đã chọn</h2>
+                    <div class="selected-items" id="selected-items-container">
+                        <p class="empty-selection">Chưa có món nào được chọn.</p>
+                    </div>
+                    <div class="total-price">
+                        <p>Tổng tiền: <span id="total-price">0 đ</span></p>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="navigation-buttons">
+                    <form id="menu-form" onsubmit="event.preventDefault(); submitCartToDishChecking();">
+                        <button class="back-button" type="button" onclick="goBack()">TRỞ LẠI</button>
+                        <button class="next-button" type="submit">TIẾP THEO</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll to top button -->
+    <button class="scroll-top-button" id="scroll-top-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+    </button>
+
+    <script>
+        // State
+        let quantities = {};
+        let selectedItems = [];
+        let totalPrice = 0;
+        let activeTab = "all";
+        let currentPage = 1;
+        const itemsPerPage = 4;
+        
+
+        // Menu items data
+        const menuItems = [
+        @foreach (var cate in Model?.Categories ?? new List<Category>())
+        {
+            foreach (var item in cate.MenuItems)
+            {
+                <text>
+                        {
+                        id: "@item.MenuItemID",
+                        name: "@item.Name",
+                        price: @(Convert.ToInt32(item.Price)), // Chuyển decimal về int
+                        image: "@item.MenuItemImage",
+                        category: "@cate.CategoryID",
+                        categoryName: "@cate.CategoryName"
+
+                },
+                </text>
+            }
+        }
+        ];
+
+        function goBack() {
+            // Logic quay lại trang trước, ví dụ:
+            window.history.back();
+        }
+
+        function buildCartJson() {
+            // Debug: Bắt đầu hàm
+            console.log("DEBUG: Bắt đầu buildCartJson");
+
+            // Debug: Kiểm tra Model và ReservationInformation
+            let reservationInfo;
+            try {
+                reservationInfo = @Html.Raw(Model != null && Model.Cart.ReservationInformation != null ? Json.Serialize(Model.Cart.ReservationInformation) : "{}") || {};
+                console.log("DEBUG: reservationInfo sau khi gán:", reservationInfo);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi gán reservationInfo:", error.message);
+                reservationInfo = {};
+            }
+
+
+
+            // Debug: Tạo cartItems
+            const cartItems = selectedItems.map(item => ({
+                MenuItemID: item.id,
+                Quantity: quantities[item.id] || 0
+            }));
+
+            // Debug: Kiểm tra cartItems sau khi tạo
+            console.log("DEBUG: cartItems sau khi lọc:", cartItems);
+
+            // Tạo JSON kết hợp
+            const combinedJson = {
+                ReservationInformation: reservationInfo,
+                CartItems: cartItems
+            };
+
+            // Debug: Kiểm tra JSON cuối cùng
+            console.log("DEBUG: combinedJson trước khi stringify:", combinedJson);
+
+            let cartInfoJson;
+            try {
+                cartInfoJson = JSON.stringify(combinedJson);
+                console.log("DEBUG: Cart JSON gửi lên:", cartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi khi stringify JSON:", error.message);
+                cartInfoJson = JSON.stringify({ ReservationInformation: {}, CartItems: [] });
+            }
+
+            return cartInfoJson;
+        }
+
+        function submitCartToDishChecking() {
+            console.log("DEBUG: Bắt đầu submitCartToDishChecking");
+
+            let CartInfoJson;
+            try {
+                CartInfoJson = buildCartJson();
+                cartInfo = JSON.parse(CartInfoJson);
+                console.log("DEBUG: CartInfoJson từ buildCartJson:", CartInfoJson);
+            } catch (error) {
+                console.error("DEBUG: Lỗi trong buildCartJson:", error.message);
+                alert("Lỗi khi tạo dữ liệu gửi đi: " + error.message);
+                return;
+            }
+                // Kiểm tra CartItems rỗng
+            if (cartInfo.CartItems.length === 0) {
+                console.warn("DEBUG: Giỏ hàng rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng rỗng! Vui lòng thêm món ăn trước khi đặt bàn.");
+                return;
+            }
+            if (CartInfoJson === JSON.stringify({ ReservationInformation: {},CartItems: [] })) {
+                console.warn("DEBUG: Giỏ hàng và thông tin đặt bàn rỗng, không gửi yêu cầu");
+                alert("Giỏ hàng hoặc thông tin đặt bàn rỗng! Vui lòng điền thông tin.");
+                return;
+            }
+
+            const url = '@Url.Action("DishChecking", "Reservation")';
+            console.log("DEBUG: URL yêu cầu:", url);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: CartInfoJson
+            })
+                .then(response => {
+                    console.log("DEBUG: Phản hồi từ server - Status:", response.status, "OK:", response.ok);
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            console.error("DEBUG: Nội dung lỗi từ server:", errorText);
+                            try {
+                                const errorJson = JSON.parse(errorText);
+                                throw new Error(errorJson.message || errorText);
+                            } catch {
+                                throw new Error(errorText || `Yêu cầu thất bại với mã trạng thái: ${response.status}`);
+                            }
+                        });
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    if (!html || html.trim() === "") {
+                        console.error("DEBUG: Phản hồi HTML rỗng hoặc không hợp lệ");
+                        alert("Không nhận được nội dung hợp lệ từ server.");
+                        return;
+                    }
+                    if (!html.includes("<!DOCTYPE") && !html.includes("<html")) {
+                        console.error("DEBUG: Phản hồi không phải HTML:", html);
+                        alert("Phản hồi từ server không phải trang HTML hợp lệ.");
+                        return;
+                    }
+                    console.log("DEBUG: Nhận được HTML, bắt đầu tải view");
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    console.log("DEBUG: View đã được tải");
+                })
+                .catch(error => {
+                    console.error("DEBUG: Lỗi khi gửi JSON:", error.message);
+                    alert("Có lỗi xảy ra khi gửi dữ liệu: " + error.message);
+                });
+        }
+        // Format price with thousand separators
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+
+        // Update quantity and selected items
+        function updateQuantity(itemId, amount) {
+            const currentQuantity = quantities[itemId] || 0;
+            const newQuantity = Math.max(0, currentQuantity + amount);
+            quantities[itemId] = newQuantity;
+
+            const item = menuItems.find(item => item.id === itemId);
+
+            if (newQuantity > 0) {
+                if (!selectedItems.some(i => i.id === itemId)) {
+                    selectedItems.push(item);
+                }
+            } else {
+                selectedItems = selectedItems.filter(i => i.id !== itemId);
+            }
+
+            // Update UI
+            updateQuantityDisplay(itemId, newQuantity);
+            updateSelectedItemsDisplay();
+            updateTotalPrice();
+            printDish();
+        }
+
+        function printDish() {
+            selectedItems.forEach(item => {
+                console.log("ID:", item.id);
+                console.log("Tên món:", item.name);
+                console.log("Giá:", item.price);
+                console.log("Số lượng", quantities[item.id]);
+                console.log("Hình ảnh:", item.image);
+                console.log("----------------------------");
+            });
+        }
+
+        // Update quantity display
+        function updateQuantityDisplay(itemId, quantity) {
+            const quantityDisplay = document.getElementById(`quantity-${itemId}`);
+            if (quantityDisplay) {
+                quantityDisplay.textContent = quantity;
+            }
+        }
+
+        // Group items by category
+        function groupItemsByCategory(items) {
+            const groupedItems = {};
+
+            items.forEach(item => {
+                if (!groupedItems[item.category]) {
+                    groupedItems[item.category] = {
+                        name: item.categoryName,
+                        items: []
+                    };
+                }
+                groupedItems[item.category].items.push(item);
+            });
+
+            return groupedItems;
+        }
+
+        function updateSelectedItemsDisplay() {
+            const selectedItemsContainer = document.getElementById('selected-items-container');
+
+            if (selectedItems.length === 0) {
+                selectedItemsContainer.innerHTML = '<p class="empty-selection">Chưa có món nào được chọn.</p>';
+                return;
+            }
+
+            // Group selected items by category
+            const groupedItems = groupItemsByCategory(selectedItems);
+            let html = '';
+
+            // Create a section for each category
+            for (const category in groupedItems) {
+                const categoryData = groupedItems[category];
+
+                html += `
+                    <div class="category-section">
+                        <h3 class="category-title">${categoryData.name}:</h3>
+                        <table class="selected-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Món ăn</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                categoryData.items.forEach(item => {
+                    const quantity = quantities[item.id];
+                    const itemTotal = item.price * quantity;
+
+                    html += `
+                        <tr>
+                            <td>
+                                <div class="selected-item-image">
+                                    <img src="/images/MenuItem/${item.image}" alt="${item.name}" >
+                                </div>
+                                <span class="item-name">${item.name}</span>
+                            </td>
+                            <td>${quantity}</td>
+                            <td>${formatPrice(item.price)} đ</td>
+                            <td>${formatPrice(itemTotal)} đ</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            selectedItemsContainer.innerHTML = html;
+        }
+        // Get paginated items
+        function getPaginatedItems() {
+            const filteredItems = activeTab === 'all'
+                ? menuItems
+                : menuItems.filter(item => item.category === activeTab);
+
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+            // Adjust current page if it's out of bounds after filtering
+            if (currentPage > totalPages && totalPages > 0) {
+                currentPage = totalPages;
+            }
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredItems.length);
+
+            return {
+                items: filteredItems.slice(startIndex, endIndex),
+                totalPages: totalPages,
+                currentPage: currentPage
+            };
+        }
+        // Update total price
+        function updateTotalPrice() {
+            totalPrice = selectedItems.reduce((total, item) => {
+                return total + (item.price * (quantities[item.id] || 0));
+            }, 0);
+
+            const totalPriceElement = document.getElementById('total-price');
+            totalPriceElement.textContent = `${formatPrice(totalPrice)} đ`;
+        }
+
+        // Render pagination
+        function renderPagination(totalPages) {
+            const paginationContainer = document.getElementById('pagination-container');
+            paginationContainer.innerHTML = '';
+
+            if (totalPages <= 1) {
+                return;
+            }
+
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.className = 'pagination-button';
+            prevButton.innerHTML = '&laquo;';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderMenuItems();
+                }
+            });
+            paginationContainer.appendChild(prevButton);
+
+            // Page buttons
+            for (let i = 1; i <= totalPages; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderMenuItems();
+                });
+                paginationContainer.appendChild(pageButton);
+            }
+
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.className = 'pagination-button';
+            nextButton.innerHTML = '&raquo;';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderMenuItems();
+                }
+            });
+            paginationContainer.appendChild(nextButton);
+        }
+
+                // Render menu items
+        function renderMenuItems() {
+            const menuItemsContainer = document.getElementById('menu-items-container');
+            menuItemsContainer.innerHTML = '';
+
+            // Use the pagination function to get the correct items for the current page
+            const { items, totalPages } = getPaginatedItems();
+
+            items.forEach(item => {
+                const menuItemElement = document.createElement('div');
+                menuItemElement.className = 'menu-item';
+                menuItemElement.innerHTML = `
+                    <div class="item-image">
+                        <img src="/images/MenuItem/${item.image}" alt="${item.name}" width="80" height="80">
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-name">${item.name}</h3>
+                        <p class="item-price">${formatPrice(item.price)} đ</p>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-button decrease-button" data-item-id="${item.id}">-</button>
+                        <span class="quantity-display" id="quantity-${item.id}">${quantities[item.id] || 0}</span>
+                        <button class="quantity-button increase-button" data-item-id="${item.id}">+</button>
+                    </div>
+                `;
+                menuItemsContainer.appendChild(menuItemElement);
+            });
+
+            // Render pagination with the correct totalPages
+            renderPagination(totalPages);
+
+            // Add event listeners to quantity buttons
+            document.querySelectorAll('.increase-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-item-id');
+                    updateQuantity(itemId, 1);
+                });
+            });
+
+            document.querySelectorAll('.decrease-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const itemId = button.getAttribute('data-item-id');
+                    updateQuantity(itemId, -1);
+                });
+            });
+        }
+
+        function initTabs() {
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    button.classList.add('active');
+                    activeTab = button.getAttribute('data-tab');
+                    currentPage = 1; // Reset to first page when changing tabs
+                    renderMenuItems();
+                });
+            });
+        }
+
+        // Scroll to top functionality
+        function initScrollToTop() {
+            const scrollTopButton = document.getElementById('scroll-top-button');
+            scrollTopButton.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Show/hide button based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    scrollTopButton.style.display = 'flex';
+                } else {
+                    scrollTopButton.style.display = 'none';
+                }
+            });
+        }
+        
+
+        // Initialize the application with model data
+        function init() {
+            // Log để kiểm tra menuItems
+            console.log("DEBUG: menuItems:", menuItems);
+
+            // Load cart items from model
+            const cartItemsFromModel = @Html.Raw(Model?.Cart?.CartItems != null ? Json.Serialize(Model.Cart.CartItems) : "[]");
+            console.log("DEBUG: typeof cartItemsFromModel:", typeof cartItemsFromModel);
+            console.log("DEBUG: cartItemsFromModel:", cartItemsFromModel);
+
+            // Kiểm tra xem cartItemsFromModel có phải mảng không
+            if (!Array.isArray(cartItemsFromModel)) {
+                console.error("DEBUG: cartItemsFromModel không phải mảng:", cartItemsFromModel);
+                return;
+            }
+
+            cartItemsFromModel.forEach(cartItem => {
+                // Log để kiểm tra từng cartItem
+                console.log("DEBUG: cartItem:", cartItem);
+                console.log("DEBUG: cartItem keys:", Object.keys(cartItem));
+
+                // Chuyển đổi kiểu để so sánh
+                const menuItem = menuItems.find(item => String(item.id) === String(cartItem.menuItemID));
+                console.log("DEBUG: menuItem:", menuItem);
+
+                if (menuItem && cartItem.quantity > 0) {
+                    quantities[menuItem.id] = cartItem.quantity;
+
+                    if (!selectedItems.some(i => String(i.id) === String(menuItem.id))) {
+                        console.log("DEBUG: cart:", cartItem.menuItemID);
+                        console.log("DEBUG: cart qty:", cartItem.quantity);
+                        console.log("DEBUG: Trước khi push - selectedItems:", selectedItems);
+                        selectedItems.push(menuItem);
+                        console.log("DEBUG: Sau khi push - selectedItems:", selectedItems);
+                    }
+                } else {
+                    console.warn("DEBUG: Không tìm thấy menuItem hoặc quantity không hợp lệ:", cartItem);
+                }
+            });
+
+            renderMenuItems();
+            initTabs();
+            initScrollToTop();
+            updateSelectedItemsDisplay();
+            updateTotalPrice();
+        }
+
+        // Run initialization when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
